@@ -1,0 +1,1580 @@
+{
+  "updatedAt": "2026-07-18T06:17:22.526032Z",
+  "recipes": [
+    {
+      "id": "carrilleras-al-vino-tinto",
+      "name": "CARRILLERAS AL VINO TINTO",
+      "yieldAmount": 6.0,
+      "yieldUnit": "RACIONES",
+      "stages": [
+        {
+          "title": "PREPARACiÓN BASE",
+          "procedureTitle": "PROCEDIMIENTO PARA GUISAR LA CARRILLERA",
+          "description": "Carrilleras de cerdo guisadas con verduras y una salsa de vino tinto y vermut.",
+          "ingredients": [
+            {
+              "qty": 1200,
+              "unit": "g",
+              "name": "Carrillera"
+            },
+            {
+              "qty": 40,
+              "unit": "g",
+              "name": "Aceite de Oliva"
+            },
+            {
+              "qty": 200,
+              "unit": "g",
+              "name": "Cebolla blanca"
+            },
+            {
+              "qty": 150,
+              "unit": "g",
+              "name": "Zanahoria en cubos"
+            },
+            {
+              "qty": 80,
+              "unit": "g",
+              "name": "Puerro"
+            },
+            {
+              "qty": 20,
+              "unit": "g",
+              "name": "Ajo pelado"
+            },
+            {
+              "qty": 150,
+              "unit": "g",
+              "name": "Tomate"
+            },
+            {
+              "qty": 5,
+              "unit": "g",
+              "name": "Pimentón dulce"
+            },
+            {
+              "qty": 30,
+              "unit": "g",
+              "name": "Harina"
+            },
+            {
+              "qty": 350,
+              "unit": "ml",
+              "name": "Vino blanco BATUTA Airén 75 cl"
+            },
+            {
+              "qty": 50,
+              "unit": "ml",
+              "name": "Vermut Crusat Bag in Box 15 L"
+            },
+            {
+              "qty": 300,
+              "unit": "ml",
+              "name": "Agua"
+            },
+            {
+              "qty": 3,
+              "unit": "g",
+              "name": "Laurel"
+            },
+            {
+              "qty": 3,
+              "unit": "g",
+              "name": "Romero"
+            },
+            {
+              "qty": 10,
+              "unit": "g",
+              "name": "Sal"
+            }
+          ],
+          "steps": [
+            "Limpiar bien las carrilleras quitando membranas y exceso de grasa.",
+            "Salpimentar con sal y pimienta y dejar reposar 15 minutoa en la nevera.",
+            "Mientras tanto, cortar en trozos medianos la verdura para preparar la salsa.",
+            "Pasado el tiempo de reposo de la carne, sacarlas del frigorífico. Pasarlas por harina y sellarlas durante 2-3 minutos para que quede una costra dorada.",
+            "No apilarlar dentro de la cazuela. Retirarlas y reservar.",
+            "En el aceite donde se marcaron las carrilleras, saltear el ajo, el puerro, la cebolla y la zanahoria durante 10 minutos vitro a nivel 5.",
+            "Añadir el tomate y el pimentón. Remover durante 2 minutos.",
+            "Agregar el vino y el vermut, subir la temperatura a nivel 7 y dejar reducir una tercera parte.",
+            "Dividir la salsa con verduras en dos partes y colocarlas en dos olla a presión.",
+            "Repartir las carrilleras por encima y agregar las hierbas aromáticas.",
+            "Tapar las ollas y llevar a cocción a nivel 3 durante 50 minutos.",
+            "Dejar atemperar. Luego abrir las ollas y retirar las carrilleras. Reservar.",
+            "Retirar las hierbas aromáticas. Pasar la salsa por túrmix para lograr una consistencia uniforme.",
+            "Volver a llevar la salsa al fuego para reducir. 15 minutos a nivel 3 en la vitro.",
+            "Cuando haya reducido, colocar en bolsas para las raciones: 100 gramos de carrilleras y 60 gramos de salsa.",
+            "Fechar bolsas y congelar hasta su uso"
+          ]
+        },
+        {
+          "title": "EMPLATADO",
+          "description": null,
+          "ingredients": [],
+          "steps": [
+            "Retirar la ración de carrillera del congelador.",
+            "Colocar en un tupper y llevar al microondas tiempo y potencias marcadas con \"C\".",
+            "Una vez caliente, emplatar en plato hondo. Colocar primero las carrilleras y por encima cubrir con la salsa caliente.",
+            "Servir inmediatamente."
+          ]
+        }
+      ],
+      "sourceSheet": "CARRILLERAS"
+    },
+    {
+      "id": "langostinos-al-ajillo",
+      "name": "LANGOSTINOS AL AJILLO",
+      "yieldAmount": 1.0,
+      "yieldUnit": "RACION",
+      "stages": [
+        {
+          "title": "PLATO FINAL",
+          "procedureTitle": "PREPARACIÓN DE LOS LANGOSTINOS",
+          "description": "Plato de langostinos con aceite macerado de ajos y cayena.",
+          "ingredients": [
+            {
+              "qty": 3,
+              "unit": "u",
+              "name": "Langostinos"
+            },
+            {
+              "qty": 40,
+              "unit": "g",
+              "name": "Aceite con ajo y cayena RTMY"
+            },
+            {
+              "qty": 3,
+              "unit": "g",
+              "name": "Sal"
+            }
+          ],
+          "steps": [
+            "Los langostinos tienen que estar bien secos.",
+            "Colocar dos cucharadas del aceite base en la sartén y calentarla en vitrocerámica nivel 4 durante 4 minutos.",
+            "Una vez que el aceite esté caliente, colocar los langostinos y cocerlos 3 minutos por un lado.",
+            "Dar vuelta los langostinos, agregar una cucharada más de aceite pero ahora con ajos y cayena. NO SE AGREGAN ANTES PARA QUE NO SE QUEMEN.",
+            "Dejar que se cocinen los langostino por el otro lado durante 3 minutos.",
+            "Retirar del fuego y emplatar en plato hondo agregando todo el aceite de la cocción por encima.",
+            "Antes de servir, espolvorear con sal en escamas por encima de los langostinos."
+          ]
+        }
+      ],
+      "sourceSheet": "LANGOSTINOS"
+    },
+    {
+      "id": "aceite-ajo-y-guindilla",
+      "name": "ACEITE AJO Y GUINDILLA",
+      "yieldAmount": 400.0,
+      "yieldUnit": "gramos",
+      "stages": [
+        {
+          "title": "RECETA BASE",
+          "procedureTitle": "PROCEDIMIENTO",
+          "description": "Aceite macerado con ajos y guindilla para la preparación del plato de langostinos al ajillo.",
+          "ingredients": [
+            {
+              "qty": 400,
+              "unit": "g",
+              "name": "Aceite de Oliva"
+            },
+            {
+              "qty": 80,
+              "unit": "g",
+              "name": "Ajo pelado"
+            },
+            {
+              "qty": 6,
+              "unit": "g",
+              "name": "Pimienta de cayena molida"
+            }
+          ],
+          "steps": [
+            "Laminar el ajo en rodajas muy finas.",
+            "Colocar el aceite en el vaso de la Thermomix junto con los ajos laminados.",
+            "Programar 12 minutos / Velocidad 1 AL REVES / 120 grados.",
+            "Agregar la cayena.",
+            "Programar 3 minutos / Velocidad 1 AL REVES / 120 grados.",
+            "Dejar atemperar. Envasar. Fechar. Conservar en frío."
+          ]
+        }
+      ],
+      "sourceSheet": "ACEITE AJO Y CAYENA"
+    },
+    {
+      "id": "tiras-de-pollo-rebozadas",
+      "name": "TIRAS DE POLLO REBOZADAS",
+      "yieldAmount": 13.0,
+      "yieldUnit": "RACIONES",
+      "stages": [
+        {
+          "title": "RECETA BASE",
+          "procedureTitle": "PROCEDIMIENTO PARA MACERAR EL POLLO",
+          "description": "Receta para preparar las tiras de pollo rebozadas con copos de maíz.",
+          "ingredients": [
+            {
+              "qty": 1000,
+              "unit": "g",
+              "name": "Pechuga de pollo"
+            },
+            {
+              "qty": 300,
+              "unit": "ml",
+              "name": "Leche"
+            },
+            {
+              "qty": 30,
+              "unit": "g",
+              "name": "Limón"
+            },
+            {
+              "qty": 10,
+              "unit": "g",
+              "name": "Sal"
+            },
+            {
+              "qty": 4,
+              "unit": "g",
+              "name": "Ajo en polvo"
+            },
+            {
+              "qty": 4,
+              "unit": "g",
+              "name": "Pimentón dulce"
+            },
+            {
+              "qty": 2,
+              "unit": "g",
+              "name": "Pimienta de cayena molida"
+            },
+            {
+              "qty": 200,
+              "unit": "g",
+              "name": "Copos de Maíz"
+            },
+            {
+              "qty": 80,
+              "unit": "g",
+              "name": "Harina"
+            },
+            {
+              "qty": 300,
+              "unit": "ml",
+              "name": "Aceite de girasol"
+            },
+            {
+              "qty": 70,
+              "unit": "g",
+              "name": "Salsa mostaza y miel"
+            }
+          ],
+          "steps": [
+            "Mezclar la leche con el zumo de limón. Remover y dejar reposar 10 minutos a temperatura ambiente hasta que se espese ligeramente.",
+            "Añadir las especies y remover.",
+            "Cortar las pechugas de pollo en tiras finas de 1 cm de ancho. Sumergirlas completamente en la leche especiada.",
+            "Tapar con film y refrigerar durante un mínimo de 6 horas (ideal 12 horas.)"
+          ]
+        },
+        {
+          "title": "REBOZADO DE LAS TIRAS",
+          "description": null,
+          "ingredients": [],
+          "steps": [
+            "Escurrir el exceso de leche de las tiras de pollo maceradas.",
+            "Triturar los copos de maiz para obtener una textura fina pero irregular (no tiene que ser un polvo).",
+            "Preparar tres estaciones para el rebozado: en un plato colocar el huevo batido, en otro plato la harina y en el tercero los copos de maíoz triturados.",
+            "Pasar las tiras primero por harina, luego por el huevo y finalmente por los copos de maíz.",
+            "Freirlas con un marcado en abuindante aceite de girasol caliente durante 3 minutos a nivel 6.",
+            "Embolsaren raciones de 150 gramos. Fechar y congelar."
+          ]
+        },
+        {
+          "title": "EMPLATADO",
+          "description": null,
+          "ingredients": [],
+          "steps": [
+            "Sacar del congelador una ración de las tiras de pollo congeladas.",
+            "Colocar en Airfryer durante 7 minutos a 205 grados.",
+            "Mientras se calientan, en un vasito metálico colocar 50 gramos de la salsa de miel y mostaza.",
+            "Cuando las tiras estén calientes, colocar en la cacerola pequeña metálica.",
+            "Servir en tabla de madera, con la cacerola y el vasito de salsa."
+          ]
+        }
+      ],
+      "sourceSheet": "TIRAS DE POLLO"
+    },
+    {
+      "id": "fumet-de-pescado",
+      "name": "FUMET DE PESCADO",
+      "yieldAmount": 5160.0,
+      "yieldUnit": "gramos",
+      "stages": [
+        {
+          "title": "RECETA BASE",
+          "procedureTitle": "PROCEDIMIENTO",
+          "description": "Fumet de pescado de roca que se utiliza para la preparación de las paellas de marisco.",
+          "ingredients": [
+            {
+              "qty": 700,
+              "unit": "g",
+              "name": "Cabeza de rape"
+            },
+            {
+              "qty": 700,
+              "unit": "g",
+              "name": "Pescado de roca"
+            },
+            {
+              "qty": 30,
+              "unit": "g",
+              "name": "Ajo pelado"
+            },
+            {
+              "qty": 400,
+              "unit": "g",
+              "name": "Cebolla blanca"
+            },
+            {
+              "qty": 200,
+              "unit": "g",
+              "name": "Puerro"
+            },
+            {
+              "qty": 150,
+              "unit": "g",
+              "name": "Zanahoria en cubos"
+            },
+            {
+              "qty": 150,
+              "unit": "g",
+              "name": "Tomate confitado RTMY"
+            },
+            {
+              "qty": 240,
+              "unit": "g",
+              "name": "Aceite de Oliva"
+            },
+            {
+              "qty": 160,
+              "unit": "ml",
+              "name": "Vino blanco 12º Bag in Box 15 L"
+            },
+            {
+              "qty": 30,
+              "unit": "g",
+              "name": "Sal"
+            },
+            {
+              "qty": 3,
+              "unit": "g",
+              "name": "Laurel"
+            },
+            {
+              "qty": 5000,
+              "unit": "ml",
+              "name": "Agua"
+            }
+          ],
+          "steps": [
+            "Lavar bien el pescado.\n2 En una olla grande, poner el pescado a hervir junto con la sal, el laurel y el agua.",
+            "Cortar las verduras en trozos medianos e incorporarlas al agua de cocción.",
+            "Agregar el aceite y el vino.",
+            "Una vez que comience a hervir, contabilizar 25 minutos y apagar el fuego.",
+            "Dejar reposar durante 10 minutos y colar el fumet con el chino."
+          ]
+        },
+        {
+          "title": "ENVASADO",
+          "description": null,
+          "ingredients": [],
+          "steps": [
+            "Colocar la olla a presión de 25 litros con suficiente agua en su interior y la bandeja de metal a hervir.",
+            "En una olla grande, poner suficiente agua a hervir y sumergir los botes de cristal donde se envasará el caldo previamente lavados.",
+            "Colocar también las tapas.",
+            "Dejar hervir los botes completamente sumergidos en el agua durante 15 minutos.",
+            "Mantener el caldo a punto de hervor.",
+            "Una vez que hayan hervido los botes, sacarlos con cuidado del agua y rellenarlos con 430 gramos de fumet hirviendo.",
+            "Tapar con cuidado e introducirlos en la olla a presión que tendrá el agua interior hirviendo.",
+            "Una vez se hayan colocado todos los botes dentro de la oilla a presión, taparla con cuidado SIN LA VALVULA DE PRESION COLOCADA.",
+            "Dejar que la olla a presión hierva sin válvula durante 10 minutos para asegurar que expulse todo el aire del interior.",
+            "Pasados los 10 minutos, colocar con cuidado la válvula y esperar a que llegue a 1 bar de presión.",
+            "Una vez alcanzada la presión necesaria, contabilizar 25 minutos.",
+            "Pasado el tiempo, apagar el fuego. NO TOCAR NADA. Dejar atemperar naturalmente.",
+            "Una vez atemperada la olla, retirar la tapa y dejar los botes dentro del agua durante 20 minutos más.",
+            "Pasado ese tiempo, los botes habrán estabilizado la presión y podrán sacarse del agua."
+          ]
+        }
+      ],
+      "sourceSheet": "FUMET DE PESCADO"
+    },
+    {
+      "id": "cebolla-pochada",
+      "name": "CEBOLLA POCHADA",
+      "yieldAmount": 530.0,
+      "yieldUnit": "Gramos",
+      "stages": [
+        {
+          "title": "RECETA BASE",
+          "procedureTitle": "PROCEDIMIENTO",
+          "description": "Cebolla pochada que se utiliza para la preparación de las paellas.",
+          "ingredients": [
+            {
+              "qty": 1000,
+              "unit": "g",
+              "name": "Patatas"
+            },
+            {
+              "qty": 40,
+              "unit": "g",
+              "name": "Aceite de Oliva"
+            },
+            {
+              "qty": 5,
+              "unit": "g",
+              "name": "Sal"
+            }
+          ],
+          "steps": [
+            "Pelar las cebollas, cortarlas en trozos medianos y colocarlas en el vaso de la Thermomix.",
+            "Programar 20 segundos / Velocidad 10. Con una espátula bajar la cebolla y repetir el proceso. El objetivo es cortar la cebolla en trozos muy pequeños.",
+            "Programar 30 minutos / Velocidad 1 / 105 grados SIN TAPAR para que evapore líquido.",
+            "Destapar. Bajar la cebolla que quede en las paredes del vaso. Volver a tapar.",
+            "Programar otros 20 minutos / Velocidad 1 / 105 grados. La cebolla debe reducir y quedar bien transparente.",
+            "Dejar atemperar. Envasar y guardar refrigerada hasta su uso."
+          ]
+        }
+      ],
+      "sourceSheet": "CEBOLLA POCHADA"
+    },
+    {
+      "id": "brownie",
+      "name": "BROWNIE",
+      "yieldAmount": 9.0,
+      "yieldUnit": "RACIONES",
+      "stages": [
+        {
+          "title": "PLATO FINAL",
+          "procedureTitle": "PROCEDIMIENTO",
+          "description": "Brownie de chocolate al 70%",
+          "ingredients": [
+            {
+              "qty": 200,
+              "unit": "g",
+              "name": "Chocolate negro 72%"
+            },
+            {
+              "qty": 115,
+              "unit": "g",
+              "name": "Mantequilla"
+            },
+            {
+              "qty": 200,
+              "unit": "g",
+              "name": "Azúcar"
+            },
+            {
+              "qty": 80,
+              "unit": "g",
+              "name": "Harina"
+            },
+            {
+              "qty": 25,
+              "unit": "g",
+              "name": "Cacao en polvo"
+            },
+            {
+              "qty": 3,
+              "unit": "ud",
+              "name": "Huevos"
+            },
+            {
+              "qty": 2,
+              "unit": "g",
+              "name": "Sal"
+            }
+          ],
+          "steps": [
+            "Precalentar el horno a 200 grados.",
+            "Fundir la mantequilla y el chocolate en el microondas, 3 minutos a nivel medio.",
+            "Después de fundida la mantequilla y mientras aún está caliente, incorporar el azúcar y mezclar bien.",
+            "Dejar enfriar la mezcla durante 10 minutos para que baje la temperatura.",
+            "Incorporar los huevos, uno a uno mezclando bien.",
+            "Incorporar el cacao, la harina y la sal tamizando y mezclando lentamente.",
+            "Hornear a 200 grados durante 25 minutos."
+          ]
+        }
+      ],
+      "sourceSheet": "BROWNIE"
+    },
+    {
+      "id": "alcachofas",
+      "name": "ALCACHOFAS",
+      "yieldAmount": 1.0,
+      "yieldUnit": "RACION",
+      "stages": [
+        {
+          "title": "PLATO FINAL",
+          "procedureTitle": "PREPARACION",
+          "description": "Corazones de alcachofas confitadas",
+          "ingredients": [
+            {
+              "qty": 2.0,
+              "unit": "ud",
+              "name": "Alcachofas confitadas"
+            },
+            {
+              "qty": 70,
+              "unit": "g",
+              "name": "Tomate confitado RTMY"
+            },
+            {
+              "qty": 5,
+              "unit": "g",
+              "name": "Avellanas tostadas"
+            },
+            {
+              "qty": 5,
+              "unit": "g",
+              "name": "Aceite ahumado"
+            },
+            {
+              "qty": 3,
+              "unit": "g",
+              "name": "Sal en escamas"
+            }
+          ],
+          "steps": [
+            "Colocar las dos alcachofas descongeladas en la Airfryer, 5 minutos a 150 grados.",
+            "Mientras se calientan, colocar la salsa de tomate confitada templada en el fondo de un plato hondo.",
+            "Una vez calientes las alcachofas, abrirlas con cuidado para darles forma de flor.",
+            "Colocarlas en el plato, sobre la salsa.",
+            "Rociarlas con un hilo fino de aceite ahumado y espolvorear sal en escamas por encima.",
+            "Para terminar el plato, espolvorear sobre todo el plato las avellanas tostadas picadas."
+          ]
+        }
+      ],
+      "sourceSheet": "ALCACHOFAS"
+    },
+    {
+      "id": "burrata",
+      "name": "BURRATA",
+      "yieldAmount": 1.0,
+      "yieldUnit": "RACION",
+      "stages": [
+        {
+          "title": "PLATO FINAL",
+          "procedureTitle": "EMPLATADO",
+          "description": "Mezcla común de patata y cebolla que se porciona en 6 raciones de 205 g y se cuaja individualmente para cada tortilla.",
+          "ingredients": [
+            {
+              "qty": 1.0,
+              "unit": "ud",
+              "name": "Burrata"
+            },
+            {
+              "qty": 60,
+              "unit": "g",
+              "name": "Tomate confitado RTMY"
+            },
+            {
+              "qty": 10,
+              "unit": "g",
+              "name": "Aceite ahumado"
+            },
+            {
+              "qty": 5,
+              "unit": "g",
+              "name": "Romero"
+            }
+          ],
+          "steps": [
+            "En un plato hondo colocar una cucharada del tomate confitado templado.",
+            "Sobre el tomate, colocar una pieza de burrata atemperada. Remojarla en agua tibia (antes de abirir la bolsa) si fuera necesario.",
+            "Rociar con unas gotas de aceite ahumado por encima de la burrata y el tomate.",
+            "Colcocar una ramita pequeña de romero sobre la burrata."
+          ]
+        }
+      ],
+      "sourceSheet": "BURRATA"
+    },
+    {
+      "id": "aceite-ahumado",
+      "name": "ACEITE AHUMADO",
+      "yieldAmount": 500.0,
+      "yieldUnit": "GRAMOS",
+      "stages": [
+        {
+          "title": "RECETA BASE",
+          "procedureTitle": "PROCEDIMIENTO",
+          "description": "Aceite con sabor ahumado usado como ingrediente para otras preparaciones.",
+          "ingredients": [
+            {
+              "qty": 500,
+              "unit": "g",
+              "name": "Aceite de Oliva"
+            },
+            {
+              "qty": 3,
+              "unit": "g",
+              "name": "Concentrado de Humo en polvo"
+            }
+          ],
+          "steps": [
+            "En el vado de la Thermomix colocar el aceite y el polvo con aroma a humo.",
+            "Programar 15 minutos / Velocidad 2 / 37 grados.",
+            "Dejar atemperar.",
+            "Envasar y conservar refrigerado hasta su uso."
+          ]
+        }
+      ],
+      "sourceSheet": "ACEITE AHUMADO"
+    },
+    {
+      "id": "anchoas",
+      "name": "ANCHOAS",
+      "yieldAmount": 1.0,
+      "yieldUnit": "RACION",
+      "stages": [
+        {
+          "title": "PLATO FINAL",
+          "procedureTitle": "EMPLATADO",
+          "description": "Plato de anchoas \"00\" del cantábrico con pan de masa madre y tomate rallado.",
+          "ingredients": [
+            {
+              "qty": 4.0,
+              "unit": "ud.",
+              "name": "Anchoas"
+            },
+            {
+              "qty": 100.0,
+              "unit": "g",
+              "name": "Pan Masa Madre RTMY"
+            },
+            {
+              "qty": 70,
+              "unit": "g",
+              "name": "Tomate rallado"
+            }
+          ],
+          "steps": [
+            "En el plato de color con divisiones, colocar una anchoa en cada división.",
+            "Colocar un vasito metálico pequeño con 70 gramos de tomate aliñado.",
+            "Colocar a un lado del plato las 2 rodajas de pan cortadas por la mitad."
+          ]
+        }
+      ],
+      "sourceSheet": "ANCHOAS"
+    },
+    {
+      "id": "salmorreta-rtmy",
+      "name": "SALMORRETA RTMY",
+      "yieldAmount": 2300.0,
+      "yieldUnit": "GRAMOS",
+      "stages": [
+        {
+          "title": "RECETA",
+          "procedureTitle": "PROCEDIMIENTO EN THERMOMIX GRANDE",
+          "description": "Preparación tradicional alicantina base para los arroces",
+          "ingredients": [
+            {
+              "qty": 1875,
+              "unit": "g",
+              "name": "Tomate"
+            },
+            {
+              "qty": 405,
+              "unit": "g",
+              "name": "Aceite de Oliva"
+            },
+            {
+              "qty": 95,
+              "unit": "g",
+              "name": "Ajo pelado"
+            },
+            {
+              "qty": 125,
+              "unit": "g",
+              "name": "Ñora"
+            },
+            {
+              "qty": 22,
+              "unit": "g",
+              "name": "Sal"
+            },
+            {
+              "qty": 9,
+              "unit": "g",
+              "name": "Pimentón dulce"
+            }
+          ],
+          "steps": [
+            "Cortar los tomates en cuartos y repartirlo en dos recipientes",
+            "Colocar en el vaso de la thermomix el aceite y el ajo. Programar 6 minutos / Velocidad 1 / 120 grados.",
+            "Agregar el pimentón. Programar 30 segundos / Velocidad 1 / 120 grados.",
+            "Agregar el bote de ñoras. Programar 3 minutos / Velocidad 1 / 110 grados.",
+            "Añadir la mitad del tomate. Programar 15 minutos / Velocidad 1 / 100 grados. SIN CUBILETE.",
+            "Añadir el resto del tomate y la sal. Programar 20 minutos / Velocidad 1 / 100 grados. SIN CUBILETE.",
+            "Dejar reposar completamente destapado 5 minutos para que baje la temperatura.",
+            "Tapar y triturar la salmorreta subiendo la velocidad lentamente hasta llegar al nivel 10 durante 1 minuto.",
+            "Dejar reposar y conservar refrigerada hasta su uso."
+          ]
+        }
+      ],
+      "sourceSheet": "SALMORRETA"
+    },
+    {
+      "id": "crema-catalana",
+      "name": "CREMA CATALANA",
+      "yieldAmount": 13.0,
+      "yieldUnit": "RACIONES",
+      "stages": [
+        {
+          "title": "BASE",
+          "procedureTitle": "PROCEDIMIENTO PARA INFUSIONAR LA LECHE",
+          "description": "Receta tradicional de la crema catalana hecha a base de leche infusionada para darle un sabor más intenso.",
+          "ingredients": [
+            {
+              "qty": 1000,
+              "unit": "ml",
+              "name": "Leche"
+            },
+            {
+              "qty": 4,
+              "unit": "g",
+              "name": "Canela"
+            },
+            {
+              "qty": 1.0,
+              "unit": "ud",
+              "name": "Piel de un limón"
+            },
+            {
+              "qty": 70,
+              "unit": "g",
+              "name": "Maizena"
+            },
+            {
+              "qty": 100,
+              "unit": "g",
+              "name": "Azúcar"
+            },
+            {
+              "qty": 180,
+              "unit": "ml",
+              "name": "Yema de huevo"
+            }
+          ],
+          "steps": [
+            "Colocar un litro de leche en el vaso de la thermomix.",
+            "Agegar la canela y la piel de limón.",
+            "Calentar 8 minutos / Velocidad 3 MARCHA ATRAS / 90 grados.",
+            "Dejar atemperar antes de utilizar en el resto de la receta."
+          ]
+        },
+        {
+          "title": "PROCEDIMIENTO PARA PREPARAR LA CREMA CATALANA",
+          "description": null,
+          "ingredients": [],
+          "steps": [
+            "En el vaso de la Thermomix con el accesorio batidor colocar la leche infusionada.",
+            "Agregar la maizena, el azúcar y la yema de huevo.",
+            "Mezclar todos los ingredientes 20 segundos / Velocidad 4 / SIN TEMPERATURA.",
+            "Cocinar la crema. Programar 14 minutos / Velocidad 3 / 90 grados.",
+            "Alisar la crema mezclando 1 minuto / Velocidad 2 / SIN TEMPERATURA.",
+            "Racionar en porciones de 90 gramos en las paellas pequeñas.",
+            "Tapar con papel de aluminio, fechar y almacenar en frío hasta su utilización."
+          ]
+        },
+        {
+          "title": "EMPLATADO",
+          "description": null,
+          "ingredients": [],
+          "steps": [
+            "Retirar la crema catalana de la nevera.",
+            "Cubrir la superficie con una fina capa de azúcar.",
+            "Fundir el azúcar con el soplete.",
+            "Servir inmediatamente."
+          ]
+        }
+      ],
+      "sourceSheet": "CATALANA"
+    },
+    {
+      "id": "patatas-bravas",
+      "name": "PATATAS BRAVAS",
+      "yieldAmount": 8.0,
+      "yieldUnit": "RACIONES",
+      "stages": [
+        {
+          "title": "BASE DE PATATAS",
+          "procedureTitle": "PROCEDIMIENTO",
+          "description": "Preparado de patatas cortadas a gajo, marcadas en frituira de aceite y almacenadas refrigeradas al vacío hasta su regeneración en servicio.",
+          "ingredients": [
+            {
+              "qty": 1650,
+              "unit": "g",
+              "name": "Patatas"
+            },
+            {
+              "qty": 11,
+              "unit": "g",
+              "name": "Sal"
+            },
+            {
+              "qty": 6,
+              "unit": "g",
+              "name": "Pimentón dulce"
+            },
+            {
+              "qty": 4,
+              "unit": "g",
+              "name": "Ajo en polvo"
+            },
+            {
+              "qty": 40,
+              "unit": "g",
+              "name": "Salsa brava RTMY"
+            }
+          ],
+          "steps": [
+            "Lavar y pelar las patatas y cortarlas en gajos con la máquina cortadora.",
+            "Calentar el aceite (2 litros, 12 minutos nivel 6)",
+            "Pochar las patatas (6 minutos nivel 5).",
+            "Dorar las patatas (2 minutos nivel 7).",
+            "Racionar en porciones de 200 gramos en bolsas al vacío. Refrigerar hasta consumir."
+          ]
+        },
+        {
+          "title": "EMPLATADO",
+          "description": null,
+          "ingredients": [],
+          "steps": [
+            "Retirar las patatas de la bolsa refrigerada.",
+            "Colocer en Airfryer a 205 grados durante 7 minutos.",
+            "Mientras tanto, colocar 40 gramos de salsa brava en un bote metálico pequeño.\n4 Una vez doradas, retirar las patatas de la airfryer y sazonar con la mezcla de especias.",
+            "Colocar las patatas en la cacerola mediana de metal.",
+            "Servir sobre bandeja pequeña, la cacerola con la salsa aparte."
+          ]
+        },
+        {
+          "title": "NUESTRA SALSA BRAVA",
+          "description": null,
+          "ingredients": [
+            {
+              "qty": 1,
+              "unit": "ud",
+              "name": "Huevos"
+            },
+            {
+              "qty": 0.5,
+              "unit": "ud",
+              "name": "Aceite de girasol"
+            },
+            {
+              "qty": 3.0,
+              "unit": "lonchas",
+              "name": "Pimentón dulce"
+            },
+            {
+              "qty": 8,
+              "unit": "ml",
+              "name": "Tabasco"
+            }
+          ],
+          "steps": [
+            "Colocar el huevo en el vaso de la turmix (el vaso debe estar bien seco).",
+            "Cubrir con el aceite de girasol, agregándolo suavemente para que el huevo quede en el fondo del vaso.",
+            "Agregar el resto de ingredientes con cuidado.",
+            "Introducir las cuchillas de la túrmix con mucho cuidado, dejando salir todo el aire.",
+            "Sin mover las cuchillas, mezclar a máxima velocidad y esperar hasta que la mayonesa emulsione.",
+            "Lentamente ir mezclando todos los ingredientes con mucho cuidado y lentamente.",
+            "Envasar en bote fechado y refrigerado hasta su utilización."
+          ]
+        }
+      ],
+      "sourceSheet": "BRAVAS"
+    },
+    {
+      "id": "tomate-confitado",
+      "name": "TOMATE CONFITADO",
+      "yieldAmount": 750.0,
+      "yieldUnit": "GRAMOS",
+      "stages": [
+        {
+          "title": "RECETA",
+          "procedureTitle": "PROCEDIMIENTO",
+          "description": "Mezcla de tomate al romero con salmorreta, usado de base para el plato de Burrata.",
+          "ingredients": [
+            {
+              "qty": 500,
+              "unit": "g",
+              "name": "Tomate"
+            },
+            {
+              "qty": 5,
+              "unit": "g",
+              "name": "Sal"
+            },
+            {
+              "qty": 10,
+              "unit": "g",
+              "name": "Aceite de Oliva"
+            },
+            {
+              "qty": 10,
+              "unit": "g",
+              "name": "Romero"
+            },
+            {
+              "qty": 300.0,
+              "unit": "g",
+              "name": "Salmorreta RTMY"
+            }
+          ],
+          "steps": [
+            "Lavar y cortar el tomate en trozos medianos.",
+            "En el vaso de la Thermomix, colocar todos los ingredientes.",
+            "Programar 30 minutos / Velocidad 2 / 70 grados. Tapado con el cubilete.",
+            "Agregar la salmorreta y mezclar todo 15 minutos / Velocidad 3 marcha atrás / 90 grados. SIN CUBILETE.",
+            "Guardar refrigerado hasta su utilización."
+          ]
+        }
+      ],
+      "sourceSheet": "TOMATE CONFITADO"
+    },
+    {
+      "id": "ensaladilla-rusa",
+      "name": "ENSALADILLA RUSA",
+      "yieldAmount": 1380.0,
+      "yieldUnit": "GRAMOS",
+      "stages": [
+        {
+          "title": "BASE DE VERDURAS COCIDAS",
+          "procedureTitle": "PROCEDIMIENTO PARA LA BASE DE VERDURAS COCIDAS",
+          "description": "Mezcla de verduras para preparar la base de la ensaladilla rusa. Se almacena en medias preparaciones selladas al vacío y conservadas en nevera.",
+          "ingredients": [
+            {
+              "qty": 1700,
+              "unit": "ml",
+              "name": "Agua"
+            },
+            {
+              "qty": 17,
+              "unit": "g",
+              "name": "Sal"
+            },
+            {
+              "qty": 600,
+              "unit": "g",
+              "name": "Patatas"
+            },
+            {
+              "qty": 90,
+              "unit": "g",
+              "name": "Guisantes"
+            },
+            {
+              "qty": 300,
+              "unit": "g",
+              "name": "Zanahoria en cubos"
+            },
+            {
+              "qty": 170.0,
+              "unit": "g",
+              "name": "Atún"
+            }
+          ],
+          "steps": [
+            "Poner a hervir el agua con la sal. Nivel 8 en vitro (aproximadamente 15 minutos).",
+            "Pelar y cortar las patatas en cubos con la máquina cortadora.",
+            "Cuando hierva el agua, bajar el nivel a 5 y cocer las zanahorias durante 8 minutos.",
+            "Agregar las patatas y cocer 12 minutos.",
+            "Agregar los guisantes y cocer 2 minutos.",
+            "Retirar del fuego. Colar y atemperar en bandeja metálica.",
+            "Cuando haya enfriado, embolsar al vacío en dos partes.",
+            "Refrigerar hasta su utilización."
+          ]
+        },
+        {
+          "title": "ELABORACIÓN DE LA ENSALADILLA",
+          "description": null,
+          "ingredients": [],
+          "steps": [
+            "Colocar la verdura cocida en una bandeja de metal.",
+            "Agregar el atún y remover con cuidado.",
+            "Preparar la mayones según receta y agregar a la mezcla de verduras y atún removiendo suavemente.",
+            "Colocar un film a piel.",
+            "Cubrir la bandeja, fechar y conservar refrigerada máximo 5 días."
+          ]
+        },
+        {
+          "title": "MAYONESA CASERA",
+          "description": null,
+          "ingredients": [
+            {
+              "qty": 2,
+              "unit": "ud",
+              "name": "Huevos"
+            },
+            {
+              "qty": 350,
+              "unit": "ml",
+              "name": "Aceite de girasol"
+            },
+            {
+              "qty": 8,
+              "unit": "g",
+              "name": "Sal"
+            },
+            {
+              "qty": 20,
+              "unit": "g",
+              "name": "Vinagre de Jerez"
+            }
+          ],
+          "steps": [
+            "Colocar los huevos en el vaso de la turmix (el vaso debe estar bien seco).",
+            "Cubrir con el aceite de girasol, agregándolo suavemente para que el huevo quede en el fondo del vaso.",
+            "Agregar el resto de ingredientes con cuidado.",
+            "Introducir las cuchillas de la túrmix con mucho cuidado, dejando salir todo el aire.",
+            "Sin mover las cuchillas, mezclar a máxima velocidad y esperar hasta que la mayonesa emulsione.",
+            "Lentamente ir mezclando todos los ingredientes con mucho cuidado y lentamente."
+          ]
+        }
+      ],
+      "sourceSheet": "ENSALADILLA"
+    },
+    {
+      "id": "gazpacho-andaluz",
+      "name": "GAZPACHO ANDALÚZ",
+      "yieldAmount": 1000.0,
+      "yieldUnit": "GRAMOS",
+      "stages": [
+        {
+          "title": "RECETA",
+          "procedureTitle": "PREPARACIÓN",
+          "description": "Mezcla común de patata y cebolla que se porciona en 6 raciones de 205 g y se cuaja individualmente para cada tortilla.",
+          "ingredients": [
+            {
+              "qty": 880,
+              "unit": "g",
+              "name": "Tomate"
+            },
+            {
+              "qty": 75,
+              "unit": "g",
+              "name": "Pimiento"
+            },
+            {
+              "qty": 110,
+              "unit": "g",
+              "name": "Pepino"
+            },
+            {
+              "qty": 11,
+              "unit": "g",
+              "name": "Ajo pelado"
+            },
+            {
+              "qty": 50,
+              "unit": "g",
+              "name": "Aceite de Oliva"
+            },
+            {
+              "qty": 22,
+              "unit": "g",
+              "name": "Vinagre de Jerez"
+            },
+            {
+              "qty": 7,
+              "unit": "g",
+              "name": "Sal"
+            }
+          ],
+          "steps": [
+            "Lavar, limpiar y cortar todas las verduras.",
+            "Curar el ajo (quitar gérmen y colocar 1 minuto en un vaso con agua en el micro nivel máximo).",
+            "En la thermomix, colocar todas las verduras y la sal. Triturar 3 minutos / Velocidad 10 / Sin calor.",
+            "Con velocidad 4, quitar el cubilete de la tapa y echar el aceite en hilo fino durante 2 minutos.",
+            "Agregar el vinagre y mezclar todo 15 segundos / Velocidad 10 / Sin calor.",
+            "Envasar en una jarra, tapar con film y refrigerar hasta su consumo. Máximo 5 días."
+          ]
+        },
+        {
+          "title": "EMPLATADO",
+          "description": null,
+          "ingredients": [],
+          "steps": [
+            "Servir 150 gramos de gazpacho en un vaso frío.",
+            "Agregar un chorrito de aceite de oliva por encima.",
+            "Servir inmediatamente."
+          ]
+        }
+      ],
+      "sourceSheet": "GAZPACHO"
+    },
+    {
+      "id": "mantequillas",
+      "name": "MANTEQUILLAS",
+      "yieldAmount": 1.0,
+      "yieldUnit": "RACIONES",
+      "stages": [
+        {
+          "title": "RECETA",
+          "description": "Mantequillas saborizadas",
+          "ingredients": [],
+          "steps": [],
+          "procedureTitle": null
+        },
+        {
+          "title": "PROCEDIMIENTO",
+          "description": "Preparar las mantequillas según corresponda.",
+          "ingredients": [],
+          "steps": [],
+          "procedureTitle": null
+        },
+        {
+          "title": "EMPLATADO",
+          "description": null,
+          "ingredients": [],
+          "steps": [
+            "Cortar una rebanada de cada una de las mantequillas.",
+            "Colocarlas en la base metálica de tres divisiones.",
+            "Dejar atemperar las mantequillas antes de servir.",
+            "Emplatar en plato de aluminio, colocando la bandeja de mantequillas en el centro.",
+            "Colocar 3 rebanadas de pan cortadas por la mitad (tostadas o no, según corresponda)."
+          ],
+          "procedureTitle": null
+        },
+        {
+          "title": "MANTEQUILLA AHUMADA",
+          "description": null,
+          "ingredients": [
+            {
+              "qty": 250,
+              "unit": "g",
+              "name": "Mantequilla"
+            },
+            {
+              "qty": 3,
+              "unit": "g",
+              "name": "Concentrado de Humo en polvo"
+            },
+            {
+              "qty": 2,
+              "unit": "g",
+              "name": "Sal"
+            }
+          ],
+          "steps": [
+            "Atemperar la mantequilla durante unos 90 minutos a temperatura ambienete (para obtener un punto pomada).",
+            "Trabajar la mantequilla con espátula para obtener una textura lisa y homogénea.",
+            "Mezclar el resto de ingredientes en un recipiente aparte. Incorporarlos a la mantequilla en dos tandas, mezclando bien.",
+            "Una vez bien mezclado, colocar la mantequilla en nevera (5 minutos) para que recuepere algo de consistencia.",
+            "Colocar la mantequilla dentro del molde plástico redondo y endurecer en el congelador durante 10 minutos.",
+            "Extraer el cilindro de mantequilla empoujando suavemente con el disco de plástico por un extremo.",
+            "Envolver la mantequilla con papel de horno y refrigerar hasta su utilización."
+          ],
+          "procedureTitle": null
+        },
+        {
+          "title": "MANTEQUILLA PICANTE",
+          "description": null,
+          "ingredients": [
+            {
+              "qty": 250,
+              "unit": "g",
+              "name": "Mantequilla"
+            },
+            {
+              "qty": 0.5,
+              "unit": "ud",
+              "name": "Pimienta de cayena molida"
+            },
+            {
+              "qty": 3.0,
+              "unit": "lonchas",
+              "name": "Pimentón dulce"
+            },
+            {
+              "qty": 1,
+              "unit": "g",
+              "name": "Ajo en polvo"
+            },
+            {
+              "qty": 2.0,
+              "unit": "g",
+              "name": "Sal"
+            }
+          ],
+          "steps": [
+            "Atemperar la mantequilla durante unos 90 minutos a temperatura ambienete (para obtener un punto pomada).",
+            "Trabajar la mantequilla con espátula para obtener una textura lisa y homogénea.",
+            "Mezclar el resto de ingredientes en un recipiente aparte. Incorporarlos a la mantequilla en dos tandas, mezclando bien.",
+            "Una vez bien mezclado, colocar la mantequilla en nevera (5 minutos) para que recuepere algo de consistencia.",
+            "Colocar la mantequilla dentro del molde plástico redondo y endurecer en el congelador durante 10 minutos.",
+            "Extraer el cilindro de mantequilla empoujando suavemente con el disco de plástico por un extremo.",
+            "Envolver la mantequilla con papel de horno y refrigerar hasta su utilización."
+          ],
+          "procedureTitle": null
+        },
+        {
+          "title": "MANTEQUILLA CON TOMILLO Y LIMÓN",
+          "description": null,
+          "ingredients": [
+            {
+              "qty": 1.0,
+              "unit": "g",
+              "name": "Mantequilla"
+            },
+            {
+              "qty": 2.0,
+              "unit": "ud",
+              "name": "Tomillo"
+            },
+            {
+              "qty": 4.0,
+              "unit": "g",
+              "name": "Ralladura de piel de limón"
+            },
+            {
+              "qty": 2.0,
+              "unit": "g",
+              "name": "Sal"
+            }
+          ],
+          "steps": [
+            "Atemperar la mantequilla durante unos 90 minutos a temperatura ambienete (para obtener un punto pomada).",
+            "Trabajar la mantequilla con espátula para obtener una textura lisa y homogénea.",
+            "Mezclar el resto de ingredientes en un recipiente aparte. Incorporarlos a la mantequilla en dos tandas, mezclando bien.",
+            "Una vez bien mezclado, colocar la mantequilla en nevera (5 minutos) para que recuepere algo de consistencia.",
+            "Colocar la mantequilla dentro del molde plástico redondo y endurecer en el congelador durante 10 minutos.",
+            "Extraer el cilindro de mantequilla empoujando suavemente con el disco de plástico por un extremo.",
+            "Envolver la mantequilla con papel de horno y refrigerar hasta su utilización."
+          ],
+          "procedureTitle": null
+        }
+      ],
+      "sourceSheet": "MANTEQUILLAS"
+    },
+    {
+      "id": "pan-de-masa-madre",
+      "name": "PAN DE MASA MADRE",
+      "yieldAmount": 810.0,
+      "yieldUnit": "GRAMOS",
+      "stages": [
+        {
+          "title": "RECETA BASE",
+          "procedureTitle": "PROCEDIMIENTO PARA EL AMASADO",
+          "description": "Pan con masa madre al 50% de hidratación",
+          "ingredients": [
+            {
+              "qty": 270.0,
+              "unit": "ml",
+              "name": "Agua"
+            },
+            {
+              "qty": 100.0,
+              "unit": "g",
+              "name": "Masa madre"
+            },
+            {
+              "qty": 500,
+              "unit": "g",
+              "name": "Harina"
+            },
+            {
+              "qty": 2,
+              "unit": "g",
+              "name": "Levadura seca"
+            },
+            {
+              "qty": 12,
+              "unit": "g",
+              "name": "Sal"
+            }
+          ],
+          "steps": [
+            "En la cubeta de la panificadora, colocar el agua y la masa madre.",
+            "Con una espátula, deshacer la masa madre en el agua, diluyendo bien.",
+            "Agregar el harina y la levadura en un extremo y la sal en el otro.",
+            "Colocar la cubeta en la máquina. Programar \"Amasado\" Prog 9, 15 minutos.",
+            "Una vez amasado, retirar la masa, darle forma y colocarla en la cubeta limpia y sin palas.",
+            "Tapar la masa con un paño húmedo y dejarla fermentar 1,5 / 2 horas.",
+            "Hornear en programa 15, durante una hora. Tostado nivel medio.",
+            "Una vez horneado, retirar inmediatamente, colocar en una rejilla y dejar enfriar 45 minutos."
+          ]
+        },
+        {
+          "title": "ALIMENTADO DE LA MASA MADRE",
+          "description": null,
+          "ingredients": [],
+          "steps": [
+            "Colocar un tupper limpio sobre la balanza y poner tara del peso a 0.",
+            "Llenar con la masa madre y pesar la cantidad de masa madre.",
+            "Agregar exactamente el mismo peso obtenido, pero con harina.",
+            "Agregar exactamente el mismo peso de antes, pero de agua.",
+            "Mezclar lentamente para integrar todos los ingredientes cuidando de que no hayan grumos.",
+            "Guardar en nevera al menos durante 8 horas como mínimo antes de usar la masa."
+          ]
+        }
+      ],
+      "sourceSheet": "PAN"
+    },
+    {
+      "id": "base-limonada",
+      "name": "BASE LIMONADA",
+      "yieldAmount": 2000.0,
+      "yieldUnit": "gramos",
+      "stages": [
+        {
+          "title": "RECETA BASE",
+          "procedureTitle": "PROCEDIMIENTO PARA LA BASE DE LA LIMONADA",
+          "description": "Concentrado de limón azucarado para preparar limonada",
+          "ingredients": [
+            {
+              "qty": 800.0,
+              "unit": "g",
+              "name": "Zumo de limón"
+            },
+            {
+              "qty": 1000.0,
+              "unit": "g",
+              "name": "Azúcar"
+            },
+            {
+              "qty": 15.0,
+              "unit": "g",
+              "name": "Ralladura de piel de limón"
+            },
+            {
+              "qty": 2.0,
+              "unit": "g",
+              "name": "Sal"
+            },
+            {
+              "qty": 400.0,
+              "unit": "g",
+              "name": "Agua"
+            }
+          ],
+          "steps": [
+            "Rallar la piel de limón. Reservar.",
+            "Exprimir el zumo de limón y reservar.",
+            "En el vaso de la thermomix colocar el agua, la ralladura de limón y la sal.",
+            "Programar 8 minutos / Velocidad 3 / 100 grados",
+            "Abrir la tapa y agregar el zumo de limón.",
+            "Programar  3 minutos / Velocidad 3 / 90 grados. (NO SUPERAR TIEMPO NI TEMPERATURA).",
+            "Dejar atemperar. Envasar en bolsas y congelar hasta su utilización."
+          ]
+        },
+        {
+          "title": "PREPARACIÓN DE LA LIMONADA",
+          "description": null,
+          "ingredients": [],
+          "steps": [
+            "Preparar una botella de agua (con o sin gas).",
+            "Agregar 3 medidas de la base de la limonada.",
+            "Remover suavemente.",
+            "Servir inmediatamente."
+          ]
+        }
+      ],
+      "sourceSheet": "BASE LIMONADA"
+    },
+    {
+      "id": "tortillas",
+      "name": "TORTILLAS",
+      "yieldAmount": 6.0,
+      "yieldUnit": "RACIONES",
+      "stages": [
+        {
+          "title": "RECETA BASE",
+          "procedureTitle": "PROCEDIMIENTO PARA LA BASE DE PATATA Y CEBOLLA",
+          "description": "Mezcla común de patata y cebolla que se porciona en 6 raciones de 205 g y se cuaja individualmente para cada tortilla.",
+          "ingredients": [
+            {
+              "qty": 1000,
+              "unit": "g",
+              "name": "Patatas"
+            },
+            {
+              "qty": 380,
+              "unit": "g",
+              "name": "Cebolla blanca"
+            },
+            {
+              "qty": 100,
+              "unit": "g",
+              "name": "Aceite de Oliva"
+            },
+            {
+              "qty": 20,
+              "unit": "g",
+              "name": "Sal"
+            }
+          ],
+          "steps": [
+            "Laminar las patatas y la cebolla con la mandolina.",
+            "Coloca en la olla a presión junto con el aceite y la sal.",
+            "Tapar y cocinar a nivel 2 en la vitro durante 38 minutos.",
+            "Dejar reposar. Abrir y colar la mezcla de patatas y cebollas.",
+            "Embolsar en raciones de 205 gramos.",
+            "Envasar al vacío y refrigerar máximo 6 días."
+          ]
+        },
+        {
+          "title": "EMPLATADO",
+          "description": null,
+          "ingredients": [],
+          "steps": [
+            "Cuajar la tortilla según corresponda.",
+            "Colocar la tortilla en un plato metálico (no en el centro, sino a un costado)",
+            "Colocar un vasito metálico pequeño con 70 gramos de tomate rallado aliñado.",
+            "Colocar una rebanada de pan cortada en dos partes (tostado o no, según corresponda)"
+          ]
+        },
+        {
+          "title": "TORTILLA CLÁSICA",
+          "description": null,
+          "ingredients": [
+            {
+              "qty": 1.0,
+              "unit": "ud",
+              "name": "Base de tortilla RTMY"
+            },
+            {
+              "qty": 2,
+              "unit": "ud",
+              "name": "Huevos"
+            }
+          ],
+          "steps": [
+            "Calentar la base de patata en el micro (T).",
+            "Calentar la sarten 14 cm.",
+            "Batir dos huevos.",
+            "Mezclar la base caliente con los huevos.",
+            "Cuajar la tortilla 3 minutos por lado"
+          ]
+        },
+        {
+          "title": "TORTILLA CON SOBRASADA Y MIEL",
+          "description": null,
+          "ingredients": [
+            {
+              "qty": 1,
+              "unit": "ud",
+              "name": "Base de tortilla RTMY"
+            },
+            {
+              "qty": 30,
+              "unit": "g",
+              "name": "Sobrasada"
+            },
+            {
+              "qty": 8,
+              "unit": "g",
+              "name": "Miel"
+            },
+            {
+              "qty": 2,
+              "unit": "ud",
+              "name": "Huevos"
+            }
+          ],
+          "steps": [
+            "Calentar la base de patata en el micro (T) junto con la sobrasada.",
+            "Calentar la sarten 14 cm.",
+            "Batir dos huevos y agregarle la miel.",
+            "Mezclar la base caliente con la sobrasada y los huevos con miel.",
+            "Cuajar la tortilla 3 minutos por lado"
+          ]
+        },
+        {
+          "title": "TORTILLA CON ALCACHOFA Y QUESO CURADO",
+          "description": null,
+          "ingredients": [
+            {
+              "qty": 1,
+              "unit": "ud",
+              "name": "Base de tortilla RTMY"
+            },
+            {
+              "qty": 0.5,
+              "unit": "ud",
+              "name": "Alcachofas confitadas"
+            },
+            {
+              "qty": 3.0,
+              "unit": "lonchas",
+              "name": "Queso curado"
+            },
+            {
+              "qty": 2,
+              "unit": "ud",
+              "name": "Huevos"
+            }
+          ],
+          "steps": [
+            "Calentar la base de patata en el micro (T).",
+            "Calentar la sarten 14 cm junto con la media alcachofa cortada en trozos.",
+            "Batir dos huevos y agregarle 2 lonchas de queso curado cortado a trocitos pequeños.",
+            "Mezclar la base caliente con la media alcachofa y los huevos con queso.",
+            "Cuajar la tortilla 3 minutos por lado"
+          ]
+        },
+        {
+          "title": "TORTILLA CON ANCHOAS",
+          "description": null,
+          "ingredients": [
+            {
+              "qty": 1.0,
+              "unit": "ud",
+              "name": "Base de tortilla RTMY"
+            },
+            {
+              "qty": 4.0,
+              "unit": "ud",
+              "name": "Anchoas"
+            }
+          ],
+          "steps": [
+            "Calentar la base de patata en el micro (T).",
+            "Calentar la sarten 14 cm.",
+            "Batir dos huevos.",
+            "Mezclar la base caliente con los huevos.",
+            "Cuajar la tortilla 3 minutos por lado. Al emplatar la tortilla, colocar por encima 4 filetes de anchoas en forma de cruz."
+          ]
+        },
+        {
+          "title": "TORTILLA CON JAMÓN Y QUESO CURADO",
+          "description": null,
+          "ingredients": [
+            {
+              "qty": 1.0,
+              "unit": "ud",
+              "name": "Base de tortilla RTMY"
+            },
+            {
+              "qty": 3.0,
+              "unit": "lonchas",
+              "name": "Jamón cortado a cuchillo"
+            },
+            {
+              "qty": 2.0,
+              "unit": "lonchas",
+              "name": "Queso curado"
+            }
+          ],
+          "steps": [
+            "Calentar la base de patata en el micro (T).",
+            "Calentar la sarten 14 cm.",
+            "Batir dos huevos y agregarle 2 lonchas de queso curado cortado a trocitos pequeños.",
+            "Mezclar la base caliente los huevos con queso.",
+            "Cuajar la tortilla 3 minutos por lado. Emplatar colocando 3 lonchas de jamón por encima."
+          ]
+        }
+      ],
+      "sourceSheet": "TORTILLAS"
+    }
+  ]
+}
