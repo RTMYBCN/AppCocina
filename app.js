@@ -113,11 +113,6 @@ document.addEventListener("visibilitychange", () => {
 
 /* ---------------- Helpers ---------------- */
 
-function slugParam() {
-  const m = location.hash.match(/^#\/receta\/([^/]+)/);
-  return m ? decodeURIComponent(m[1]) : null;
-}
-
 function findRecipe(id) {
   return state.recipes.find((r) => r.id === id) || null;
 }
@@ -164,22 +159,46 @@ function extractWarnings(raw) {
   return [...new Set(warnings)];
 }
 
-/* ---------------- Router ---------------- */
+/* ---------------- Router ----------------
+   Every screen (list / detail / steps / final) gets its own hash so the
+   header "Volver" button and the device's native back gesture always
+   trigger a real hashchange — otherwise setting the hash to the value it
+   already has is a no-op and the screen never updates (this was the bug:
+   steps and final used to just flip state.view without touching the URL,
+   so going "back" from them did nothing).
+------------------------------------------------- */
+
+const ROUTE_RE = /^#\/receta\/([^/]+)(?:\/(pasos|final)(?:\/(\d+))?)?$/;
 
 function onHashChange() {
   const hash = location.hash || "#/";
+  const match = hash.match(ROUTE_RE);
+
   if (hash === "#/" || hash === "") {
     state.view = "list";
-  } else if (hash.startsWith("#/receta/")) {
-    const id = slugParam();
+  } else if (match) {
+    const id = decodeURIComponent(match[1]);
+    const sub = match[2];
     const r = findRecipe(id);
-    if (r) {
-      state.currentRecipe = r;
-      state.view = "detail";
-      resetScale(r);
-    } else {
+    if (!r) {
       state.view = "list";
+    } else {
+      state.currentRecipe = r;
+      if (sub === "pasos") {
+        const stageIndex = match[3] !== undefined ? parseInt(match[3], 10) : 0;
+        state.startStageIndex = stageIndex;
+        state.flow = buildFlow(r, stageIndex);
+        state.flowPos = 0;
+        state.view = "steps";
+      } else if (sub === "final") {
+        state.view = "final";
+      } else {
+        state.view = "detail";
+        resetScale(r);
+      }
     }
+  } else {
+    state.view = "list";
   }
   render();
   window.scrollTo(0, 0);
@@ -241,11 +260,7 @@ function buildFlow(recipe, startStageIndex) {
 }
 
 function startFlow(recipe, startStageIndex) {
-  state.startStageIndex = startStageIndex;
-  state.flow = buildFlow(recipe, startStageIndex);
-  state.flowPos = 0;
-  state.view = "steps";
-  render();
+  goto("#/receta/" + encodeURIComponent(recipe.id) + "/pasos/" + startStageIndex);
 }
 
 /* ---------------- Views ---------------- */
@@ -546,9 +561,7 @@ window.stepBack = function () {
   }
 };
 window.finishFlow = function () {
-  state.view = "final";
-  render();
-  window.scrollTo(0, 0);
+  goto("#/receta/" + encodeURIComponent(state.currentRecipe.id) + "/final");
 };
 
 function renderFinal() {
