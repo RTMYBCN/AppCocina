@@ -323,9 +323,29 @@ function fmtUpdatedAt() {
   }
 }
 
-function renderList() {
+function buildListItemsHtml() {
   const q = state.search.trim().toLowerCase();
   const list = state.recipes.filter((r) => r.name.toLowerCase().includes(q));
+  return list.length
+    ? list
+        .map(
+          (r) => `
+        <button class="rtmy-card" onclick="goto('#/receta/${encodeURIComponent(r.id)}')">
+          <div>
+            <div class="rtmy-card-name">${escapeHtml(titleCase(r.name))}</div>
+            <div class="rtmy-card-meta">${r.yieldAmount ?? ""} ${escapeHtml(
+                r.yieldUnit || ""
+              )} · ${r.stages.length} etapa${r.stages.length === 1 ? "" : "s"}</div>
+          </div>
+          <svg class="rtmy-card-arrow" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><path d="M9 6l6 6-6 6"/></svg>
+        </button>
+      `
+        )
+        .join("")
+    : `<div class="rtmy-empty">No se encontraron recetas.</div>`;
+}
+
+function renderList() {
   root.innerHTML = `
     ${header(false)}
     <div class="rtmy-refresh-row">
@@ -338,26 +358,8 @@ function renderList() {
     <input class="rtmy-search" placeholder="Buscar receta…" value="${escapeHtml(
       state.search
     )}" oninput="onSearch(this.value)">
-    <div class="rtmy-list">
-      ${
-        list.length
-          ? list
-              .map(
-                (r) => `
-        <button class="rtmy-card" onclick="goto('#/receta/${encodeURIComponent(r.id)}')">
-          <div>
-            <div class="rtmy-card-name">${escapeHtml(titleCase(r.name))}</div>
-            <div class="rtmy-card-meta">${r.yieldAmount ?? ""} ${escapeHtml(
-                  r.yieldUnit || ""
-                )} · ${r.stages.length} etapa${r.stages.length === 1 ? "" : "s"}</div>
-          </div>
-          <svg class="rtmy-card-arrow" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><path d="M9 6l6 6-6 6"/></svg>
-        </button>
-      `
-              )
-              .join("")
-          : `<div class="rtmy-empty">No se encontraron recetas.</div>`
-      }
+    <div class="rtmy-list" id="rtmy-list-container">
+      ${buildListItemsHtml()}
     </div>
     <p class="rtmy-footer-note">Rice to Meet You · El Raval, Barcelona</p>
   `;
@@ -365,7 +367,11 @@ function renderList() {
 
 window.onSearch = function (val) {
   state.search = val;
-  renderList();
+  // Only refresh the results container — never touch the <input> itself,
+  // otherwise re-rendering it destroys and recreates the DOM node, which
+  // drops focus (and on mobile, closes the keyboard) after every keystroke.
+  const container = document.getElementById("rtmy-list-container");
+  if (container) container.innerHTML = buildListItemsHtml();
 };
 
 function renderDetail() {
