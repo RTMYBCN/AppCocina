@@ -26,6 +26,8 @@ const state = {
   flow: [],
   flowPos: 0,
   refreshing: false,
+  timers: [],
+  currentStepDurations: [],
 };
 
 const root = document.getElementById("app");
@@ -157,6 +159,174 @@ function extractWarnings(raw) {
     }
   }
   return [...new Set(warnings)];
+}
+
+/* ---------------- Timers ----------------
+   Steps often name a duration ("cocinar durante 8 minutos"). We detect
+   those mentions and offer an optional timer button per step — starting
+   one is always the cook's choice, never automatic. Timers live in a
+   persistent bar outside #app (see index.html) so they keep counting
+   down and stay visible no matter which screen/step the cook navigates
+   to next; only #app gets replaced on render(), the timer bar never does.
+------------------------------------------------- */
+
+const DURATION_RE = /(\d+(?:[.,]\d+)?)(?:\s*[-–]\s*(\d+(?:[.,]\d+)?))?\s*(horas?|minutos?|segundos?)\b/gi;
+
+function extractDurations(text) {
+  const results = [];
+  const seen = new Set();
+  let m;
+  DURATION_RE.lastIndex = 0;
+  while ((m = DURATION_RE.exec(text))) {
+    const n1 = parseFloat(m[1].replace(",", "."));
+    const n2 = m[2] ? parseFloat(m[2].replace(",", ".")) : null;
+    const unit = m[3].toLowerCase();
+    // Ranges ("2-3 minutos") use the upper bound, so the alarm never
+    // fires before the dish could realistically be ready.
+    const value = n2 !== null ? n2 : n1;
+    let seconds;
+    if (unit.startsWith("hora")) seconds = value * 3600;
+    else if (unit.startsWith("minuto")) seconds = value * 60;
+    else seconds = value;
+    seconds = Math.round(seconds);
+    if (seconds <= 0) continue;
+    const label = m[0].trim();
+    const key = label.toLowerCase();
+    if (seen.has(key)) continue;
+    seen.add(key);
+    results.push({ label, seconds });
+  }
+  return results;
+}
+
+let timerIdSeq = 1;
+let timerTickHandle = null;
+let audioCtx = null;
+const timerBarEl = document.getElementById("timer-bar");
+
+function ensureAudioCtx() {
+  try {
+    if (!audioCtx) audioCtx = new (window.AudioContext || window.webkitAudioContext)();
+    else if (audioCtx.state === "suspended") audioCtx.resume().catch(() => {});
+  } catch (e) {}
+  return audioCtx;
+}
+
+function playAlarmSound() {
+  const ctx = audioCtx;
+  if (!ctx) return;
+  try {
+    const now = ctx.currentTime;
+    for (let i = 0; i < 3; i++) {
+      const osc = ctx.createOscillator();
+      const gain = ctx.createGain();
+      osc.type = "sine";
+      osc.frequency.value = 880;
+      const t0 = now + i * 0.35;
+      gain.gain.setValueAtTime(0.0001, t0);
+      gain.gain.exponentialRampToValueAtTime(0.35, t0 + 0.02);
+      gain.gain.exponentialRampToValueAtTime(0.0001, t0 + 0.25);
+      osc.connect(gain).connect(ctx.destination);
+      osc.start(t0);
+      osc.stop(t0 + 0.3);
+    }
+  } catch (e) {}
+}
+
+function fmtClock(totalSeconds) {
+  const m = Math.floor(totalSeconds / 60);
+  const s = totalSeconds % 60;
+  return `${m}:${s.toString().padStart(2, "0")}`;
+}
+
+function ensureTimerTick() {
+  if (timerTickHandle) return;
+  timerTickHandle = setInterval(() => {
+    let changed = false;
+    state.timers.forEach((t) => {
+      if (t.running && !t.done) {
+        t.remaining--;
+        changed = true;
+        if (t.remaining <= 0) {
+          t.remaining = 0;
+          t.running = false;
+          t.done = true;
+          playAlarmSound();
+          if (navigator.vibrate) navigator.vibrate([200, 100, 200, 100, 400]);
+        }
+      }
+    });
+    if (!state.timers.some((t) => t.running)) {
+      clearInterval(timerTickHandle);
+      timerTickHandle = null;
+    }
+    if (changed) renderTimerBar();
+  }, 1000);
+}
+
+function startTimer(label, seconds) {
+  const dup = state.timers.find((t) => t.label === label && !t.done);
+  if (dup) return; // already running/paused, avoid a duplicate of the same duration
+  ensureAudioCtx(); // create/unlock audio now, while we still have a user gesture
+  state.timers.push({
+    id: timerIdSeq++,
+    label,
+    remaining: seconds,
+    running: true,
+    done: false,
+  });
+  ensureTimerTick();
+  renderTimerBar();
+}
+
+window.startTimerByIndex = function (i) {
+  const d = (state.currentStepDurations || [])[i];
+  if (!d) return;
+  startTimer(d.label, d.seconds);
+};
+
+window.toggleTimer = function (id) {
+  const t = state.timers.find((x) => x.id === id);
+  if (!t || t.done) return;
+  t.running = !t.running;
+  if (t.running) ensureTimerTick();
+  renderTimerBar();
+};
+
+window.cancelTimer = function (id) {
+  state.timers = state.timers.filter((x) => x.id !== id);
+  renderTimerBar();
+};
+
+function renderTimerBar() {
+  if (!timerBarEl) return;
+  document.body.classList.toggle("has-timer", state.timers.length > 0);
+  if (!state.timers.length) {
+    timerBarEl.innerHTML = "";
+    timerBarEl.classList.remove("visible");
+    return;
+  }
+  timerBarEl.classList.add("visible");
+  timerBarEl.innerHTML = state.timers
+    .map(
+      (t) => `
+    <div class="rtmy-timer-row ${t.done ? "done" : ""}">
+      <div class="rtmy-timer-info">
+        <span class="rtmy-timer-clock">${t.done ? "¡Listo!" : fmtClock(t.remaining)}</span>
+        <span class="rtmy-timer-label">${escapeHtml(t.label)}</span>
+      </div>
+      <div class="rtmy-timer-controls">
+        ${
+          !t.done
+            ? `<button onclick="toggleTimer(${t.id})" aria-label="${t.running ? "Pausar" : "Reanudar"}">${t.running ? "⏸" : "▶️"}</button>`
+            : ""
+        }
+        <button onclick="cancelTimer(${t.id})" aria-label="Descartar">✕</button>
+      </div>
+    </div>
+  `
+    )
+    .join("");
 }
 
 /* ---------------- Router ----------------
@@ -489,6 +659,8 @@ function renderSteps() {
       item.stepIndexInStage
     ];
   const warnings = extractWarnings(stepText);
+  const durations = extractDurations(stepText);
+  state.currentStepDurations = durations;
 
   // progress dots: one per stage in active range
   const activeStages = r.stages.slice(state.startStageIndex);
@@ -537,6 +709,18 @@ function renderSteps() {
             return `<div class="rtmy-warning ${danger ? "danger" : ""}">${danger ? "🚫" : "⚠️"} ${escapeHtml(w)}</div>`;
           })
           .join("")}
+        ${
+          durations.length
+            ? `<div class="rtmy-timer-chips">
+                ${durations
+                  .map(
+                    (d, i) =>
+                      `<button class="rtmy-timer-chip" onclick="startTimerByIndex(${i})">⏱️ Iniciar ${escapeHtml(d.label)}</button>`
+                  )
+                  .join("")}
+              </div>`
+            : ""
+        }
       </div>
     </div>
     <div class="rtmy-step-nav">
