@@ -46,6 +46,12 @@ let lastFetchAt = 0;
    currently open).
 ------------------------------------------------- */
 
+function sortRecipesByName(recipes) {
+  return recipes
+    .slice()
+    .sort((a, b) => a.name.localeCompare(b.name, "es", { sensitivity: "base" }));
+}
+
 async function loadRecipes(opts) {
   opts = opts || {};
   const silent = !!opts.silent;
@@ -55,7 +61,7 @@ async function loadRecipes(opts) {
     try {
       const cached = JSON.parse(sessionStorage.getItem(CONFIG.CACHE_KEY) || "null");
       if (cached && Date.now() - cached.ts < CONFIG.CACHE_TTL_MS) {
-        state.recipes = cached.data.recipes;
+        state.recipes = sortRecipesByName(cached.data.recipes);
         state.updatedAt = cached.data.updatedAt || null;
         state.view = "list";
         render();
@@ -73,7 +79,7 @@ async function loadRecipes(opts) {
     const res = await fetch(url, { cache: "no-store" });
     if (!res.ok) throw new Error("HTTP " + res.status);
     const data = await res.json();
-    state.recipes = data.recipes || [];
+    state.recipes = sortRecipesByName(data.recipes || []);
     state.updatedAt = data.updatedAt || null;
     state.view = state.view === "loading" ? "list" : state.view;
     lastFetchAt = Date.now();
