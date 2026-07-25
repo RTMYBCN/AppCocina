@@ -14,20 +14,34 @@ const CONFIG = {
   CACHE_TTL_MS: 1000 * 60 * 10, // 10 minutos
 };
 
+const MAX_SESSIONS = 4;
+
 const state = {
   view: "loading", // loading | error | list | detail | steps | final
   recipes: [],
   updatedAt: null,
-  currentRecipe: null,
   search: "",
-  scaleFactor: 1,
-  scaleQty: null,
-  startStageIndex: 0,
-  flow: [],
-  flowPos: 0,
   refreshing: false,
   timers: [],
   currentStepDurations: [],
+
+  // Detail screen: a lightweight "draft" scale for whichever recipe is
+  // currently being looked at, before (or while) it's being cooked.
+  currentRecipe: null,
+  scaleFactor: 1,
+  scaleQty: null,
+  sessionCapWarning: false,
+
+  // Up to MAX_SESSIONS recipes can be "in preparation" at once — each one
+  // keeps its own scale and step position so the cook can freely switch
+  // between them (e.g. start a timer on one, work on another meanwhile).
+  sessions: [],
+  activeSessionId: null,
+
+  // Snapshot used only by the final screen, captured at the moment a
+  // session finishes (the session itself is removed right away so its
+  // slot frees up for another recipe).
+  finishedSession: null,
 };
 
 const root = document.getElementById("app");
@@ -270,8 +284,8 @@ function ensureTimerTick() {
   }, 1000);
 }
 
-function startTimer(label, seconds) {
-  const dup = state.timers.find((t) => t.label === label && !t.done);
+function startTimer(label, seconds, sessionId, recipeName) {
+  const dup = state.timers.find((t) => t.label === label && t.sessionId === (sessionId || null) && !t.done);
   if (dup) return; // already running/paused, avoid a duplicate of the same duration
   ensureAudioCtx(); // create/unlock audio now, while we still have a user gesture
   state.timers.push({
@@ -280,6 +294,8 @@ function startTimer(label, seconds) {
     remaining: seconds,
     running: true,
     done: false,
+    sessionId: sessionId || null,
+    recipeName: recipeName || null,
   });
   ensureTimerTick();
   renderTimerBar();
@@ -288,7 +304,8 @@ function startTimer(label, seconds) {
 window.startTimerByIndex = function (i) {
   const d = (state.currentStepDurations || [])[i];
   if (!d) return;
-  startTimer(d.label, d.seconds);
+  const session = activeSession();
+  startTimer(d.label, d.seconds, session ? session.id : null, session ? session.recipe.name : null);
 };
 
 window.toggleTimer = function (id) {
@@ -314,14 +331,18 @@ function renderTimerBar() {
   }
   timerBarEl.classList.add("visible");
   timerBarEl.innerHTML = state.timers
-    .map(
-      (t) => `
+    .map((t) => {
+      const sessionStillOpen = t.sessionId && state.sessions.some((s) => s.id === t.sessionId);
+      const info = t.done
+        ? t.recipeName
+          ? `<span class="rtmy-timer-clock">⏰</span><span class="rtmy-timer-label"><b>${escapeHtml(titleCase(t.recipeName))}</b> necesita tu atención — ${escapeHtml(t.label)}</span>`
+          : `<span class="rtmy-timer-clock">¡Listo!</span><span class="rtmy-timer-label">${escapeHtml(t.label)}</span>`
+        : `<span class="rtmy-timer-clock">${fmtClock(t.remaining)}</span><span class="rtmy-timer-label">${escapeHtml(t.label)}${t.recipeName ? " · " + escapeHtml(titleCase(t.recipeName)) : ""}</span>`;
+      return `
     <div class="rtmy-timer-row ${t.done ? "done" : ""}">
-      <div class="rtmy-timer-info">
-        <span class="rtmy-timer-clock">${t.done ? "¡Listo!" : fmtClock(t.remaining)}</span>
-        <span class="rtmy-timer-label">${escapeHtml(t.label)}</span>
-      </div>
+      <div class="rtmy-timer-info">${info}</div>
       <div class="rtmy-timer-controls">
+        ${t.done && sessionStillOpen ? `<button class="rtmy-timer-goto" onclick="switchToSession('${t.sessionId}')">Ir a la receta</button>` : ""}
         ${
           !t.done
             ? `<button onclick="toggleTimer(${t.id})" aria-label="${t.running ? "Pausar" : "Reanudar"}">${t.running ? "⏸" : "▶️"}</button>`
@@ -330,9 +351,99 @@ function renderTimerBar() {
         <button onclick="cancelTimer(${t.id})" aria-label="Descartar">✕</button>
       </div>
     </div>
-  `
-    )
+  `;
+    })
     .join("");
+}
+
+/* ---------------- Ingredient quantities in step text ----------------
+   "saltear la cebolla" -> "saltear los 210 g de cebolla", pulling the
+   number straight from the (already scaled) ingredient list — never a
+   guess, always the real figure for that batch.
+
+   Matching strategy: use each ingredient's first word as its "key" (the
+   table often reads "Cebolla blanca" while the step just says "la
+   cebolla"). If two ingredients in the same list share a first word
+   (e.g. two "Aceite ..."), that key is skipped entirely rather than
+   guessing which one a step means. Only the first mention of each
+   ingredient in a step gets annotated.
+------------------------------------------------- */
+
+const UNIT_GENDER = {
+  g: "m", gramo: "m", gramos: "m",
+  kg: "m", kilo: "m", kilos: "m",
+  ml: "m", mililitro: "m", mililitros: "m",
+  cl: "m", l: "m", litro: "m", litros: "m",
+  ud: "f", "u.": "f", unidad: "f", unidades: "f",
+  loncha: "f", lonchas: "f",
+};
+
+function articleFor(unit, plural) {
+  const gender = UNIT_GENDER[(unit || "").toLowerCase()] || "m";
+  if (gender === "f") return plural ? "las" : "la";
+  return plural ? "los" : "el";
+}
+
+function escapeRegex(s) {
+  return s.replace(/[.*+?^${}()|[\]\\]/g, "\\$&");
+}
+
+function ingredientKeyTerm(name) {
+  const word = name.trim().split(/\s+/)[0];
+  return word.toLowerCase();
+}
+
+// Generic culinary nouns that regularly show up in prose meaning "the
+// mix/prep I already made" rather than the specific named ingredient
+// (e.g. "Base de tortilla RTMY" the ingredient vs. "la base de patata"
+// meaning the potato mixture). Too ambiguous to auto-annotate safely.
+const GENERIC_KEY_BLOCKLIST = new Set([
+  "base", "salsa", "mezcla", "masa", "relleno", "caldo", "fondo", "reduccion", "reducción",
+]);
+
+function injectIngredientQuantities(text, ingredients) {
+  if (!ingredients || !ingredients.length) return text;
+
+  const byKey = new Map();
+  ingredients.forEach((ing) => {
+    const key = ingredientKeyTerm(ing.name);
+    if (key.length < 3 || GENERIC_KEY_BLOCKLIST.has(key)) return;
+    if (!byKey.has(key)) byKey.set(key, []);
+    byKey.get(key).push(ing);
+  });
+
+  let result = text;
+  byKey.forEach((list, key) => {
+    if (list.length > 1) return; // ambiguous shared first word — don't guess
+    const ing = list[0];
+    // \b on both ends: without the trailing boundary, a short key like
+    // "sal" would also match inside an unrelated word like "saltear".
+    // The optional (es|s) only covers simple Spanish pluralization. The
+    // lookbehind skips mentions that already carry their own explicit
+    // quantity (e.g. "embolsar en raciones de 150 gramos de carrilleras")
+    // so we don't tack the full batch weight onto a portion size.
+    // Trailing \s* (not \s+) on the lookbehind: the regex engine tries a
+    // match starting right at the space before the key as well as right
+    // after it, so the exclusion has to fire at either boundary or the
+    // "at the space" attempt slips through as the leftmost match.
+    const re = new RegExp(
+      `(?<!\\d+\\s*(?:g|gramos?|kg|kilos?|ml|mililitros?|ud|unidades?)\\s+de\\s*)(el|la|los|las)?(\\s*)\\b(${escapeRegex(key)}(?:es|s)?)\\b`,
+      "i"
+    );
+    const m = result.match(re);
+    if (!m) return;
+    const qtyLabel = `${fmtQty(ing.qty)} ${ing.unit}`;
+    const plural = Math.abs(ing.qty - 1) > 0.001;
+    const matchedWord = m[3];
+    // No article to swap out (e.g. "con sal", "por harina"): the leading
+    // whitespace (m[2]) was consumed by the match too, so it must be put
+    // back or the words on either side run together ("consal").
+    const replacement = m[1]
+      ? `${articleFor(ing.unit, plural)} ${qtyLabel} de ${matchedWord}`
+      : `${m[2]}${matchedWord} (${qtyLabel})`;
+    result = result.replace(m[0], replacement);
+  });
+  return result;
 }
 
 /* ---------------- Router ----------------
@@ -342,41 +453,64 @@ function renderTimerBar() {
    already has is a no-op and the screen never updates (this was the bug:
    steps and final used to just flip state.view without touching the URL,
    so going "back" from them did nothing).
+
+   Cooking a recipe now lives in a "session" (see Sessions below), so the
+   steps screen is reached via #/sesion/<id> — a session must already
+   exist (created by startFlow, or resumed by switchToSession) before that
+   route resolves; the hash itself never encodes stage/step position.
 ------------------------------------------------- */
 
-const ROUTE_RE = /^#\/receta\/([^/]+)(?:\/(pasos|final)(?:\/(\d+))?)?$/;
+const ROUTE_SESION_RE = /^#\/sesion\/([^/]+)$/;
+const ROUTE_RECETA_RE = /^#\/receta\/([^/]+)(?:\/(final))?$/;
 
 function onHashChange() {
   const hash = location.hash || "#/";
-  const match = hash.match(ROUTE_RE);
+  const sesionMatch = hash.match(ROUTE_SESION_RE);
+  const recetaMatch = !sesionMatch ? hash.match(ROUTE_RECETA_RE) : null;
 
   if (hash === "#/" || hash === "") {
     state.view = "list";
-  } else if (match) {
-    const id = decodeURIComponent(match[1]);
-    const sub = match[2];
+  } else if (sesionMatch) {
+    const id = decodeURIComponent(sesionMatch[1]);
+    const s = findSession(id);
+    if (s) {
+      state.activeSessionId = id;
+      state.view = "steps";
+    } else {
+      // No live session for this id (e.g. after a page reload — sessions
+      // only live in memory). Fall back to the recipe's detail screen.
+      const r = findRecipe(id);
+      if (r) {
+        state.currentRecipe = r;
+        state.view = "detail";
+        resetScale(r);
+      } else {
+        state.view = "list";
+      }
+    }
+  } else if (recetaMatch) {
+    const id = decodeURIComponent(recetaMatch[1]);
+    const sub = recetaMatch[2];
     const r = findRecipe(id);
     if (!r) {
       state.view = "list";
-    } else {
-      state.currentRecipe = r;
-      if (sub === "pasos") {
-        const stageIndex = match[3] !== undefined ? parseInt(match[3], 10) : 0;
-        state.startStageIndex = stageIndex;
-        state.flow = buildFlow(r, stageIndex);
-        state.flowPos = 0;
-        state.view = "steps";
-      } else if (sub === "final") {
-        state.view = "final";
-      } else {
-        state.view = "detail";
+    } else if (sub === "final") {
+      state.view =
+        state.finishedSession && state.finishedSession.recipe.id === id ? "final" : "detail";
+      if (state.view === "detail") {
+        state.currentRecipe = r;
         resetScale(r);
       }
+    } else {
+      state.currentRecipe = r;
+      state.view = "detail";
+      resetScale(r);
     }
   } else {
     state.view = "list";
   }
   render();
+  renderSessionBar();
   window.scrollTo(0, 0);
 }
 
@@ -384,14 +518,53 @@ function goto(hash) {
   location.hash = hash;
 }
 
+/* ---------------- Sessions ----------------
+   A "session" is one recipe currently being cooked: its own scale and its
+   own position in the step flow, independent from every other session.
+   Up to MAX_SESSIONS can be open at once so the cook can start a timer on
+   one dish and switch to another while it runs, then switch back.
+------------------------------------------------- */
+
+function findSession(recipeId) {
+  return state.sessions.find((s) => s.id === recipeId) || null;
+}
+
+function activeSession() {
+  return findSession(state.activeSessionId);
+}
+
+function switchToSession(id) {
+  if (!findSession(id)) return;
+  goto("#/sesion/" + encodeURIComponent(id));
+}
+window.switchToSession = switchToSession;
+
+window.closeSession = function (id) {
+  state.sessions = state.sessions.filter((s) => s.id !== id);
+  if (state.activeSessionId === id) {
+    state.activeSessionId = null;
+    if (state.view === "steps") goto("#/");
+  }
+  if (state.sessions.length < MAX_SESSIONS) state.sessionCapWarning = false;
+  renderSessionBar();
+  if (state.view === "detail") renderDetail();
+};
+
 /* ---------------- Scaling ---------------- */
 
 function resetScale(recipe) {
+  // If this recipe already has an open session, reflect its current
+  // scale here instead of resetting to the base quantity.
+  const existing = findSession(recipe.id);
+  if (existing) {
+    state.scaleFactor = existing.scaleFactor;
+    state.scaleQty = existing.scaleQty;
+    return;
+  }
   const stage0 = recipe.stages[0];
   const main = stage0 && stage0.ingredients[0];
   state.scaleQty = main ? main.qty : null;
   state.scaleFactor = 1;
-  state.startStageIndex = 0;
 }
 
 function mainIngredient(recipe) {
@@ -399,14 +572,14 @@ function mainIngredient(recipe) {
   return stage0 && stage0.ingredients.length ? stage0.ingredients[0] : null;
 }
 
+function applyScale(ingredients, ratio) {
+  return ingredients.map((ing) => ({ ...ing, qty: ing.qty * ratio }));
+}
+
 function scaledIngredients(recipe) {
   const stage0 = recipe.stages[0];
   if (!stage0) return [];
-  const ratio = state.scaleFactor;
-  return stage0.ingredients.map((ing) => ({
-    ...ing,
-    qty: ing.qty * ratio,
-  }));
+  return applyScale(stage0.ingredients, state.scaleFactor);
 }
 
 function sliderRange(mainQty) {
@@ -436,7 +609,27 @@ function buildFlow(recipe, startStageIndex) {
 }
 
 function startFlow(recipe, startStageIndex) {
-  goto("#/receta/" + encodeURIComponent(recipe.id) + "/pasos/" + startStageIndex);
+  let session = findSession(recipe.id);
+  if (!session && state.sessions.length >= MAX_SESSIONS) {
+    // Already cooking the maximum of MAX_SESSIONS different recipes at
+    // once — show the limit inline instead of silently doing nothing.
+    state.sessionCapWarning = true;
+    renderDetail();
+    return;
+  }
+  if (!session) {
+    session = { id: recipe.id, recipe, scaleFactor: 1, scaleQty: null, startStageIndex: 0, flow: [], flowPos: 0 };
+    state.sessions.push(session);
+  }
+  session.recipe = recipe;
+  session.scaleFactor = state.scaleFactor;
+  session.scaleQty = state.scaleQty;
+  session.startStageIndex = startStageIndex;
+  session.flow = buildFlow(recipe, startStageIndex);
+  session.flowPos = 0;
+  state.activeSessionId = recipe.id;
+  state.sessionCapWarning = false;
+  goto("#/sesion/" + encodeURIComponent(recipe.id));
 }
 
 /* ---------------- Views ---------------- */
@@ -555,12 +748,35 @@ function renderDetail() {
   const stage0 = r.stages[0];
   const main = mainIngredient(r);
   const hasMultipleStages = r.stages.length > 1;
+  const session = findSession(r.id);
 
   root.innerHTML = `
     ${header(true, "#/", "Detalle de receta")}
+    ${
+      state.sessionCapWarning
+        ? `
+    <div class="rtmy-panel rtmy-cap-warning">
+      <p><strong>Ya tienes ${MAX_SESSIONS} recetas en preparación a la vez.</strong></p>
+      <p style="font-size:13px;opacity:.8;margin-top:4px;">Cierra una para poder empezar esta.</p>
+      <div class="rtmy-session-list">
+        ${state.sessions
+          .map((s) => {
+            const item = s.flow[s.flowPos];
+            const step = item ? `Paso ${item.stepIndexInStage + 1} de ${item.totalInStage}` : "";
+            return `<div class="rtmy-session-list-row">
+              <span>${escapeHtml(titleCase(s.recipe.name))} <span style="opacity:.6;">· ${step}</span></span>
+              <button class="rtmy-cta secondary" style="padding:6px 12px;margin:0;" onclick="closeSession('${s.id}')">Cerrar</button>
+            </div>`;
+          })
+          .join("")}
+      </div>
+    </div>`
+        : ""
+    }
     <div class="rtmy-panel">
       <div class="rtmy-recipe-yield">${r.yieldAmount ?? ""} ${escapeHtml(r.yieldUnit || "")}</div>
       <h2 class="rtmy-recipe-name">${escapeHtml(titleCase(r.name))}</h2>
+      ${session ? `<span class="rtmy-inprogress-badge">👩‍🍳 En preparación</span>` : ""}
       ${stage0 && stage0.description ? `<p class="rtmy-recipe-desc">${escapeHtml(stage0.description)}</p>` : ""}
 
       ${
@@ -593,10 +809,16 @@ function renderDetail() {
     </div>
 
     ${
+      session
+        ? `<button class="rtmy-cta" onclick="switchToSession('${r.id}')">Continuar donde lo dejaste</button>`
+        : ""
+    }
+
+    ${
       hasMultipleStages
         ? `
     <div class="rtmy-panel">
-      <div class="rtmy-scale-label">¿Por dónde empezamos?</div>
+      <div class="rtmy-scale-label">${session ? "O empezar de nuevo desde…" : "¿Por dónde empezamos?"}</div>
       <div class="rtmy-stage-picker">
         ${r.stages
           .map(
@@ -614,7 +836,9 @@ function renderDetail() {
       </div>
     </div>
     `
-        : `<button class="rtmy-cta" onclick="startFlow(state.currentRecipe, 0)">Empezar receta</button>`
+        : !session
+          ? `<button class="rtmy-cta" onclick="startFlow(state.currentRecipe, 0)">Empezar receta</button>`
+          : ""
     }
 
     <p class="rtmy-footer-note">Rice to Meet You · El Raval, Barcelona</p>
@@ -655,24 +879,38 @@ window.onScaleInput = function (val) {
 };
 
 function renderSteps() {
-  const r = state.currentRecipe;
-  const flow = state.flow;
-  const pos = state.flowPos;
+  const session = activeSession();
+  if (!session) {
+    goto("#/");
+    return;
+  }
+  const r = session.recipe;
+  const flow = session.flow;
+  const pos = session.flowPos;
   const item = flow[pos];
   const stage = r.stages[item.stageIndex];
-  const stepText =
+  const rawStepText =
     (stage.steps && stage.steps.length ? stage.steps : [stage.description])[
       item.stepIndexInStage
     ];
-  const warnings = extractWarnings(stepText);
-  const durations = extractDurations(stepText);
+  const warnings = extractWarnings(rawStepText);
+  const durations = extractDurations(rawStepText);
   state.currentStepDurations = durations;
 
+  // Ingredients available to name-check quantities against: the scaled
+  // base batch for stage 0, or that stage's own (unscaled) table for
+  // composite recipes with sub-recipes further down.
+  const stageIngredients =
+    item.stageIndex === 0
+      ? applyScale(r.stages[0].ingredients, session.scaleFactor)
+      : stage.ingredients;
+  const stepText = injectIngredientQuantities(rawStepText, stageIngredients);
+
   // progress dots: one per stage in active range
-  const activeStages = r.stages.slice(state.startStageIndex);
+  const activeStages = r.stages.slice(session.startStageIndex);
   const dots = activeStages
     .map((s, idx) => {
-      const stageIdx = state.startStageIndex + idx;
+      const stageIdx = session.startStageIndex + idx;
       let cls = "dot";
       if (stageIdx < item.stageIndex) cls += " done";
       else if (stageIdx === item.stageIndex) cls += " current";
@@ -743,25 +981,36 @@ function renderSteps() {
 }
 
 window.stepNext = function () {
-  if (state.flowPos < state.flow.length - 1) {
-    state.flowPos++;
+  const s = activeSession();
+  if (!s) return;
+  if (s.flowPos < s.flow.length - 1) {
+    s.flowPos++;
     render();
+    renderSessionBar();
     window.scrollTo(0, 0);
   }
 };
 window.stepBack = function () {
-  if (state.flowPos > 0) {
-    state.flowPos--;
+  const s = activeSession();
+  if (!s) return;
+  if (s.flowPos > 0) {
+    s.flowPos--;
     render();
+    renderSessionBar();
     window.scrollTo(0, 0);
   }
 };
 window.finishFlow = function () {
-  goto("#/receta/" + encodeURIComponent(state.currentRecipe.id) + "/final");
+  const s = activeSession();
+  if (!s) return;
+  state.finishedSession = { recipe: s.recipe };
+  state.sessions = state.sessions.filter((x) => x.id !== s.id);
+  if (state.activeSessionId === s.id) state.activeSessionId = null;
+  goto("#/receta/" + encodeURIComponent(s.recipe.id) + "/final");
 };
 
 function renderFinal() {
-  const r = state.currentRecipe;
+  const r = state.finishedSession.recipe;
   const lastStage = r.stages[r.stages.length - 1];
   const steps = lastStage.steps && lastStage.steps.length ? lastStage.steps : [];
 
@@ -785,6 +1034,37 @@ function renderFinal() {
     <button class="rtmy-cta" onclick="goto('#/')">Volver al listado de recetas</button>
     <p class="rtmy-footer-note">Rice to Meet You · El Raval, Barcelona</p>
   `;
+}
+
+/* ---------------- Session switcher bar ----------------
+   Persistent, outside #app (like the timer bar) — shows every recipe
+   currently being cooked so the cook can jump between them freely.
+------------------------------------------------- */
+
+const sessionBarEl = document.getElementById("session-bar");
+
+function renderSessionBar() {
+  if (!sessionBarEl) return;
+  document.body.classList.toggle("has-session", state.sessions.length > 0);
+  if (!state.sessions.length) {
+    sessionBarEl.innerHTML = "";
+    sessionBarEl.classList.remove("visible");
+    return;
+  }
+  sessionBarEl.classList.add("visible");
+  sessionBarEl.innerHTML = state.sessions
+    .map((s) => {
+      const active = state.view === "steps" && s.id === state.activeSessionId;
+      const item = s.flow[s.flowPos];
+      const stepInfo = item ? `Paso ${item.stepIndexInStage + 1}/${item.totalInStage}` : "";
+      return `
+      <button class="rtmy-session-chip ${active ? "active" : ""}" onclick="switchToSession('${s.id}')">
+        <span class="chip-name">${escapeHtml(titleCase(s.recipe.name))}</span>
+        <span class="chip-step">${stepInfo}</span>
+        <span class="chip-close" onclick="event.stopPropagation(); closeSession('${s.id}')" aria-label="Cerrar">✕</span>
+      </button>`;
+    })
+    .join("");
 }
 
 /* ---------------- Boot ---------------- */
