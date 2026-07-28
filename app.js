@@ -10,7 +10,8 @@ const CONFIG = {
   // Mientras esté vacío, la app usa recipes.json local (modo desarrollo/demo).
   DATA_URL: "https://script.google.com/macros/s/AKfycbylwL_HoE5bLKaAnKPMILZOD96h_hel1b5Uhuu5ht0JzvbRisBGgUQy4OWg7tiMACpY/exec",
   LOCAL_FALLBACK: "recipes.json",
-  CACHE_KEY: "rtmy_recipes_cache_v1",
+  CACHE_KEY: "rtmy_recipes_cache_v2",
+  RUNTIME_KEY: "rtmy_runtime_v2",
   CACHE_TTL_MS: 1000 * 60 * 10, // 10 minutos
 };
 
@@ -20,6 +21,7 @@ const state = {
   view: "loading", // loading | error | list | detail | steps | final
   recipes: [],
   updatedAt: null,
+  dataSource: null,
   search: "",
   refreshing: false,
   timers: [],
@@ -46,6 +48,83 @@ const state = {
 
 const root = document.getElementById("app");
 let lastFetchAt = 0;
+
+function normalizeSearchText(value) {
+  return String(value || "")
+    .normalize("NFD")
+    .replace(/[\u0300-\u036f]/g, "")
+    .toLowerCase();
+}
+
+function validateRecipesPayload(data) {
+  if (!data || !Array.isArray(data.recipes)) {
+    throw new Error("La respuesta no contiene una lista de recetas válida.");
+  }
+  const ids = new Set();
+  const recipes = data.recipes.filter((recipe) => {
+    if (!recipe || typeof recipe.id !== "string" || !recipe.id.trim()) return false;
+    if (ids.has(recipe.id)) return false;
+    if (typeof recipe.name !== "string" || !recipe.name.trim()) return false;
+    if (!Array.isArray(recipe.stages) || !recipe.stages.length) return false;
+    const validStages = recipe.stages.every((stage) => {
+      if (!stage || typeof stage.title !== "string") return false;
+      if (!Array.isArray(stage.ingredients) || !Array.isArray(stage.steps)) return false;
+      const ingredientsOk = stage.ingredients.every(
+        (ing) =>
+          ing &&
+          typeof ing.name === "string" &&
+          Number.isFinite(ing.qty) &&
+          ing.qty >= 0 &&
+          typeof ing.unit === "string"
+      );
+      const stepsOk = stage.steps.every((step) => typeof step === "string" && step.trim());
+      return ingredientsOk && stepsOk && (stage.steps.length || stage.description || stage.ingredients.length);
+    });
+    if (!validStages) return false;
+    ids.add(recipe.id);
+    return true;
+  });
+  if (!recipes.length) throw new Error("No se encontró ninguna receta válida.");
+  return { ...data, recipes };
+}
+
+function saveRuntimeState() {
+  try {
+    localStorage.setItem(
+      CONFIG.RUNTIME_KEY,
+      JSON.stringify({
+        sessions: state.sessions,
+        timers: state.timers,
+        activeSessionId: state.activeSessionId,
+        finishedSession: state.finishedSession,
+      })
+    );
+  } catch (e) {
+    console.warn("No se pudo guardar el estado de cocina.", e);
+  }
+}
+
+function restoreRuntimeState() {
+  try {
+    const saved = JSON.parse(localStorage.getItem(CONFIG.RUNTIME_KEY) || "null");
+    if (!saved) return;
+    state.sessions = Array.isArray(saved.sessions) ? saved.sessions : [];
+    state.timers = Array.isArray(saved.timers) ? saved.timers : [];
+    state.activeSessionId = saved.activeSessionId || null;
+    state.finishedSession = saved.finishedSession || null;
+    timerIdSeq = state.timers.reduce((max, timer) => Math.max(max, timer.id || 0), 0) + 1;
+    state.timers.forEach(updateTimerRemaining);
+  } catch (e) {
+    console.warn("No se pudo restaurar el estado de cocina.", e);
+  }
+}
+
+async function fetchRecipesFrom(url, source) {
+  const res = await fetch(url, { cache: "no-store" });
+  if (!res.ok) throw new Error("HTTP " + res.status);
+  const data = validateRecipesPayload(await res.json());
+  return { data, source };
+}
 
 /* ---------------- Data loading ----------------
    The Apps Script always reads the Google Sheet live, so every fresh page
@@ -75,12 +154,17 @@ async function loadRecipes(opts) {
     try {
       const cached = JSON.parse(sessionStorage.getItem(CONFIG.CACHE_KEY) || "null");
       if (cached && Date.now() - cached.ts < CONFIG.CACHE_TTL_MS) {
-        state.recipes = sortRecipesByName(cached.data.recipes);
-        state.updatedAt = cached.data.updatedAt || null;
+        const data = validateRecipesPayload(cached.data);
+        state.recipes = sortRecipesByName(data.recipes);
+        state.updatedAt =
+          cached.data.sourceUpdatedAt || cached.data.fetchedAt || cached.data.updatedAt || null;
+        state.dataSource = "cache";
         state.view = "list";
         render();
       }
-    } catch (e) {}
+    } catch (e) {
+      console.warn("La caché de recetas no era válida.", e);
+    }
   }
 
   if (silent) {
@@ -88,13 +172,21 @@ async function loadRecipes(opts) {
     if (state.view === "list") render();
   }
 
-  const url = CONFIG.DATA_URL || CONFIG.LOCAL_FALLBACK;
   try {
-    const res = await fetch(url, { cache: "no-store" });
-    if (!res.ok) throw new Error("HTTP " + res.status);
-    const data = await res.json();
+    let result;
+    try {
+      result = await fetchRecipesFrom(
+        CONFIG.DATA_URL || CONFIG.LOCAL_FALLBACK,
+        CONFIG.DATA_URL ? "live" : "fallback"
+      );
+    } catch (liveError) {
+      if (!CONFIG.DATA_URL) throw liveError;
+      result = await fetchRecipesFrom(CONFIG.LOCAL_FALLBACK, "fallback");
+    }
+    const { data, source } = result;
     state.recipes = sortRecipesByName(data.recipes || []);
-    state.updatedAt = data.updatedAt || null;
+    state.updatedAt = data.sourceUpdatedAt || data.fetchedAt || data.updatedAt || null;
+    state.dataSource = source;
     state.view = state.view === "loading" ? "list" : state.view;
     lastFetchAt = Date.now();
     try {
@@ -102,7 +194,9 @@ async function loadRecipes(opts) {
         CONFIG.CACHE_KEY,
         JSON.stringify({ ts: Date.now(), data })
       );
-    } catch (e) {}
+    } catch (e) {
+      console.warn("No se pudo actualizar la caché de recetas.", e);
+    }
     state.refreshing = false;
     // Only force a re-render when it's safe: the list view, or first boot.
     // Detail/steps/final keep whatever was already on screen so an
@@ -265,7 +359,7 @@ function ensureTimerTick() {
     let changed = false;
     state.timers.forEach((t) => {
       if (t.running && !t.done) {
-        t.remaining--;
+        updateTimerRemaining(t);
         changed = true;
         if (t.remaining <= 0) {
           t.remaining = 0;
@@ -280,8 +374,16 @@ function ensureTimerTick() {
       clearInterval(timerTickHandle);
       timerTickHandle = null;
     }
-    if (changed) renderTimerBar();
+    if (changed) {
+      saveRuntimeState();
+      renderTimerBar();
+    }
   }, 1000);
+}
+
+function updateTimerRemaining(timer) {
+  if (!timer.running || timer.done) return;
+  timer.remaining = Math.max(0, Math.ceil((timer.endsAt - Date.now()) / 1000));
 }
 
 function startTimer(label, seconds, sessionId, recipeName) {
@@ -292,11 +394,13 @@ function startTimer(label, seconds, sessionId, recipeName) {
     id: timerIdSeq++,
     label,
     remaining: seconds,
+    endsAt: Date.now() + seconds * 1000,
     running: true,
     done: false,
     sessionId: sessionId || null,
     recipeName: recipeName || null,
   });
+  saveRuntimeState();
   ensureTimerTick();
   renderTimerBar();
 }
@@ -312,12 +416,17 @@ window.toggleTimer = function (id) {
   const t = state.timers.find((x) => x.id === id);
   if (!t || t.done) return;
   t.running = !t.running;
-  if (t.running) ensureTimerTick();
+  if (t.running) {
+    t.endsAt = Date.now() + t.remaining * 1000;
+    ensureTimerTick();
+  }
+  saveRuntimeState();
   renderTimerBar();
 };
 
 window.cancelTimer = function (id) {
   state.timers = state.timers.filter((x) => x.id !== id);
+  saveRuntimeState();
   renderTimerBar();
 };
 
@@ -546,6 +655,7 @@ window.closeSession = function (id) {
     if (state.view === "steps") goto("#/");
   }
   if (state.sessions.length < MAX_SESSIONS) state.sessionCapWarning = false;
+  saveRuntimeState();
   renderSessionBar();
   if (state.view === "detail") renderDetail();
 };
@@ -626,9 +736,17 @@ function startFlow(recipe, startStageIndex) {
   session.scaleQty = state.scaleQty;
   session.startStageIndex = startStageIndex;
   session.flow = buildFlow(recipe, startStageIndex);
+  if (!session.flow.length) {
+    state.sessions = state.sessions.filter((item) => item !== session);
+    state.errorMsg = "Esta etapa no contiene pasos ejecutables.";
+    state.view = "error";
+    render();
+    return;
+  }
   session.flowPos = 0;
   state.activeSessionId = recipe.id;
   state.sessionCapWarning = false;
+  saveRuntimeState();
   goto("#/sesion/" + encodeURIComponent(recipe.id));
 }
 
@@ -693,38 +811,47 @@ function fmtUpdatedAt() {
 }
 
 function buildListItemsHtml() {
-  const q = state.search.trim().toLowerCase();
-  const list = state.recipes.filter((r) => r.name.toLowerCase().includes(q));
+  const q = normalizeSearchText(state.search.trim());
+  const list = state.recipes.filter((r) => normalizeSearchText(r.name).includes(q));
   return list.length
     ? list
-        .map(
-          (r) => `
-        <button class="rtmy-card" onclick="goto('#/receta/${encodeURIComponent(r.id)}')">
+        .map((r) => {
+          const inProgress = !!findSession(r.id);
+          return `
+        <button class="rtmy-card ${inProgress ? "in-progress" : ""}" onclick="goto('#/receta/${encodeURIComponent(r.id)}')">
           <div>
             <div class="rtmy-card-name">${escapeHtml(titleCase(r.name))}</div>
             <div class="rtmy-card-meta">${r.yieldAmount ?? ""} ${escapeHtml(
                 r.yieldUnit || ""
               )} · ${r.stages.length} etapa${r.stages.length === 1 ? "" : "s"}</div>
+            ${inProgress ? '<div class="rtmy-card-status">👩‍🍳 En preparación</div>' : ""}
           </div>
           <svg class="rtmy-card-arrow" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><path d="M9 6l6 6-6 6"/></svg>
         </button>
-      `
-        )
+      `;
+        })
         .join("")
     : `<div class="rtmy-empty">No se encontraron recetas.</div>`;
 }
 
 function renderList() {
+  const sourceLabel =
+    state.dataSource === "fallback"
+      ? " · copia local"
+      : state.dataSource === "cache"
+        ? " · caché"
+        : "";
   root.innerHTML = `
     ${header(false)}
     <div class="rtmy-refresh-row">
-      <span>${state.refreshing ? "Actualizando…" : state.updatedAt ? "Datos de las " + fmtUpdatedAt() : ""}</span>
+      <span>${state.refreshing ? "Actualizando…" : state.updatedAt ? "Datos consultados a las " + fmtUpdatedAt() + sourceLabel : sourceLabel.replace(" · ", "")}</span>
       <button class="rtmy-refresh-btn" onclick="refreshRecipes()" ${state.refreshing ? "disabled" : ""}>
         <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" class="${state.refreshing ? "spin" : ""}"><path d="M4 4v5h5M20 20v-5h-5"/><path d="M4 9a8 8 0 0 1 14-4.5M20 15a8 8 0 0 1-14 4.5"/></svg>
         Actualizar
       </button>
     </div>
-    <input class="rtmy-search" placeholder="Buscar receta…" value="${escapeHtml(
+    <label class="rtmy-sr-only" for="recipe-search">Buscar receta</label>
+    <input id="recipe-search" class="rtmy-search" placeholder="Buscar receta…" value="${escapeHtml(
       state.search
     )}" oninput="onSearch(this.value)">
     <div class="rtmy-list" id="rtmy-list-container">
@@ -853,6 +980,7 @@ function renderSlider(main) {
   );
   return `
     <input type="range" class="rtmy-slider" id="scaleSlider"
+      aria-label="Cantidad de ${escapeHtml(main.name)}"
       min="${min}" max="${max}" step="${step}" value="${state.scaleQty}"
       style="--pct:${pct}%"
       oninput="onScaleSlider(this.value)">
@@ -888,6 +1016,12 @@ function renderSteps() {
   const flow = session.flow;
   const pos = session.flowPos;
   const item = flow[pos];
+  if (!item) {
+    state.sessions = state.sessions.filter((itemSession) => itemSession.id !== session.id);
+    saveRuntimeState();
+    goto("#/receta/" + encodeURIComponent(session.recipe.id));
+    return;
+  }
   const stage = r.stages[item.stageIndex];
   const rawStepText =
     (stage.steps && stage.steps.length ? stage.steps : [stage.description])[
@@ -985,6 +1119,7 @@ window.stepNext = function () {
   if (!s) return;
   if (s.flowPos < s.flow.length - 1) {
     s.flowPos++;
+    saveRuntimeState();
     render();
     renderSessionBar();
     window.scrollTo(0, 0);
@@ -995,6 +1130,7 @@ window.stepBack = function () {
   if (!s) return;
   if (s.flowPos > 0) {
     s.flowPos--;
+    saveRuntimeState();
     render();
     renderSessionBar();
     window.scrollTo(0, 0);
@@ -1006,6 +1142,7 @@ window.finishFlow = function () {
   state.finishedSession = { recipe: s.recipe };
   state.sessions = state.sessions.filter((x) => x.id !== s.id);
   if (state.activeSessionId === s.id) state.activeSessionId = null;
+  saveRuntimeState();
   goto("#/receta/" + encodeURIComponent(s.recipe.id) + "/final");
 };
 
@@ -1052,19 +1189,30 @@ function renderSessionBar() {
     return;
   }
   sessionBarEl.classList.add("visible");
-  sessionBarEl.innerHTML = state.sessions
+  const sessionChips = state.sessions
     .map((s) => {
       const active = state.view === "steps" && s.id === state.activeSessionId;
       const item = s.flow[s.flowPos];
       const stepInfo = item ? `Paso ${item.stepIndexInStage + 1}/${item.totalInStage}` : "";
       return `
-      <button class="rtmy-session-chip ${active ? "active" : ""}" onclick="switchToSession('${s.id}')">
-        <span class="chip-name">${escapeHtml(titleCase(s.recipe.name))}</span>
-        <span class="chip-step">${stepInfo}</span>
-        <span class="chip-close" onclick="event.stopPropagation(); closeSession('${s.id}')" aria-label="Cerrar">✕</span>
-      </button>`;
+      <div class="rtmy-session-chip ${active ? "active" : ""}">
+        <button class="chip-open" onclick="switchToSession('${s.id}')" ${active ? 'aria-current="step"' : ""}>
+          <span class="chip-name">${escapeHtml(titleCase(s.recipe.name))}</span>
+          <span class="chip-step">${stepInfo}</span>
+        </button>
+        <button class="chip-close" onclick="closeSession('${s.id}')" aria-label="Cerrar ${escapeHtml(titleCase(s.recipe.name))}">✕</button>
+      </div>`;
     })
     .join("");
+  sessionBarEl.innerHTML = `
+    <div class="rtmy-session-bar-content">
+      <button class="rtmy-new-prep-btn" onclick="goto('#/')" aria-label="Iniciar una nueva preparación">
+        <span aria-hidden="true">＋</span>
+        Nueva preparación
+      </button>
+      <div class="rtmy-session-chips">${sessionChips}</div>
+    </div>
+  `;
 }
 
 /* ---------------- Boot ---------------- */
@@ -1076,5 +1224,9 @@ window.refreshRecipes = refreshRecipes;
 
 window.addEventListener("hashchange", onHashChange);
 loadRecipes().then(() => {
+  restoreRuntimeState();
+  if (state.timers.some((timer) => timer.running && !timer.done)) ensureTimerTick();
+  renderTimerBar();
+  renderSessionBar();
   onHashChange();
 });

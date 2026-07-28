@@ -16,9 +16,13 @@ var SPREADSHEET_ID = '1wcm_-ASHlkXjzOTXGyIl2lcbOfi1GFWDBZHRleVPPwo';
 var MARKER = 'FICHA TÉCNICA · ESCANDALLO DE COCINA';
 
 function doGet(e) {
-  var recipes = buildRecipes();
+  var cache = CacheService.getScriptCache();
+  var cached = cache.get('recipes-v2');
+  var recipes = cached ? JSON.parse(cached) : buildRecipes();
+  if (!cached) cache.put('recipes-v2', JSON.stringify(recipes), 300);
   var payload = {
-    updatedAt: new Date().toISOString(),
+    fetchedAt: new Date().toISOString(),
+    sourceUpdatedAt: DriveApp.getFileById(SPREADSHEET_ID).getLastUpdated().toISOString(),
     recipes: recipes,
   };
   return ContentService
@@ -30,19 +34,27 @@ function buildRecipes() {
   var ss = SpreadsheetApp.openById(SPREADSHEET_ID);
   var sheets = ss.getSheets();
   var recipes = [];
+  var usedIds = {};
 
   for (var i = 0; i < sheets.length; i++) {
     var sheet = sheets[i];
     var sheetName = sheet.getName().trim();
     if (sheetName.toUpperCase() === 'PLANTILLA') continue;
+    var values = sheet.getDataRange().getValues();
 
-    var marker = safeGet(sheet, 1, 5); // E1
+    var marker = valueAt(values, 1, 5); // E1
     if (!marker || String(marker).toUpperCase().indexOf(MARKER.toUpperCase()) === -1) {
       continue;
     }
 
-    var recipe = parseSheet(sheet);
+    var recipe = parseSheet(sheetName, values);
     if (recipe) {
+      var baseId = recipe.id || 'receta';
+      var id = baseId;
+      var suffix = 2;
+      while (usedIds[id]) id = baseId + '-' + suffix++;
+      recipe.id = id;
+      usedIds[id] = true;
       recipe.sourceSheet = sheetName;
       recipes.push(recipe);
     }
@@ -50,9 +62,9 @@ function buildRecipes() {
   return recipes;
 }
 
-function safeGet(sheet, row, col) {
-  if (row > sheet.getMaxRows() || col > sheet.getMaxColumns()) return null;
-  var v = sheet.getRange(row, col).getValue();
+function valueAt(values, row, col) {
+  if (row < 1 || col < 1 || row > values.length || col > (values[row - 1] || []).length) return null;
+  var v = values[row - 1][col - 1];
   return v === '' ? null : v;
 }
 
@@ -95,22 +107,22 @@ function slugify(s) {
   return out;
 }
 
-function parseSheet(sheet) {
-  var name = cleanText(safeGet(sheet, 2, 5)); // E2
+function parseSheet(sheetName, values) {
+  var name = cleanText(valueAt(values, 2, 5)); // E2
   if (!name) return null;
-  var yieldAmountRaw = safeGet(sheet, 2, 6); // F2
+  var yieldAmountRaw = valueAt(values, 2, 6); // F2
   var yieldAmount = isNumber(yieldAmountRaw) ? yieldAmountRaw : null;
-  var yieldUnit = cleanText(safeGet(sheet, 3, 6)); // F3
+  var yieldUnit = cleanText(valueAt(values, 3, 6)); // F3
 
-  var lastRow = sheet.getLastRow();
+  var lastRow = values.length;
   var stages = [];
   var current = null;
 
   for (var r = 5; r <= lastRow; r++) {
-    var bVal = cleanText(safeGet(sheet, r, 2)); // B
-    var cVal = safeGet(sheet, r, 3); // C
-    var dVal = cleanText(safeGet(sheet, r, 4)); // D
-    var eVal = cleanText(safeGet(sheet, r, 5)); // E
+    var bVal = cleanText(valueAt(values, r, 2)); // B
+    var cVal = valueAt(values, r, 3); // C
+    var dVal = cleanText(valueAt(values, r, 4)); // D
+    var eVal = cleanText(valueAt(values, r, 5)); // E
 
     if (bVal === 'CANTIDAD') continue;
 

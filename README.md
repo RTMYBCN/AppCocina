@@ -84,6 +84,24 @@ Es 100% gratis y no tiene límite de visitas para un uso normal como este.
 
 ---
 
+## Calidad y recuperación
+
+- La app intenta primero la API en vivo y, si no responde, carga
+  `recipes.json` indicando que se está usando la copia local.
+- Las sesiones, el paso actual y los temporizadores se guardan en el
+  dispositivo para sobrevivir a una recarga accidental.
+- Para ejecutar las comprobaciones automáticas:
+
+```bash
+npm run check
+```
+
+La rama `archive/production-2026-07-27` conserva la versión de producción
+anterior a esta revisión. La nueva versión debe probarse desde su propia rama
+antes de fusionarla con `main`.
+
+---
+
 ## 4. Insertarla en Squarespace
 
 La forma más limpia es un **iframe** apuntando a la URL de GitHub Pages,

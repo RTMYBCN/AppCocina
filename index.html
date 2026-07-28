@@ -10,12 +10,12 @@
      cache). Bump this number every time either file changes, or a device
      that loaded the app right before a deploy can keep running the old
      version for up to 10 minutes. -->
-<link rel="stylesheet" href="styles.css?v=2">
+<link rel="stylesheet" href="styles.css?v=4">
 </head>
 <body>
-<div id="session-bar"></div>
+<div id="session-bar" aria-label="Recetas en preparación"></div>
 <div id="app"></div>
-<div id="timer-bar"></div>
-<script src="app.js?v=2"></script>
+<div id="timer-bar" aria-live="assertive" aria-label="Temporizadores"></div>
+<script src="app.js?v=4"></script>
 </body>
 </html>

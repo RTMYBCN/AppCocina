@@ -42,6 +42,24 @@ body.has-timer #app{
 
 a{color:inherit;}
 
+.rtmy-sr-only{
+  position:absolute;
+  width:1px;
+  height:1px;
+  padding:0;
+  margin:-1px;
+  overflow:hidden;
+  clip:rect(0,0,0,0);
+  white-space:nowrap;
+  border:0;
+}
+
+button:focus-visible,
+input:focus-visible{
+  outline:3px solid var(--rtmy-maroon);
+  outline-offset:3px;
+}
+
 /* ---------- Timer bar (persistent, outside #app) ---------- */
 #timer-bar{
   position:fixed;
@@ -168,6 +186,34 @@ body.has-session #app{
 }
 #session-bar.visible{display:block;}
 
+.rtmy-session-bar-content{
+  display:flex;
+  align-items:center;
+  gap:8px;
+  min-width:max-content;
+}
+.rtmy-session-chips{
+  display:flex;
+  align-items:center;
+}
+.rtmy-new-prep-btn{
+  display:inline-flex;
+  align-items:center;
+  gap:5px;
+  min-height:38px;
+  padding:8px 14px;
+  border:1.5px solid var(--rtmy-maroon);
+  border-radius:999px;
+  background:var(--rtmy-maroon);
+  color:#fff;
+  font-family:inherit;
+  font-size:12.5px;
+  font-weight:600;
+  white-space:nowrap;
+  cursor:pointer;
+}
+.rtmy-new-prep-btn:hover{background:var(--rtmy-maroon-dark);}
+
 .rtmy-session-chip{
   display:inline-flex;
   align-items:center;
@@ -178,10 +224,19 @@ body.has-session #app{
   border-radius:999px;
   border:1.5px solid var(--rtmy-tan-dark);
   background:#fff;
-  font-family:inherit;
-  cursor:pointer;
   white-space:nowrap;
   vertical-align:top;
+}
+.rtmy-session-chip .chip-open{
+  display:inline-flex;
+  align-items:center;
+  gap:8px;
+  min-width:0;
+  border:0;
+  padding:0;
+  background:transparent;
+  font-family:inherit;
+  cursor:pointer;
 }
 .rtmy-session-chip.active{
   border-color:var(--rtmy-maroon);
@@ -209,6 +264,10 @@ body.has-session #app{
   border-radius:50%;
   font-size:10px;
   opacity:.6;
+  border:0;
+  padding:0;
+  background:transparent;
+  cursor:pointer;
 }
 .rtmy-session-chip .chip-close:hover{opacity:1; background:var(--rtmy-tan);}
 
@@ -361,6 +420,11 @@ body.has-session #app{
   transition: transform .15s ease, box-shadow .15s ease;
 }
 .rtmy-card:hover{transform:translateY(-2px); box-shadow:var(--shadow-lift);}
+.rtmy-card.in-progress{
+  border-color:var(--rtmy-green-border);
+  background:linear-gradient(135deg, var(--rtmy-green-bg), #fff);
+  box-shadow:0 0 0 2px rgba(90,138,82,.16), var(--shadow-soft);
+}
 .rtmy-card-name{
   font-weight:600;
   font-size:16px;
@@ -370,6 +434,18 @@ body.has-session #app{
   font-size:12.5px;
   opacity:.75;
   margin-top:2px;
+}
+.rtmy-card-status{
+  display:inline-flex;
+  align-items:center;
+  margin-top:7px;
+  padding:3px 9px;
+  border:1px solid var(--rtmy-green-border);
+  border-radius:999px;
+  background:#fff;
+  color:#3d6b37;
+  font-size:11.5px;
+  font-weight:600;
 }
 .rtmy-card-arrow{flex:0 0 auto; width:20px; height:20px; color:var(--rtmy-brown);}
 
@@ -682,4 +758,13 @@ input[type=range].rtmy-slider::-moz-range-track{
 @media (max-width:380px){
   .rtmy-recipe-name{font-size:22px;}
   .rtmy-step-text{font-size:15.5px;}
+}
+
+@media (prefers-reduced-motion:reduce){
+  *,*::before,*::after{
+    scroll-behavior:auto!important;
+    animation-duration:.01ms!important;
+    animation-iteration-count:1!important;
+    transition-duration:.01ms!important;
+  }
 }

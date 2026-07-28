@@ -1,0 +1,8 @@
+{
+  "name": "rtmy-app-cocina",
+  "version": "2.0.0",
+  "private": true,
+  "scripts": {
+    "check": "node --check app.js && node test/repository.test.js"
+  }
+}
