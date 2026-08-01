@@ -32,6 +32,7 @@ const state = {
   currentRecipe: null,
   scaleFactor: 1,
   scaleQty: null,
+  scaleIngredientIndex: 0,
   sessionCapWarning: false,
 
   // Up to MAX_SESSIONS recipes can be "in preparation" at once — each one
@@ -430,6 +431,13 @@ window.cancelTimer = function (id) {
   renderTimerBar();
 };
 
+// Resuming a recipe from a finished timer's "Ir a la receta" button should
+// dismiss that pill, not leave it sitting there for the cook to close by hand.
+window.resumeFromTimer = function (sessionId, timerId) {
+  cancelTimer(timerId);
+  switchToSession(sessionId);
+};
+
 function renderTimerBar() {
   if (!timerBarEl) return;
   document.body.classList.toggle("has-timer", state.timers.length > 0);
@@ -451,7 +459,7 @@ function renderTimerBar() {
     <div class="rtmy-timer-row ${t.done ? "done" : ""}">
       <div class="rtmy-timer-info">${info}</div>
       <div class="rtmy-timer-controls">
-        ${t.done && sessionStillOpen ? `<button class="rtmy-timer-goto" onclick="switchToSession('${t.sessionId}')">Ir a la receta</button>` : ""}
+        ${t.done && sessionStillOpen ? `<button class="rtmy-timer-goto" onclick="resumeFromTimer('${t.sessionId}', ${t.id})">Ir a la receta</button>` : ""}
         ${
           !t.done
             ? `<button onclick="toggleTimer(${t.id})" aria-label="${t.running ? "Pausar" : "Reanudar"}">${t.running ? "⏸" : "▶️"}</button>`
@@ -669,18 +677,36 @@ function resetScale(recipe) {
   if (existing) {
     state.scaleFactor = existing.scaleFactor;
     state.scaleQty = existing.scaleQty;
+    state.scaleIngredientIndex = existing.scaleIngredientIndex || 0;
     return;
   }
+  state.scaleIngredientIndex = 0;
   const stage0 = recipe.stages[0];
   const main = stage0 && stage0.ingredients[0];
   state.scaleQty = main ? main.qty : null;
   state.scaleFactor = 1;
 }
 
+// The "main" ingredient is whichever one the cook has chosen to scale the
+// recipe by (defaults to the first ingredient in the table).
 function mainIngredient(recipe) {
   const stage0 = recipe.stages[0];
-  return stage0 && stage0.ingredients.length ? stage0.ingredients[0] : null;
+  if (!stage0 || !stage0.ingredients.length) return null;
+  const idx = state.scaleIngredientIndex || 0;
+  return stage0.ingredients[idx] || stage0.ingredients[0];
 }
+
+window.onSelectMainIngredient = function (idx) {
+  const r = state.currentRecipe;
+  const stage0 = r.stages[0];
+  if (!stage0 || !stage0.ingredients[idx]) return;
+  const newMain = stage0.ingredients[idx];
+  state.scaleIngredientIndex = idx;
+  // Keep the current scale ratio, just re-anchor the editable quantity
+  // to whichever ingredient is now the scaling reference.
+  state.scaleQty = newMain.qty * state.scaleFactor;
+  renderDetail();
+};
 
 function applyScale(ingredients, ratio) {
   return ingredients.map((ing) => ({ ...ing, qty: ing.qty * ratio }));
@@ -728,12 +754,13 @@ function startFlow(recipe, startStageIndex) {
     return;
   }
   if (!session) {
-    session = { id: recipe.id, recipe, scaleFactor: 1, scaleQty: null, startStageIndex: 0, flow: [], flowPos: 0 };
+    session = { id: recipe.id, recipe, scaleFactor: 1, scaleQty: null, scaleIngredientIndex: 0, startStageIndex: 0, flow: [], flowPos: 0 };
     state.sessions.push(session);
   }
   session.recipe = recipe;
   session.scaleFactor = state.scaleFactor;
   session.scaleQty = state.scaleQty;
+  session.scaleIngredientIndex = state.scaleIngredientIndex || 0;
   session.startStageIndex = startStageIndex;
   session.flow = buildFlow(recipe, startStageIndex);
   if (!session.flow.length) {
@@ -921,13 +948,21 @@ function renderDetail() {
         <span class="rtmy-ratio-pill">${state.scaleFactor === 1 ? "Cantidad original" : "×" + (Math.round(state.scaleFactor * 100) / 100).toString().replace(".", ",")}</span>
       </div>
 
-      <ul class="rtmy-ingredients">
+      <div class="rtmy-scale-label" style="margin-top:14px;">Toca un ingrediente para escalar por él</div>
+      <ul class="rtmy-ingredients rtmy-ingredients-selectable">
         ${scaledIngredients(r)
-          .map(
-            (i) => `
-          <li><span class="name">${escapeHtml(titleCase(i.name))}</span><span class="qty">${fmtQty(i.qty)} ${escapeHtml(i.unit)}</span></li>
-        `
-          )
+          .map((i, idx) => {
+            const selected = idx === (state.scaleIngredientIndex || 0);
+            return `
+          <li>
+            <button class="rtmy-ingredient-select ${selected ? "selected" : ""}" onclick="onSelectMainIngredient(${idx})" aria-pressed="${selected}">
+              <span class="rtmy-ingredient-radio" aria-hidden="true"></span>
+              <span class="name">${escapeHtml(titleCase(i.name))}</span>
+              <span class="qty">${fmtQty(i.qty)} ${escapeHtml(i.unit)}</span>
+            </button>
+          </li>
+        `;
+          })
           .join("")}
       </ul>
       `

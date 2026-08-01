@@ -592,6 +592,64 @@ input[type=range].rtmy-slider::-moz-range-track{
   white-space:nowrap;
 }
 
+/* Selectable ingredients (choose which one scales the recipe) */
+.rtmy-ingredients-selectable li{
+  padding:0;
+  border-bottom:none;
+}
+.rtmy-ingredient-select{
+  display:flex;
+  align-items:center;
+  justify-content:space-between;
+  gap:10px;
+  width:100%;
+  padding:10px 8px;
+  margin:0;
+  border:none;
+  border-bottom:1px dashed var(--rtmy-tan-dark);
+  background:none;
+  font:inherit;
+  font-size:14.5px;
+  text-align:left;
+  cursor:pointer;
+  border-radius:8px;
+  transition:background-color .15s ease;
+}
+.rtmy-ingredient-select:hover{
+  background:var(--rtmy-tan);
+}
+.rtmy-ingredient-select.selected{
+  background:var(--rtmy-tan);
+}
+.rtmy-ingredient-select .name{flex:1;text-transform:capitalize;}
+.rtmy-ingredient-select .qty{
+  font-weight:700;
+  color: var(--rtmy-brown);
+  white-space:nowrap;
+}
+.rtmy-ingredient-radio{
+  flex-shrink:0;
+  width:18px;
+  height:18px;
+  border-radius:50%;
+  border:2px solid var(--rtmy-tan-dark);
+  background:#fff;
+  position:relative;
+}
+.rtmy-ingredient-select.selected .rtmy-ingredient-radio{
+  border-color: var(--rtmy-maroon);
+}
+.rtmy-ingredient-select.selected .rtmy-ingredient-radio::after{
+  content:"";
+  position:absolute;
+  top:3px;
+  left:3px;
+  right:3px;
+  bottom:3px;
+  border-radius:50%;
+  background: var(--rtmy-maroon);
+}
+
 /* ---------- Stage picker ---------- */
 .rtmy-stage-picker{
   display:flex;
