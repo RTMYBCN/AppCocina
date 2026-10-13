@@ -8,11 +8,14 @@
 const CONFIG = {
   // Sustituir por la URL de despliegue del Apps Script (termina en /exec).
   // Mientras esté vacío, la app usa recipes.json local (modo desarrollo/demo).
-  DATA_URL: "https://script.google.com/macros/s/AKfycbylwL_HoE5bLKaAnKPMILZOD96h_hel1b5Uhuu5ht0JzvbRisBGgUQy4OWg7tiMACpY/exec",
+  DATA_URL: "https://script.google.com/macros/s/AKfycbxldzxI4eqiW3i0nSrsj5JApxOKc2ujMVg6rixaRnkHqbzv_WTBkkrUsAAhq49nb01v/exec",
   LOCAL_FALLBACK: "recipes.json",
   CACHE_KEY: "rtmy_recipes_cache_v2",
   RUNTIME_KEY: "rtmy_runtime_v2",
   CACHE_TTL_MS: 1000 * 60 * 10, // 10 minutos
+  // Si el Apps Script no responde a tiempo se usa el respaldo local en vez
+  // de dejar la app en "Cargando recetas…" indefinidamente.
+  FETCH_TIMEOUT_MS: 10000,
 };
 
 const MAX_SESSIONS = 4;
@@ -121,10 +124,16 @@ function restoreRuntimeState() {
 }
 
 async function fetchRecipesFrom(url, source) {
-  const res = await fetch(url, { cache: "no-store" });
-  if (!res.ok) throw new Error("HTTP " + res.status);
-  const data = validateRecipesPayload(await res.json());
-  return { data, source };
+  const controller = new AbortController();
+  const timer = setTimeout(() => controller.abort(), CONFIG.FETCH_TIMEOUT_MS);
+  try {
+    const res = await fetch(url, { cache: "no-store", signal: controller.signal });
+    if (!res.ok) throw new Error("HTTP " + res.status);
+    const data = validateRecipesPayload(await res.json());
+    return { data, source };
+  } finally {
+    clearTimeout(timer);
+  }
 }
 
 /* ---------------- Data loading ----------------
@@ -140,10 +149,15 @@ async function fetchRecipesFrom(url, source) {
    currently open).
 ------------------------------------------------- */
 
-function sortRecipesByName(recipes) {
-  return recipes
-    .slice()
-    .sort((a, b) => a.name.localeCompare(b.name, "es", { sensitivity: "base" }));
+function sortRecipes(recipes) {
+  // Con secciones (B/S/C): por sección y número de ficha; sin ellas (datos
+  // antiguos), alfabético como siempre.
+  return recipes.slice().sort((a, b) => {
+    const bySection = (a.sectionOrder || 0) - (b.sectionOrder || 0);
+    if (bySection) return bySection;
+    if (a.code && b.code && a.code !== b.code) return a.code < b.code ? -1 : 1;
+    return a.name.localeCompare(b.name, "es", { sensitivity: "base" });
+  });
 }
 
 async function loadRecipes(opts) {
@@ -156,7 +170,7 @@ async function loadRecipes(opts) {
       const cached = JSON.parse(sessionStorage.getItem(CONFIG.CACHE_KEY) || "null");
       if (cached && Date.now() - cached.ts < CONFIG.CACHE_TTL_MS) {
         const data = validateRecipesPayload(cached.data);
-        state.recipes = sortRecipesByName(data.recipes);
+        state.recipes = sortRecipes(data.recipes);
         state.updatedAt =
           cached.data.sourceUpdatedAt || cached.data.fetchedAt || cached.data.updatedAt || null;
         state.dataSource = "cache";
@@ -185,7 +199,7 @@ async function loadRecipes(opts) {
       result = await fetchRecipesFrom(CONFIG.LOCAL_FALLBACK, "fallback");
     }
     const { data, source } = result;
-    state.recipes = sortRecipesByName(data.recipes || []);
+    state.recipes = sortRecipes(data.recipes || []);
     state.updatedAt = data.sourceUpdatedAt || data.fetchedAt || data.updatedAt || null;
     state.dataSource = source;
     state.view = state.view === "loading" ? "list" : state.view;
@@ -837,28 +851,50 @@ function fmtUpdatedAt() {
   }
 }
 
-function buildListItemsHtml() {
-  const q = normalizeSearchText(state.search.trim());
-  const list = state.recipes.filter((r) => normalizeSearchText(r.name).includes(q));
-  return list.length
-    ? list
-        .map((r) => {
-          const inProgress = !!findSession(r.id);
-          return `
+function buildRecipeCardHtml(r) {
+  const inProgress = !!findSession(r.id);
+  return `
         <button class="rtmy-card ${inProgress ? "in-progress" : ""}" onclick="goto('#/receta/${encodeURIComponent(r.id)}')">
           <div>
             <div class="rtmy-card-name">${escapeHtml(titleCase(r.name))}</div>
             <div class="rtmy-card-meta">${r.yieldAmount ?? ""} ${escapeHtml(
-                r.yieldUnit || ""
-              )} · ${r.stages.length} etapa${r.stages.length === 1 ? "" : "s"}</div>
+    r.yieldUnit || ""
+  )} · ${r.stages.length} etapa${r.stages.length === 1 ? "" : "s"}</div>
             ${inProgress ? '<div class="rtmy-card-status">👩‍🍳 En preparación</div>' : ""}
           </div>
           <svg class="rtmy-card-arrow" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><path d="M9 6l6 6-6 6"/></svg>
         </button>
       `;
-        })
-        .join("")
-    : `<div class="rtmy-empty">No se encontraron recetas.</div>`;
+}
+
+function buildListItemsHtml() {
+  const q = normalizeSearchText(state.search.trim());
+  const list = state.recipes.filter((r) => normalizeSearchText(r.name).includes(q));
+  if (!list.length) return `<div class="rtmy-empty">No se encontraron recetas.</div>`;
+
+  // Recetas con sección (preparaciones base, sub-preparaciones, platos…):
+  // se agrupan bajo su título. Sin sección, lista plana como antes.
+  if (!list.some((r) => r.section)) return list.map(buildRecipeCardHtml).join("");
+
+  const groups = [];
+  list.forEach((r) => {
+    const title = r.section || "Otras recetas";
+    let g = groups[groups.length - 1];
+    if (!g || g.title !== title) {
+      g = { title, items: [] };
+      groups.push(g);
+    }
+    g.items.push(r);
+  });
+  return groups
+    .map(
+      (g) => `
+        <section class="rtmy-section" aria-label="${escapeHtml(g.title)}">
+          <h2 class="rtmy-section-title">${escapeHtml(g.title)}<span class="rtmy-section-count">${g.items.length}</span></h2>
+          <div class="rtmy-section-items">${g.items.map(buildRecipeCardHtml).join("")}</div>
+        </section>`
+    )
+    .join("");
 }
 
 function renderList() {

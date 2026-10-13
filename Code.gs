@@ -1,10 +1,19 @@
 /**
  * RTMY — API de recetas para la app de preparaciones del taller.
  *
- * Lee en vivo el Excel "MANUAL COCINA" y devuelve JSON con las recetas
- * que siguen la plantilla "FICHA TÉCNICA · ESCANDALLO DE COCINA".
- * Nunca expone columnas de coste, merma, subtotal ni precio de compra:
- * solo cantidad, unidad, nombre de ingrediente y pasos de preparación.
+ * Lee en vivo el Excel "MANUAL COCINA" (versión reorganizada, fichas B/S/C)
+ * y devuelve JSON con las recetas.
+ *
+ * Fichas que se publican: las pestañas cuyo nombre empieza por un código
+ * de ficha — B01 (preparaciones base), S01 (sub-preparaciones) o
+ * C01 (platos de carta). El resto de pestañas (ÍNDICE, PRECIOS,
+ * INCIDENCIAS, PLANTILLA, ARROCES, BEBIDAS, facturas…) se ignoran.
+ *
+ * Nunca se expone información interna: solo se leen el nombre, la
+ * descripción, el rendimiento, los ingredientes (columna C = nombre,
+ * E = cantidad, F = unidad) y los bloques de pasos. Las columnas de
+ * producto comercial, merma, €/unidad, coste y aviso (G–K), las filas de
+ * coste/PVP y las "NOTAS DE LA REVISIÓN" no se leen ni se devuelven.
  *
  * Despliegue: Extensiones > Apps Script > pegar este código > Desplegar
  * > Nueva implementación > Aplicación web > Ejecutar como: Yo
@@ -12,14 +21,28 @@
  * Copiar la URL que termina en /exec y pegarla en CONFIG.DATA_URL de app.js.
  */
 
-var SPREADSHEET_ID = '1wcm_-ASHlkXjzOTXGyIl2lcbOfi1GFWDBZHRleVPPwo';
-var MARKER = 'FICHA TÉCNICA · ESCANDALLO DE COCINA';
+var SPREADSHEET_ID = '1OhUs4RJdkgbZuFM0DcmgqDPI4QxQP7dP-6jTtLjQtbY';
+var CACHE_KEY = 'recipes-v3';
+
+// Código de la pestaña (B01, S02, C09…) -> sección del listado.
+var SECTIONS = {
+  B: { name: 'Preparaciones base', order: 1 },
+  S: { name: 'Sub-preparaciones', order: 2 },
+  C: { name: 'Platos de carta', order: 3 },
+};
+var TAB_RE = /^([BSC])(\d{2})(?:\s|$)/i;
 
 function doGet(e) {
   var cache = CacheService.getScriptCache();
-  var cached = cache.get('recipes-v2');
+  var cached = cache.get(CACHE_KEY);
   var recipes = cached ? JSON.parse(cached) : buildRecipes();
-  if (!cached) cache.put('recipes-v2', JSON.stringify(recipes), 300);
+  if (!cached) {
+    try {
+      cache.put(CACHE_KEY, JSON.stringify(recipes), 300);
+    } catch (err) {
+      // JSON demasiado grande para la caché (límite 100 KB): se sirve sin caché.
+    }
+  }
   var payload = {
     fetchedAt: new Date().toISOString(),
     sourceUpdatedAt: DriveApp.getFileById(SPREADSHEET_ID).getLastUpdated().toISOString(),
@@ -39,15 +62,11 @@ function buildRecipes() {
   for (var i = 0; i < sheets.length; i++) {
     var sheet = sheets[i];
     var sheetName = sheet.getName().trim();
-    if (sheetName.toUpperCase() === 'PLANTILLA') continue;
+    var tab = TAB_RE.exec(sheetName);
+    if (!tab) continue;
+
     var values = sheet.getDataRange().getValues();
-
-    var marker = valueAt(values, 1, 5); // E1
-    if (!marker || String(marker).toUpperCase().indexOf(MARKER.toUpperCase()) === -1) {
-      continue;
-    }
-
-    var recipe = parseSheet(sheetName, values);
+    var recipe = parseSheet(sheetName, tab[1].toUpperCase(), tab[1].toUpperCase() + tab[2], values);
     if (recipe) {
       var baseId = recipe.id || 'receta';
       var id = baseId;
@@ -59,6 +78,12 @@ function buildRecipes() {
       recipes.push(recipe);
     }
   }
+
+  // Orden estable: sección y, dentro de ella, número de ficha.
+  recipes.sort(function (a, b) {
+    if (a.sectionOrder !== b.sectionOrder) return a.sectionOrder - b.sectionOrder;
+    return a.code < b.code ? -1 : a.code > b.code ? 1 : 0;
+  });
   return recipes;
 }
 
@@ -107,88 +132,115 @@ function slugify(s) {
   return out;
 }
 
-function parseSheet(sheetName, values) {
-  var name = cleanText(valueAt(values, 2, 5)); // E2
+// "ración" -> "ración"/"raciones" según la cantidad; el resto se deja tal cual.
+function normalizeYieldUnit(unit, amount) {
+  var u = cleanText(unit);
+  if (!u) return null;
+  if (/^raci[oó]n(es)?$/i.test(u)) return amount === 1 ? 'ración' : 'raciones';
+  return u;
+}
+
+// Fila (1-based) de la primera celda de la columna `col` cuyo texto es `label`.
+function findLabelRow(values, col, label, fromRow, toRow) {
+  var target = label.toLowerCase();
+  for (var r = fromRow; r <= toRow; r++) {
+    var v = cleanText(valueAt(values, r, col));
+    if (v && v.toLowerCase() === target) return r;
+  }
+  return null;
+}
+
+function parseSheet(sheetName, sectionKey, code, values) {
+  var name = cleanText(valueAt(values, 2, 2)); // B2
   if (!name) return null;
-  var yieldAmountRaw = valueAt(values, 2, 6); // F2
-  var yieldAmount = isNumber(yieldAmountRaw) ? yieldAmountRaw : null;
-  var yieldUnit = cleanText(valueAt(values, 3, 6)); // F3
-
+  var section = SECTIONS[sectionKey];
   var lastRow = values.length;
-  var stages = [];
+
+  var descRow = findLabelRow(values, 2, 'Descripción', 1, Math.min(lastRow, 12));
+  var description = descRow ? cleanText(valueAt(values, descRow, 3)) : null; // C
+  var yieldRow = findLabelRow(values, 2, 'Rendimiento', 1, Math.min(lastRow, 12));
+  var yieldAmountRaw = yieldRow ? valueAt(values, yieldRow, 5) : null; // E
+  var yieldAmount = isNumber(yieldAmountRaw) ? yieldAmountRaw : null;
+  var yieldUnit = normalizeYieldUnit(yieldRow ? valueAt(values, yieldRow, 6) : null, yieldAmount); // F
+
+  // Tabla de ingredientes: empieza justo debajo de la cabecera "Ingrediente" (col. C).
+  var headerRow = findLabelRow(values, 3, 'Ingrediente', 1, Math.min(lastRow, 15));
+  var ingredients = [];
+  var r = (headerRow || 7) + 1;
+  for (; r <= lastRow; r++) {
+    var gVal = cleanText(valueAt(values, r, 7));
+    if (gVal && /^COSTE TOTAL/i.test(gVal)) break; // fin de la tabla (a partir de aquí, costes)
+    var cVal = cleanText(valueAt(values, r, 3));
+    var eVal = valueAt(values, r, 5);
+    if (cVal && isNumber(eVal)) {
+      var ing = { qty: eVal, unit: cleanText(valueAt(values, r, 6)) || '', name: cVal };
+      var phase = cleanText(valueAt(values, r, 2)); // B = fase (Masa, Relleno…)
+      if (phase) ing.phase = phase;
+      ingredients.push(ing);
+    }
+  }
+
+  // Bloques de pasos: columna B, tras la tabla de costes. Un bloque es un
+  // título corto seguido de una celda con los pasos numerados.
+  var blocks = [];
   var current = null;
-
-  for (var r = 5; r <= lastRow; r++) {
-    var bVal = cleanText(valueAt(values, r, 2)); // B
-    var cVal = valueAt(values, r, 3); // C
-    var dVal = cleanText(valueAt(values, r, 4)); // D
-    var eVal = cleanText(valueAt(values, r, 5)); // E
-
-    if (bVal === 'CANTIDAD') continue;
-
-    if (isNumber(cVal) && eVal) {
-      if (!current) current = newStage(name);
-      current.ingredients.push({ qty: cVal, unit: dVal || '', name: eVal });
+  var pending = null;
+  for (r = r + 1; r <= lastRow; r++) {
+    var bVal = cleanText(valueAt(values, r, 2));
+    if (!bVal) continue;
+    if (/^NOTAS DE LA REVISI/i.test(bVal)) break; // notas internas: no se publican
+    if (/^PENDIENTE/i.test(bVal)) {
+      pending = bVal;
       continue;
     }
-
-    if (typeof cVal === 'string' && cVal.trim() && !dVal && !eVal) {
-      var text = cVal.trim();
-      if (looksNumbered(text) || text.indexOf('\n') !== -1) {
-        if (!current) current = newStage(name);
-        current.steps = current.steps.concat(splitSteps(text));
-      } else {
-        if (current && !current.ingredients.length && !current.steps.length && current.description === null) {
-          current.description = text;
-        } else {
-          if (current) stages.push(current);
-          current = newStage(text);
-        }
+    var isStepText = looksNumbered(bVal) || bVal.indexOf('\n') !== -1 || bVal.length > 90;
+    if (isStepText) {
+      if (!current) {
+        current = { title: null, steps: [] };
+        blocks.push(current);
       }
-      continue;
+      current.steps = current.steps.concat(splitSteps(bVal));
+    } else {
+      current = { title: bVal, steps: [] };
+      blocks.push(current);
     }
   }
-  if (current) stages.push(current);
+  blocks = blocks.filter(function (b) { return b.steps.length; });
 
-  stages = stages.filter(function (s) {
-    return s.ingredients.length || s.steps.length || s.description;
-  });
+  var stages = [];
+  if (blocks.length) {
+    blocks.forEach(function (b, idx) {
+      stages.push({
+        title: b.title || (idx === 0 ? 'Preparación' : 'Paso ' + (idx + 1)),
+        procedureTitle: null,
+        description: idx === 0 ? description : null,
+        // La tabla de ingredientes completa va en la primera etapa (es la que se escala).
+        ingredients: idx === 0 ? ingredients : [],
+        steps: b.steps,
+      });
+    });
+  } else if (ingredients.length || description) {
+    // Ficha sin pasos todavía: se publica igualmente, con el aviso de la hoja.
+    stages.push({
+      title: 'Preparación',
+      procedureTitle: null,
+      description: description,
+      ingredients: ingredients,
+      steps: [pending || 'Pasos pendientes de redactar.'],
+    });
+  }
   if (!stages.length) return null;
-
-  // Merge the ingredient-table stage with the immediately following
-  // steps-only stage: the template splits the first cooking phase across
-  // two labeled blocks ("RECETA BASE" + "PROCEDIMIENTO...").
-  if (
-    stages.length >= 2 &&
-    stages[0].ingredients.length && !stages[0].steps.length &&
-    !stages[1].ingredients.length && stages[1].steps.length
-  ) {
-    var merged = {
-      title: stages[0].title,
-      procedureTitle: stages[1].title,
-      description: stages[0].description,
-      ingredients: stages[0].ingredients,
-      steps: stages[1].steps,
-    };
-    stages = [merged].concat(stages.slice(2));
-  } else {
-    stages[0].procedureTitle = null;
-    for (var k = 1; k < stages.length; k++) {
-      if (stages[k].procedureTitle === undefined) stages[k].procedureTitle = null;
-    }
-  }
 
   return {
     id: slugify(name),
     name: name,
+    code: code,
+    section: section.name,
+    sectionOrder: section.order,
     yieldAmount: yieldAmount,
     yieldUnit: yieldUnit,
     stages: stages,
   };
-}
-
-function newStage(title) {
-  return { title: title, description: null, ingredients: [], steps: [] };
 }
 
 /**
@@ -199,6 +251,7 @@ function testParse() {
   var recipes = buildRecipes();
   Logger.log('Recetas encontradas: ' + recipes.length);
   recipes.forEach(function (r) {
-    Logger.log(r.name + ' -> ' + r.stages.length + ' etapas');
+    Logger.log(r.code + ' ' + r.name + ' -> ' + r.stages.length + ' etapas, ' +
+      r.stages[0].ingredients.length + ' ingredientes');
   });
 }

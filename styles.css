@@ -403,6 +403,33 @@ body.has-session #app{
   flex-direction:column;
   gap:12px;
 }
+/* Listado agrupado por secciones */
+.rtmy-section{margin-top:6px;}
+.rtmy-section + .rtmy-section{margin-top:18px;}
+.rtmy-section-title{
+  display:flex;
+  align-items:center;
+  gap:8px;
+  margin:0 0 10px;
+  font-family:'Playfair Display',serif;
+  font-size:19px;
+  font-weight:600;
+  color: var(--rtmy-maroon);
+}
+.rtmy-section-count{
+  font-family:'Poppins',sans-serif;
+  font-size:12px;
+  font-weight:600;
+  padding:2px 9px;
+  border-radius:999px;
+  background: var(--rtmy-tan);
+  color: var(--rtmy-maroon-dark);
+}
+.rtmy-section-items{
+  display:flex;
+  flex-direction:column;
+  gap:12px;
+}
 .rtmy-card{
   display:flex;
   align-items:center;
