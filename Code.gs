@@ -33,8 +33,11 @@ var SECTIONS = {
 var TAB_RE = /^([BSC])(\d{2})(?:\s|$)/i;
 
 function doGet(e) {
+  // ?fresh=… (botón "Actualizar" de la app): ignora la caché de 5 min, relee
+  // el Sheet y deja la caché al día para los demás.
+  var fresh = !!(e && e.parameter && e.parameter.fresh);
   var cache = CacheService.getScriptCache();
-  var cached = cache.get(CACHE_KEY);
+  var cached = fresh ? null : cache.get(CACHE_KEY);
   var recipes = cached ? JSON.parse(cached) : buildRecipes();
   if (!cached) {
     try {

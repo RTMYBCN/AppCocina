@@ -10,12 +10,17 @@ const CONFIG = {
   // Mientras esté vacío, la app usa recipes.json local (modo desarrollo/demo).
   DATA_URL: "https://script.google.com/macros/s/AKfycbxldzxI4eqiW3i0nSrsj5JApxOKc2ujMVg6rixaRnkHqbzv_WTBkkrUsAAhq49nb01v/exec",
   LOCAL_FALLBACK: "recipes.json",
-  CACHE_KEY: "rtmy_recipes_cache_v2",
+  // Última versión recibida del Apps Script (localStorage: sobrevive al cerrar
+  // la app). Es el respaldo preferido si falla la carga: siempre más reciente
+  // que recipes.json.
+  LAST_GOOD_KEY: "rtmy_recipes_lastgood_v1",
   RUNTIME_KEY: "rtmy_runtime_v2",
-  CACHE_TTL_MS: 1000 * 60 * 10, // 10 minutos
   // Si el Apps Script no responde a tiempo se usa el respaldo local en vez
   // de dejar la app en "Cargando recetas…" indefinidamente.
   FETCH_TIMEOUT_MS: 10000,
+  // "Actualizar" pide al script que reconstruya desde el Sheet (sin su caché
+  // de 5 min), lo que tarda más que una respuesta cacheada.
+  FRESH_TIMEOUT_MS: 30000,
 };
 
 const MAX_SESSIONS = 4;
@@ -23,8 +28,10 @@ const MAX_SESSIONS = 4;
 const state = {
   view: "loading", // loading | error | list | detail | steps | final
   recipes: [],
-  updatedAt: null,
-  dataSource: null,
+  updatedAt: null, // última edición del Sheet (la informa el script)
+  fetchedAt: null, // cuándo recibió la app estos datos
+  refreshError: null, // aviso si la última actualización falló
+  dataSource: null, // live | saved | fallback
   search: "",
   refreshing: false,
   timers: [],
@@ -123,17 +130,52 @@ function restoreRuntimeState() {
   }
 }
 
-async function fetchRecipesFrom(url, source) {
+async function fetchRecipesFrom(url, source, opts) {
+  opts = opts || {};
+  // fresh: el script ignora su caché y relee el Sheet (un script antiguo
+  // simplemente ignora el parámetro).
+  const target = opts.fresh ? url + (url.includes("?") ? "&" : "?") + "fresh=" + Date.now() : url;
   const controller = new AbortController();
-  const timer = setTimeout(() => controller.abort(), CONFIG.FETCH_TIMEOUT_MS);
+  const timer = setTimeout(
+    () => controller.abort(),
+    opts.fresh ? CONFIG.FRESH_TIMEOUT_MS : CONFIG.FETCH_TIMEOUT_MS
+  );
   try {
-    const res = await fetch(url, { cache: "no-store", signal: controller.signal });
+    const res = await fetch(target, { cache: "no-store", signal: controller.signal });
     if (!res.ok) throw new Error("HTTP " + res.status);
     const data = validateRecipesPayload(await res.json());
     return { data, source };
   } finally {
     clearTimeout(timer);
   }
+}
+
+function readLastGood() {
+  try {
+    const saved = JSON.parse(localStorage.getItem(CONFIG.LAST_GOOD_KEY) || "null");
+    if (!saved || !saved.data) return null;
+    return { ts: saved.ts || null, data: validateRecipesPayload(saved.data) };
+  } catch (e) {
+    console.warn("La última versión guardada no era válida.", e);
+    return null;
+  }
+}
+
+function writeLastGood(data) {
+  try {
+    localStorage.setItem(CONFIG.LAST_GOOD_KEY, JSON.stringify({ ts: Date.now(), data }));
+  } catch (e) {
+    console.warn("No se pudo guardar la última versión de las recetas.", e);
+  }
+}
+
+// Sustituye por completo las recetas en memoria por las recibidas.
+function applyRecipes(data, source, fetchedAt) {
+  state.recipes = sortRecipes(data.recipes || []);
+  state.updatedAt = data.sourceUpdatedAt || data.fetchedAt || data.updatedAt || null;
+  state.fetchedAt = fetchedAt || Date.now();
+  state.dataSource = source;
+  state.refreshError = null;
 }
 
 /* ---------------- Data loading ----------------
@@ -163,27 +205,23 @@ function sortRecipes(recipes) {
 async function loadRecipes(opts) {
   opts = opts || {};
   const silent = !!opts.silent;
+  const manual = !!opts.manual; // botón "Actualizar"
 
-  // 1) try cache for a fast first paint (only relevant on first boot)
-  if (!silent) {
-    try {
-      const cached = JSON.parse(sessionStorage.getItem(CONFIG.CACHE_KEY) || "null");
-      if (cached && Date.now() - cached.ts < CONFIG.CACHE_TTL_MS) {
-        const data = validateRecipesPayload(cached.data);
-        state.recipes = sortRecipes(data.recipes);
-        state.updatedAt =
-          cached.data.sourceUpdatedAt || cached.data.fetchedAt || cached.data.updatedAt || null;
-        state.dataSource = "cache";
-        state.view = "list";
-        render();
-      }
-    } catch (e) {
-      console.warn("La caché de recetas no era válida.", e);
+  // 1) Primer pintado rápido con la última versión buena guardada (nunca con
+  //    recipes.json mientras exista algo más reciente). La carga en vivo la
+  //    sustituye en cuanto llega.
+  if (!silent && !state.recipes.length) {
+    const saved = readLastGood();
+    if (saved) {
+      applyRecipes(saved.data, "saved", saved.ts);
+      state.view = "list";
+      render();
     }
   }
 
   if (silent) {
     state.refreshing = true;
+    state.refreshError = null;
     if (state.view === "list") render();
   }
 
@@ -192,26 +230,29 @@ async function loadRecipes(opts) {
     try {
       result = await fetchRecipesFrom(
         CONFIG.DATA_URL || CONFIG.LOCAL_FALLBACK,
-        CONFIG.DATA_URL ? "live" : "fallback"
+        CONFIG.DATA_URL ? "live" : "fallback",
+        { fresh: manual }
       );
     } catch (liveError) {
       if (!CONFIG.DATA_URL) throw liveError;
+      if (state.recipes.length) {
+        // Ya hay recetas en memoria (la última versión buena): se conservan.
+        // Nunca se cambian por una copia más antigua.
+        state.refreshing = false;
+        state.refreshError = "No se pudo actualizar";
+        if (state.view === "list") render();
+        return;
+      }
       result = await fetchRecipesFrom(CONFIG.LOCAL_FALLBACK, "fallback");
+      state.refreshError = "No se pudo conectar con las recetas en vivo";
     }
     const { data, source } = result;
-    state.recipes = sortRecipes(data.recipes || []);
-    state.updatedAt = data.sourceUpdatedAt || data.fetchedAt || data.updatedAt || null;
-    state.dataSource = source;
+    const keepError = state.refreshError;
+    applyRecipes(data, source);
+    state.refreshError = keepError;
+    if (source === "live") writeLastGood(data);
     state.view = state.view === "loading" ? "list" : state.view;
     lastFetchAt = Date.now();
-    try {
-      sessionStorage.setItem(
-        CONFIG.CACHE_KEY,
-        JSON.stringify({ ts: Date.now(), data })
-      );
-    } catch (e) {
-      console.warn("No se pudo actualizar la caché de recetas.", e);
-    }
     state.refreshing = false;
     // Only force a re-render when it's safe: the list view, or first boot.
     // Detail/steps/final keep whatever was already on screen so an
@@ -230,8 +271,10 @@ async function loadRecipes(opts) {
   }
 }
 
+// Botón "Actualizar": pide los datos más recientes del Sheet y reemplazan a
+// los que hay en memoria.
 function refreshRecipes() {
-  loadRecipes({ silent: true });
+  loadRecipes({ silent: true, manual: true });
 }
 
 document.addEventListener("visibilitychange", () => {
@@ -239,7 +282,7 @@ document.addEventListener("visibilitychange", () => {
   if (state.view === "loading") return;
   // Avoid refetching too often if the tab is switched back and forth.
   if (Date.now() - lastFetchAt < 30 * 1000) return;
-  refreshRecipes();
+  loadRecipes({ silent: true });
 });
 
 /* ---------------- Helpers ---------------- */
@@ -841,14 +884,33 @@ function renderError() {
   `;
 }
 
-function fmtUpdatedAt() {
-  if (!state.updatedAt) return "";
+// "hoy 18:55" / "6 nov 18:55": con fecha, para saber de qué día es cada dato.
+function fmtWhen(ts) {
+  if (!ts) return "";
   try {
-    const d = new Date(state.updatedAt);
-    return d.toLocaleTimeString("es-ES", { hour: "2-digit", minute: "2-digit" });
+    const d = new Date(ts);
+    if (isNaN(d)) return "";
+    const time = d.toLocaleTimeString("es-ES", { hour: "2-digit", minute: "2-digit" });
+    if (d.toDateString() === new Date().toDateString()) return "hoy " + time;
+    const day = d.toLocaleDateString("es-ES", { day: "numeric", month: "short" }).replace(".", "");
+    return day + " " + time;
   } catch (e) {
     return "";
   }
+}
+
+function recipesStatusText() {
+  if (state.refreshing) return "Actualizando…";
+  if (state.dataSource === "fallback") return "Copia local · puede estar desactualizada";
+  const edited = state.updatedAt ? " · hoja editada " + fmtWhen(state.updatedAt) : "";
+  if (state.dataSource === "saved") return "Última versión guardada de " + fmtWhen(state.fetchedAt) + edited;
+  return "Actualizado " + fmtWhen(state.fetchedAt) + edited;
+}
+
+function recipesErrorText() {
+  if (!state.refreshError || state.refreshing) return "";
+  if (state.dataSource === "fallback") return state.refreshError + ".";
+  return state.refreshError + ": se mantiene la versión de " + fmtWhen(state.fetchedAt) + ".";
 }
 
 function buildRecipeCardHtml(r) {
@@ -898,21 +960,17 @@ function buildListItemsHtml() {
 }
 
 function renderList() {
-  const sourceLabel =
-    state.dataSource === "fallback"
-      ? " · copia local"
-      : state.dataSource === "cache"
-        ? " · caché"
-        : "";
+  const errorText = recipesErrorText();
   root.innerHTML = `
     ${header(false)}
     <div class="rtmy-refresh-row">
-      <span>${state.refreshing ? "Actualizando…" : state.updatedAt ? "Datos consultados a las " + fmtUpdatedAt() + sourceLabel : sourceLabel.replace(" · ", "")}</span>
+      <span>${escapeHtml(recipesStatusText())}</span>
       <button class="rtmy-refresh-btn" onclick="refreshRecipes()" ${state.refreshing ? "disabled" : ""}>
         <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" class="${state.refreshing ? "spin" : ""}"><path d="M4 4v5h5M20 20v-5h-5"/><path d="M4 9a8 8 0 0 1 14-4.5M20 15a8 8 0 0 1-14 4.5"/></svg>
         Actualizar
       </button>
     </div>
+    ${errorText ? `<div class="rtmy-refresh-error" role="status">${escapeHtml(errorText)}</div>` : ""}
     <label class="rtmy-sr-only" for="recipe-search">Buscar receta</label>
     <input id="recipe-search" class="rtmy-search" placeholder="Buscar receta…" value="${escapeHtml(
       state.search
