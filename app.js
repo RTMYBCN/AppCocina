@@ -31,6 +31,7 @@ const state = {
   updatedAt: null, // última edición del Sheet (la informa el script)
   fetchedAt: null, // cuándo recibió la app estos datos
   refreshError: null, // aviso si la última actualización falló
+  refreshingManual: false, // el botón "Actualizar" está esperando datos
   dataSource: null, // live | saved | fallback
   search: "",
   refreshing: false,
@@ -202,10 +203,22 @@ function sortRecipes(recipes) {
   });
 }
 
+let loadSeq = 0;
+
 async function loadRecipes(opts) {
   opts = opts || {};
   const silent = !!opts.silent;
   const manual = !!opts.manual; // botón "Actualizar"
+
+  // Un refresco automático (al volver a la pestaña) nunca pisa a uno manual
+  // en curso: pide la versión con caché y podría devolver datos más viejos.
+  if (!manual && silent && state.refreshingManual) return;
+
+  // Solo la última petición lanzada puede cambiar el estado. Una pulsación de
+  // "Actualizar" sustituye a un refresco automático que siga en vuelo, y la
+  // respuesta tardía de este último se descarta.
+  const seq = ++loadSeq;
+  if (manual) state.refreshingManual = true;
 
   // 1) Primer pintado rápido con la última versión buena guardada (nunca con
   //    recipes.json mientras exista algo más reciente). La carga en vivo la
@@ -225,6 +238,14 @@ async function loadRecipes(opts) {
     if (state.view === "list") render();
   }
 
+  // Cierra esta carga (solo la última lanzada) y devuelve true si sigue vigente.
+  const finish = () => {
+    if (seq !== loadSeq) return false;
+    state.refreshing = false;
+    state.refreshingManual = false;
+    return true;
+  };
+
   try {
     let result;
     try {
@@ -235,10 +256,11 @@ async function loadRecipes(opts) {
       );
     } catch (liveError) {
       if (!CONFIG.DATA_URL) throw liveError;
+      if (seq !== loadSeq) return; // la sustituyó una petición más reciente
       if (state.recipes.length) {
         // Ya hay recetas en memoria (la última versión buena): se conservan.
         // Nunca se cambian por una copia más antigua.
-        state.refreshing = false;
+        finish();
         state.refreshError = "No se pudo actualizar";
         if (state.view === "list") render();
         return;
@@ -246,6 +268,9 @@ async function loadRecipes(opts) {
       result = await fetchRecipesFrom(CONFIG.LOCAL_FALLBACK, "fallback");
       state.refreshError = "No se pudo conectar con las recetas en vivo";
     }
+    // Respuesta tardía de una petición ya sustituida (p. ej. el refresco
+    // automático con caché, tras pulsar "Actualizar"): se descarta.
+    if (!finish()) return;
     const { data, source } = result;
     const keepError = state.refreshError;
     applyRecipes(data, source);
@@ -253,14 +278,13 @@ async function loadRecipes(opts) {
     if (source === "live") writeLastGood(data);
     state.view = state.view === "loading" ? "list" : state.view;
     lastFetchAt = Date.now();
-    state.refreshing = false;
     // Only force a re-render when it's safe: the list view, or first boot.
     // Detail/steps/final keep whatever was already on screen so an
     // in-progress recipe never changes under the cook's hands; the fresh
     // data is already in state.recipes for the next time they navigate.
     if (state.view === "list" || root.dataset.rendered !== "1") render();
   } catch (err) {
-    state.refreshing = false;
+    if (!finish()) return;
     if (!state.recipes.length) {
       state.view = "error";
       state.errorMsg = err.message;
@@ -965,7 +989,7 @@ function renderList() {
     ${header(false)}
     <div class="rtmy-refresh-row">
       <span>${escapeHtml(recipesStatusText())}</span>
-      <button class="rtmy-refresh-btn" onclick="refreshRecipes()" ${state.refreshing ? "disabled" : ""}>
+      <button class="rtmy-refresh-btn" onclick="refreshRecipes()" ${state.refreshingManual ? "disabled" : ""}>
         <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" class="${state.refreshing ? "spin" : ""}"><path d="M4 4v5h5M20 20v-5h-5"/><path d="M4 9a8 8 0 0 1 14-4.5M20 15a8 8 0 0 1-14 4.5"/></svg>
         Actualizar
       </button>
