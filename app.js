@@ -1661,12 +1661,11 @@ function planWaitMin(t) {
 }
 
 // Una tarjeta de paso dentro de la franja de una persona (o de "sin nadie").
-function planCardHtml(t, plan, colors, opts) {
+function planCardHtml(t, plan, colors) {
   const done = !!state.planUi.done[planTaskKey(t)];
   const machine = t.person === null;
   const wait = planWaitMin(t);
   const dur = (t.assumed ? "~" : "") + RTMYPlanner.fmtDuration(machine ? t.totalMin : t.personMin);
-  const showRecipe = !opts || opts.showRecipe !== false;
   return `
     <li class="rtmy-plan-task ${machine ? "machine" : ""} ${done ? "done" : ""}" style="--rc:${colors[t.recipeId]}">
       <div class="rtmy-plan-head">
@@ -1676,12 +1675,18 @@ function planCardHtml(t, plan, colors, opts) {
           <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="3" stroke-linecap="round" stroke-linejoin="round"><path d="M5 12.5l4.5 4.5L19 7.5"/></svg>
         </button>
       </div>
-      ${showRecipe ? `<div class="rtmy-plan-recipe-tag"><b>${escapeHtml(t.code)}</b> ${escapeHtml(titleCase(t.recipeName))} <span>· paso ${t.step}</span></div>` : `<div class="rtmy-plan-recipe-tag plain"><b>${escapeHtml(t.code)}</b> <span>· paso ${t.step}</span></div>`}
-      <div class="rtmy-plan-tags"><span class="rtmy-plan-eq">${escapeHtml(t.equipment)}</span></div>
+      <div class="rtmy-plan-recipe-tag"><b>${escapeHtml(t.code)}</b> ${escapeHtml(titleCase(t.recipeName))} <span>· paso ${t.step}</span></div>
+      <div class="rtmy-plan-tags">
+        <span class="rtmy-plan-eq">${escapeHtml(t.equipment)}</span>
+        ${machine && t.totalMin >= 5 ? `<span class="rtmy-plan-alone">en marcha · no hace falta estar</span>` : ""}
+      </div>
       <p>${escapeHtml(t.text)}</p>
       ${
         machine
-          ? `<div class="rtmy-plan-wait"><button class="rtmy-plan-timer" onclick="planTimer(${t.id})" aria-label="Iniciar temporizador de ${dur}"><span aria-hidden="true">⏱</span> Temporizador de ${dur}</button></div>`
+          ? // Un paso de menos de 2 min no necesita temporizador: se hace al momento.
+            t.totalMin >= 2
+            ? `<div class="rtmy-plan-wait"><button class="rtmy-plan-timer" onclick="planTimer(${t.id})" aria-label="Iniciar temporizador de ${dur}"><span aria-hidden="true">⏱</span> Temporizador de ${dur}</button></div>`
+            : ""
           : wait
             ? `<div class="rtmy-plan-wait">Después, ${t.assumed ? "~" : ""}${RTMYPlanner.fmtDuration(wait)} de espera · listo a las ${planClock(plan, t.end)}
                  <button class="rtmy-plan-timer" onclick="planTimer(${t.id})" aria-label="Iniciar temporizador de ${RTMYPlanner.fmtDuration(wait)}"><span aria-hidden="true">⏱</span> Temporizador</button></div>`
@@ -1708,35 +1713,27 @@ function planWhoChips(tasks, plan, colors) {
 }
 
 /* Vista "por persona": una franja por cocinero, en horizontal. En el móvil se
-   desliza de una a otra (cada franja encaja en la pantalla); en pantalla ancha
-   se ven todas a la vez. La última franja recoge lo que va solo. */
+   desliza de una a otra; en pantalla ancha se ven todas a la vez. Los pasos que
+   hace sola la máquina salen en la franja de quien la pone en marcha, marcados
+   aparte, para que sepa cuándo volver sin buscarlos en otro sitio. */
 function planByPersonHtml(plan, colors) {
   const ui = state.planUi;
   const inDay = (t) => RTMYPlanner.dayOf(t.start) === ui.day;
   const cols = [];
 
   for (let p = 0; p < plan.persons; p++) {
-    const mine = plan.tasks.filter((t) => t.person === p && inDay(t));
+    const mine = plan.tasks
+      .filter((t) => (t.person === p || (t.person === null && t.watcher === p)) && inDay(t))
+      .sort((x, y) => x.start - y.start || x.id - y.id);
     const total = plan.tasks.filter((t) => t.person === p).reduce((s, t) => s + t.personMin, 0);
+    const waiting = mine.filter((t) => t.person === null).length;
     cols.push({
       title: "Persona " + (p + 1),
-      sub: total ? RTMYPlanner.fmtDuration(total) + " de trabajo" : "sin tareas",
+      sub: (total ? RTMYPlanner.fmtDuration(total) + " de trabajo" : "sin tareas") + (waiting ? " · " + waiting + " en marcha" : ""),
       chips: planWhoChips(mine, plan, colors),
       body: mine.length
         ? `<ol class="rtmy-plan-tasks">${mine.map((t) => planCardHtml(t, plan, colors)).join("")}</ol>`
         : `<p class="rtmy-plan-none">${total ? "Nada que hacer este día." : "Con este lote no hace falta una persona más."}</p>`,
-    });
-  }
-
-  const machines = plan.tasks.filter((t) => t.person === null && inDay(t));
-  if (machines.length) {
-    cols.push({
-      title: "Sin nadie al lado",
-      sub: machines.length + " paso" + (machines.length === 1 ? "" : "s"),
-      machine: true,
-      chips: "",
-      body: `<p class="rtmy-plan-hint">La máquina o el reposo trabajan solos.</p>
-             <ol class="rtmy-plan-tasks">${machines.map((t) => planCardHtml(t, plan, colors)).join("")}</ol>`,
     });
   }
 
@@ -1745,7 +1742,7 @@ function planByPersonHtml(plan, colors) {
       ${cols
         .map(
           (c) => `
-        <section class="rtmy-plan-col ${c.machine ? "machine" : ""}" aria-label="${escapeHtml(c.title)}">
+        <section class="rtmy-plan-col" aria-label="${escapeHtml(c.title)}">
           <header class="rtmy-plan-col-head">
             <h2>${escapeHtml(c.title)}</h2>
             <span class="rtmy-plan-col-sub">${escapeHtml(c.sub)}</span>

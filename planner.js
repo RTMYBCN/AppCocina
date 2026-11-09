@@ -456,6 +456,21 @@
       }
     }
 
+    // Un paso de máquina o de espera no lo hace nadie, pero alguien lo deja en
+    // marcha: se apunta a quien hizo el paso anterior de esa receta (o, si no
+    // hay, a quien hace el siguiente) para que salga en su lista y sepa cuándo
+    // volver. `watcher` no ocupa tiempo de esa persona.
+    selected.forEach((r) => {
+      const mine = tasks.filter((t) => t.recipeId === r.id && t.start !== null).sort((a, b) => a.start - b.start);
+      mine.forEach((t, i) => {
+        if (t.person !== null) return;
+        let who = null;
+        for (let j = i - 1; j >= 0 && who === null; j--) who = mine[j].person;
+        for (let j = i + 1; j < mine.length && who === null; j++) who = mine[j].person;
+        t.watcher = who === null ? 0 : who;
+      });
+    });
+
     // ---- resultado
     const done = tasks.filter((t) => t.start !== null);
     result.tasks = done.sort((a, b) => a.start - b.start || a.id - b.id);

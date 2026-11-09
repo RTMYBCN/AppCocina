@@ -238,3 +238,27 @@ test("el aparato de un paso no cambia a mitad de la misma reserva", () => {
     mine.forEach((t) => assert.equal(t.equipment, sp.label));
   });
 });
+
+test("cada paso de máquina o espera queda a cargo de quien la pone en marcha", () => {
+  const plan = planner.buildPlan(withB03, withB03.map((r) => r.id), { people: 2 });
+  const alone = plan.tasks.filter((t) => t.person === null);
+  assert.ok(alone.length > 0, "este lote debería tener pasos de máquina");
+  alone.forEach((t) => {
+    assert.ok(Number.isInteger(t.watcher), `${t.code}.${t.step} no tiene a nadie a cargo`);
+    assert.ok(t.watcher >= 0 && t.watcher < 2);
+  });
+});
+
+test("quien vigila una máquina es quien hizo el paso anterior de esa receta", () => {
+  const plan = planner.buildPlan(withB03, withB03.map((r) => r.id), { people: 2 });
+  plan.tasks
+    .filter((t) => t.person === null)
+    .forEach((t) => {
+      const mine = plan.tasks.filter((x) => x.recipeId === t.recipeId).sort((a, b) => a.start - b.start);
+      const i = mine.indexOf(t);
+      let expected = null;
+      for (let j = i - 1; j >= 0 && expected === null; j--) expected = mine[j].person;
+      for (let j = i + 1; j < mine.length && expected === null; j++) expected = mine[j].person;
+      assert.equal(t.watcher, expected === null ? 0 : expected);
+    });
+});

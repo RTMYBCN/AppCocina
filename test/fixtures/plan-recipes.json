@@ -1232,6 +1232,141 @@
         ]
       },
       "sourceSheet": "B05 CALDO DE POLLO"
+    },
+    {
+      "id": "aceite-de-ajo-y-cayena",
+      "name": "ACEITE DE AJO Y CAYENA",
+      "code": "B06",
+      "section": "Preparaciones base",
+      "sectionOrder": 1,
+      "yieldAmount": 400,
+      "yieldUnit": "g",
+      "stages": [
+        {
+          "title": "PROCEDIMIENTO",
+          "procedureTitle": null,
+          "description": "Aceite macerado con ajos y cayena para el plato de langostinos al ajillo.",
+          "ingredients": [
+            {
+              "qty": 400,
+              "unit": "g",
+              "name": "Aceite de Oliva"
+            },
+            {
+              "qty": 80,
+              "unit": "g",
+              "name": "Ajo pelado"
+            },
+            {
+              "qty": 6,
+              "unit": "g",
+              "name": "Pimienta de cayena molida"
+            }
+          ],
+          "steps": [
+            "Pelar los ajos.",
+            "Laminar el ajo en rodajas muy finas con la cuchilla de laminar del rallador.",
+            "Colocar el aceite y los ajos laminados en el vaso de la Thermomix.",
+            "Programar 12 minutos, 120 °C, velocidad 1, marcha atrás.",
+            "Agregar la cayena.",
+            "Programar 3 minutos, 120 °C, velocidad 1, marcha atrás.",
+            "Pasar el aceite a un túper y dejar atemperar.",
+            "Tapar el túper, etiquetar, fechar y guardar en nevera un máximo de 4 días."
+          ]
+        }
+      ],
+      "plan": {
+        "phase": "Producción",
+        "shelfLifeDays": 4,
+        "storage": "Nevera",
+        "requires": [],
+        "steps": [
+          {
+            "b": 1,
+            "s": 1,
+            "d": 1,
+            "eq": "Manual",
+            "t": "Activo",
+            "pm": 6,
+            "mm": null,
+            "sc": true
+          },
+          {
+            "b": 1,
+            "s": 2,
+            "d": 1,
+            "eq": "Manual",
+            "t": "Activo",
+            "pm": 5,
+            "mm": null,
+            "sc": true,
+            "n": "Con la cuchilla de laminar del rallador"
+          },
+          {
+            "b": 1,
+            "s": 3,
+            "d": 1,
+            "eq": "Thermomix (cualquiera)",
+            "t": "Activo",
+            "pm": 1,
+            "mm": null,
+            "sc": false
+          },
+          {
+            "b": 1,
+            "s": 4,
+            "d": 1,
+            "eq": "Thermomix (cualquiera)",
+            "t": "Máquina",
+            "pm": null,
+            "mm": 12,
+            "sc": false
+          },
+          {
+            "b": 1,
+            "s": 5,
+            "d": 1,
+            "eq": "Thermomix (cualquiera)",
+            "t": "Activo",
+            "pm": 1,
+            "mm": null,
+            "sc": false
+          },
+          {
+            "b": 1,
+            "s": 6,
+            "d": 1,
+            "eq": "Thermomix (cualquiera)",
+            "t": "Máquina",
+            "pm": null,
+            "mm": 3,
+            "sc": false
+          },
+          {
+            "b": 1,
+            "s": 7,
+            "d": 1,
+            "eq": "Manual",
+            "t": "Activo + espera",
+            "pm": 5,
+            "mm": 30,
+            "sc": true,
+            "n": "Atemperado desatendido. Valor inicial, ajustar cuando se mida"
+          },
+          {
+            "b": 1,
+            "s": 8,
+            "d": 1,
+            "eq": "Manual",
+            "t": "Activo",
+            "pm": 5,
+            "mm": null,
+            "sc": false,
+            "n": "Ajo en aceite: máximo 4 días en nevera (riesgo de botulismo)"
+          }
+        ]
+      },
+      "sourceSheet": "B06 ACEITE AJO Y CAYENA"
     }
   ]
 }

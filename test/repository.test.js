@@ -43,9 +43,9 @@ test("recipes.json has valid unique recipes and executable stages", () => {
 
 test("HTML references the current cache-busted assets and accessibility regions", () => {
   const html = fs.readFileSync(path.join(root, "index.html"), "utf8");
-  assert.match(html, /styles\.css\?v=11/);
-  assert.match(html, /planner\.js\?v=11/);
-  assert.match(html, /app\.js\?v=11/);
+  assert.match(html, /styles\.css\?v=12/);
+  assert.match(html, /planner\.js\?v=12/);
+  assert.match(html, /app\.js\?v=12/);
   assert.match(html, /id="timer-bar"[^>]+aria-live="assertive"/);
 });
 
@@ -80,8 +80,11 @@ test("the planner shows one column per cook and names the recipe on each card", 
   const source = fs.readFileSync(path.join(root, "app.js"), "utf8");
   const css = fs.readFileSync(path.join(root, "styles.css"), "utf8");
   assert.match(source, /rtmy-plan-cols/);
-  assert.match(source, /class="rtmy-plan-col /);
+  assert.match(source, /class="rtmy-plan-col"/);
   assert.match(source, /rtmy-plan-recipe-tag/);
+  // los pasos de máquina van en la franja de quien la pone en marcha
+  assert.match(source, /t\.watcher === p/);
+  assert.match(source, /en marcha · no hace falta estar/);
   assert.match(css, /\.rtmy-plan-cols\{[^}]*overflow-x:auto/s);
   assert.match(css, /\.rtmy-plan-col-head\{[^}]*position:sticky/s);
   // "SALMORRETA RTMY" debe quedar como "Salmorreta RTMY", no "Salmorreta Rtmy"
