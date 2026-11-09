@@ -43,9 +43,9 @@ test("recipes.json has valid unique recipes and executable stages", () => {
 
 test("HTML references the current cache-busted assets and accessibility regions", () => {
   const html = fs.readFileSync(path.join(root, "index.html"), "utf8");
-  assert.match(html, /styles\.css\?v=13/);
-  assert.match(html, /planner\.js\?v=13/);
-  assert.match(html, /app\.js\?v=13/);
+  assert.match(html, /styles\.css\?v=14/);
+  assert.match(html, /planner\.js\?v=14/);
+  assert.match(html, /app\.js\?v=14/);
   assert.match(html, /id="timer-bar"[^>]+aria-live="assertive"/);
 });
 
@@ -100,4 +100,16 @@ test("each timer belongs to the cook who started it", () => {
   assert.match(source, /rtmy-plan-timers\[data-person\]/);
   assert.match(source, /rtmy-timer-who/); // la barra de abajo marca P1 / P2
   assert.match(css, /\.rtmy-plan-timer-chip/);
+});
+
+test("the bottom bar splits into one lane per cook while the plan is open", () => {
+  const source = fs.readFileSync(path.join(root, "app.js"), "utf8");
+  const css = fs.readFileSync(path.join(root, "styles.css"), "utf8");
+  assert.match(source, /function planBarPersons\(\)/);
+  assert.match(source, /rtmy-timer-grid/);
+  assert.match(source, /rtmy-timer-lane-head/);
+  // los temporizadores sin dueño siguen a lo ancho
+  assert.match(source, /const loose = state\.timers\.filter/);
+  assert.match(css, /\.rtmy-timer-grid\{/);
+  assert.match(css, /grid-template-columns:repeat\(var\(--cols,2\)/);
 });

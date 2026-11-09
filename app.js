@@ -545,24 +545,30 @@ window.resumeFromTimer = function (sessionId, timerId) {
   switchToSession(sessionId);
 };
 
-function renderTimerBar() {
-  if (!timerBarEl) return;
-  document.body.classList.toggle("has-timer", state.timers.length > 0);
-  if (!state.timers.length) {
-    timerBarEl.innerHTML = "";
-    timerBarEl.classList.remove("visible");
-    return;
+// Número de franjas del plan que hay ahora mismo en pantalla. Fuera del plan
+// (o con una sola persona) la barra de abajo no se divide.
+function planBarPersons() {
+  if (state.view !== "plan") return 0;
+  const plan = state.planUi.result;
+  return plan && plan.ok && plan.persons > 1 ? plan.persons : 0;
+}
+
+function timerRowHtml(t, compact) {
+  const sessionStillOpen = t.sessionId && state.sessions.some((s) => s.id === t.sessionId);
+  // En la franja de su dueño sobra repetir "P1": lo dice la cabecera.
+  const who = !compact && Number.isInteger(t.person) ? `<b class="rtmy-timer-who">P${t.person + 1}</b> ` : "";
+  let info;
+  if (t.done && compact) {
+    // En franja estrecha basta con el aviso y el paso: de quién es lo dice la cabecera.
+    info = `<span class="rtmy-timer-clock">⏰ ¡Listo!</span><span class="rtmy-timer-label">${escapeHtml(t.label)}</span>`;
+  } else if (t.done) {
+    info = t.recipeName
+      ? `<span class="rtmy-timer-clock">⏰</span><span class="rtmy-timer-label">${who}<b>${escapeHtml(titleCase(t.recipeName))}</b> necesita tu atención — ${escapeHtml(t.label)}</span>`
+      : `<span class="rtmy-timer-clock">¡Listo!</span><span class="rtmy-timer-label">${escapeHtml(t.label)}</span>`;
+  } else {
+    info = `<span class="rtmy-timer-clock">${fmtClock(t.remaining)}</span><span class="rtmy-timer-label">${who}${escapeHtml(t.label)}${t.recipeName && !compact ? " · " + escapeHtml(titleCase(t.recipeName)) : ""}</span>`;
   }
-  timerBarEl.classList.add("visible");
-  timerBarEl.innerHTML = state.timers
-    .map((t) => {
-      const sessionStillOpen = t.sessionId && state.sessions.some((s) => s.id === t.sessionId);
-      const info = t.done
-        ? t.recipeName
-          ? `<span class="rtmy-timer-clock">⏰</span><span class="rtmy-timer-label">${t.person !== null && t.person !== undefined ? `<b class="rtmy-timer-who">P${t.person + 1}</b> ` : ""}<b>${escapeHtml(titleCase(t.recipeName))}</b> necesita tu atención — ${escapeHtml(t.label)}</span>`
-          : `<span class="rtmy-timer-clock">¡Listo!</span><span class="rtmy-timer-label">${escapeHtml(t.label)}</span>`
-        : `<span class="rtmy-timer-clock">${fmtClock(t.remaining)}</span><span class="rtmy-timer-label">${t.person !== null && t.person !== undefined ? `<b class="rtmy-timer-who">P${t.person + 1}</b> ` : ""}${escapeHtml(t.label)}${t.recipeName ? " · " + escapeHtml(titleCase(t.recipeName)) : ""}</span>`;
-      return `
+  return `
     <div class="rtmy-timer-row ${t.done ? "done" : ""}">
       <div class="rtmy-timer-info">${info}</div>
       <div class="rtmy-timer-controls">
@@ -574,10 +580,41 @@ function renderTimerBar() {
         }
         <button onclick="cancelTimer(${t.id})" aria-label="Descartar">✕</button>
       </div>
-    </div>
-  `;
-    })
-    .join("");
+    </div>`;
+}
+
+function renderTimerBar() {
+  if (!timerBarEl) return;
+  document.body.classList.toggle("has-timer", state.timers.length > 0);
+  if (!state.timers.length) {
+    timerBarEl.innerHTML = "";
+    timerBarEl.classList.remove("visible", "cols");
+    return;
+  }
+  timerBarEl.classList.add("visible");
+
+  // Dentro del plan la barra se parte en las mismas franjas que la pantalla:
+  // cada cuenta atrás cae debajo de quien la puso, no en el centro.
+  const persons = planBarPersons();
+  if (!persons) {
+    timerBarEl.classList.remove("cols");
+    timerBarEl.innerHTML = state.timers.map((t) => timerRowHtml(t, false)).join("");
+    return;
+  }
+  timerBarEl.classList.add("cols");
+  timerBarEl.style.setProperty("--cols", persons);
+  let lanes = "";
+  for (let p = 0; p < persons; p++) {
+    const mine = state.timers.filter((t) => t.person === p);
+    lanes += `
+      <div class="rtmy-timer-lane${mine.some((t) => t.done) ? " alert" : ""}">
+        <span class="rtmy-timer-lane-head">Persona ${p + 1}</span>
+        ${mine.length ? mine.map((t) => timerRowHtml(t, true)).join("") : `<span class="rtmy-timer-lane-empty">Sin temporizadores</span>`}
+      </div>`;
+  }
+  // Los de fuera del plan (una receta abierta a mano) no son de nadie.
+  const loose = state.timers.filter((t) => !Number.isInteger(t.person) || t.person >= persons);
+  timerBarEl.innerHTML = `<div class="rtmy-timer-grid">${lanes}</div>${loose.map((t) => timerRowHtml(t, false)).join("")}`;
 }
 
 /* ---------------- Ingredient quantities in step text ----------------
@@ -896,14 +933,15 @@ function render() {
   root.dataset.rendered = "1";
   // El plan se ve mejor ancho en tablet/ordenador: las franjas caben a la vez.
   document.body.classList.toggle("view-plan", state.view === "plan");
-  if (state.view === "loading") return renderLoading();
-  if (state.view === "error") return renderError();
-  if (state.view === "list") return renderList();
-  if (state.view === "detail") return renderDetail();
-  if (state.view === "steps") return renderSteps();
-  if (state.view === "final") return renderFinal();
-  if (state.view === "plan-setup") return renderPlanSetup();
-  if (state.view === "plan") return renderPlan();
+  if (state.view === "loading") renderLoading();
+  else if (state.view === "error") renderError();
+  else if (state.view === "list") renderList();
+  else if (state.view === "detail") renderDetail();
+  else if (state.view === "steps") renderSteps();
+  else if (state.view === "final") renderFinal();
+  else if (state.view === "plan-setup") renderPlanSetup();
+  else if (state.view === "plan") renderPlan();
+  renderTimerBar(); // al entrar o salir del plan la barra cambia de forma
 }
 
 function header(showBack, backHash, title) {

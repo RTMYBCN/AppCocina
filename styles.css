@@ -89,6 +89,56 @@ input:focus-visible{
   padding:9px 14px;
   box-shadow:var(--shadow-soft);
 }
+/* En el plan la barra se reparte en franjas, una por cocinero, para que cada
+   cuenta atrás quede debajo de quien la ha puesto. */
+#timer-bar.cols{ padding-left:10px; padding-right:10px; }
+.rtmy-timer-grid{
+  display:grid;
+  grid-template-columns:repeat(var(--cols,2), minmax(0,1fr));
+  gap:8px;
+  width:100%;
+  max-width:1120px;
+  margin:0 auto;
+}
+.rtmy-timer-lane{
+  min-width:0;
+  display:flex;
+  flex-direction:column;
+  gap:6px;
+  padding:6px;
+  border-radius:12px;
+  background:rgba(255,255,255,0.55);
+  border:1.5px dashed var(--rtmy-tan-dark);
+}
+.rtmy-timer-lane.alert{ border-style:solid; border-color:var(--rtmy-red-border); }
+.rtmy-timer-lane-head{
+  font-family:'Archivo Black','Arial Black',sans-serif;
+  font-size:10.5px;
+  letter-spacing:.06em;
+  text-transform:uppercase;
+  color:var(--rtmy-maroon);
+}
+.rtmy-timer-lane-empty{ font-size:11px; opacity:.5; }
+.rtmy-timer-lane .rtmy-timer-row{
+  max-width:none;
+  margin:0;
+  flex-direction:column;
+  align-items:stretch;
+  padding:7px 9px;
+  gap:6px;
+}
+.rtmy-timer-lane .rtmy-timer-info{ width:100%; flex-direction:column; align-items:flex-start; gap:2px; }
+/* En franja estrecha el paso cabe en dos líneas en vez de cortarse. */
+.rtmy-timer-lane .rtmy-timer-label{
+  white-space:normal;
+  display:-webkit-box;
+  -webkit-line-clamp:2;
+  -webkit-box-orient:vertical;
+  line-height:1.25;
+}
+.rtmy-timer-lane .rtmy-timer-clock{ font-size:16px; min-width:0; }
+.rtmy-timer-lane .rtmy-timer-controls{ margin-left:auto; }
+
 .rtmy-timer-row.done{
   border-color:var(--rtmy-red-border);
   background:var(--rtmy-red-bg);
