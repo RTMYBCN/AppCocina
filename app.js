@@ -478,6 +478,7 @@ function ensureTimerTick() {
     if (changed) {
       saveRuntimeState();
       renderTimerBar();
+      renderPlanTimers();
     }
   }, 1000);
 }
@@ -487,7 +488,7 @@ function updateTimerRemaining(timer) {
   timer.remaining = Math.max(0, Math.ceil((timer.endsAt - Date.now()) / 1000));
 }
 
-function startTimer(label, seconds, sessionId, recipeName) {
+function startTimer(label, seconds, sessionId, recipeName, person) {
   const dup = state.timers.find((t) => t.label === label && t.sessionId === (sessionId || null) && !t.done);
   if (dup) return; // already running/paused, avoid a duplicate of the same duration
   ensureAudioCtx(); // create/unlock audio now, while we still have a user gesture
@@ -500,10 +501,14 @@ function startTimer(label, seconds, sessionId, recipeName) {
     done: false,
     sessionId: sessionId || null,
     recipeName: recipeName || null,
+    // Quién lo puso en marcha (índice de persona del plan), para que aparezca
+    // en su franja y no se mezcle con los de los demás.
+    person: Number.isInteger(person) ? person : null,
   });
   saveRuntimeState();
   ensureTimerTick();
   renderTimerBar();
+  renderPlanTimers();
 }
 
 window.startTimerByIndex = function (i) {
@@ -523,12 +528,14 @@ window.toggleTimer = function (id) {
   }
   saveRuntimeState();
   renderTimerBar();
+  renderPlanTimers();
 };
 
 window.cancelTimer = function (id) {
   state.timers = state.timers.filter((x) => x.id !== id);
   saveRuntimeState();
   renderTimerBar();
+  renderPlanTimers();
 };
 
 // Resuming a recipe from a finished timer's "Ir a la receta" button should
@@ -552,9 +559,9 @@ function renderTimerBar() {
       const sessionStillOpen = t.sessionId && state.sessions.some((s) => s.id === t.sessionId);
       const info = t.done
         ? t.recipeName
-          ? `<span class="rtmy-timer-clock">⏰</span><span class="rtmy-timer-label"><b>${escapeHtml(titleCase(t.recipeName))}</b> necesita tu atención — ${escapeHtml(t.label)}</span>`
+          ? `<span class="rtmy-timer-clock">⏰</span><span class="rtmy-timer-label">${t.person !== null && t.person !== undefined ? `<b class="rtmy-timer-who">P${t.person + 1}</b> ` : ""}<b>${escapeHtml(titleCase(t.recipeName))}</b> necesita tu atención — ${escapeHtml(t.label)}</span>`
           : `<span class="rtmy-timer-clock">¡Listo!</span><span class="rtmy-timer-label">${escapeHtml(t.label)}</span>`
-        : `<span class="rtmy-timer-clock">${fmtClock(t.remaining)}</span><span class="rtmy-timer-label">${escapeHtml(t.label)}${t.recipeName ? " · " + escapeHtml(titleCase(t.recipeName)) : ""}</span>`;
+        : `<span class="rtmy-timer-clock">${fmtClock(t.remaining)}</span><span class="rtmy-timer-label">${t.person !== null && t.person !== undefined ? `<b class="rtmy-timer-who">P${t.person + 1}</b> ` : ""}${escapeHtml(t.label)}${t.recipeName ? " · " + escapeHtml(titleCase(t.recipeName)) : ""}</span>`;
       return `
     <div class="rtmy-timer-row ${t.done ? "done" : ""}">
       <div class="rtmy-timer-info">${info}</div>
@@ -1728,6 +1735,7 @@ function planByPersonHtml(plan, colors) {
     const total = plan.tasks.filter((t) => t.person === p).reduce((s, t) => s + t.personMin, 0);
     const waiting = mine.filter((t) => t.person === null).length;
     cols.push({
+      person: p,
       title: "Persona " + (p + 1),
       sub: (total ? RTMYPlanner.fmtDuration(total) + " de trabajo" : "sin tareas") + (waiting ? " · " + waiting + " en marcha" : ""),
       chips: planWhoChips(mine, plan, colors),
@@ -1747,6 +1755,7 @@ function planByPersonHtml(plan, colors) {
             <h2>${escapeHtml(c.title)}</h2>
             <span class="rtmy-plan-col-sub">${escapeHtml(c.sub)}</span>
             ${c.chips}
+            <div class="rtmy-plan-timers" data-person="${c.person}" aria-live="polite"></div>
           </header>
           ${c.body}
         </section>`
@@ -1979,6 +1988,31 @@ function renderPlan() {
     <button class="rtmy-plan-reset" onclick="onPlanResetDone()">Borrar lo marcado como hecho</button>
   `;
   syncPlanSwipeHint();
+  renderPlanTimers();
+}
+
+/* Los temporizadores del plan se muestran en la franja de quien los puso, para
+   no confundirlos con los de otra persona. Se repintan cada segundo sin tocar
+   el resto de la vista, para no perder el desplazamiento de la franja. */
+function renderPlanTimers() {
+  const slots = root.querySelectorAll(".rtmy-plan-timers[data-person]");
+  if (!slots.length) return;
+  slots.forEach((slot) => {
+    const person = Number(slot.dataset.person);
+    const mine = state.timers.filter((t) => t.person === person);
+    slot.innerHTML = mine
+      .map(
+        (t) => `
+        <div class="rtmy-plan-timer-chip ${t.done ? "done" : ""}">
+          <span class="clock">${t.done ? "¡Listo!" : fmtClock(t.remaining)}</span>
+          <span class="what">${escapeHtml(t.label)}</span>
+          ${t.done ? "" : `<button onclick="toggleTimer(${t.id})" aria-label="${t.running ? "Pausar" : "Reanudar"}">${t.running ? "⏸" : "▶️"}</button>`}
+          <button onclick="cancelTimer(${t.id})" aria-label="Descartar temporizador">✕</button>
+        </div>`
+      )
+      .join("");
+    slot.hidden = !mine.length;
+  });
 }
 
 // La pista "desliza a los lados" solo tiene sentido si alguna franja se sale.
@@ -2036,7 +2070,8 @@ window.planTimer = function (taskId) {
   if (!t) return;
   const minutes = t.type === "Activo + espera" ? t.totalMin - t.personMin : t.totalMin;
   const short = t.text.length > 34 ? t.text.slice(0, 33).trimEnd() + "…" : t.text;
-  startTimer(`${t.code}.${t.step} · ${short}`, Math.max(1, Math.round(minutes * 60)), null, t.recipeName);
+  const who = t.person !== null && t.person !== undefined ? t.person : t.watcher;
+  startTimer(`${t.code}.${t.step} · ${short}`, Math.max(1, Math.round(minutes * 60)), null, t.recipeName, who);
 };
 
 /* ---------------- Boot ---------------- */
