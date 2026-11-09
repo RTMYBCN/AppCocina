@@ -1,0 +1,376 @@
+/* Planificador de jornada · Rice to Meet You
+ *
+ * Lógica pura (sin DOM): recibe las recetas con su campo `plan` (que lee el
+ * Apps Script del bloque M:Z de cada ficha) y devuelve un plan de trabajo:
+ * qué paso hace cada persona, a qué hora y en qué equipo.
+ *
+ * Reglas (acordadas con Leo):
+ *  - Solo entran los pasos de producción que traen datos de planificación.
+ *  - Regla del stock: una ficha previa que no esté en la selección se da por
+ *    hecha; si está en la selección, se prepara antes.
+ *  - Cada ficha es una tanda. Un paso "POR TANDA" se repite según el
+ *    rendimiento y las unidades por tanda.
+ *  - Un equipo no puede atender dos pasos a la vez: se reserva desde el primer
+ *    hasta el último paso que lo usa dentro de la misma etapa.
+ *  - Las personas solo trabajan dentro de la jornada; las máquinas y las
+ *    esperas siguen fuera de ella.
+ *  - El día de cada etapa (campo Día) marca el primer momento en que puede
+ *    empezar: el día siguiente arranca a la hora de inicio de la jornada.
+ */
+(function (root) {
+  "use strict";
+
+  const DAY = 1440;
+
+  // Capacidad de cada equipo (unidades). Ajustar aquí si cambia el inventario.
+  const EQUIPMENT = {
+    "Thermomix grande": { key: "TMX_G", cap: 1 },
+    "Thermomix pequeña": { key: "TMX_P", cap: 1 },
+    "Thermomix (cualquiera)": { key: "TMX_ANY", cap: 1 },
+    "Olla 25 L": { key: "OLLA25", cap: 2 },
+    "Olla pequeña": { key: "OLLAP", cap: 3 },
+    "Olla grande (sin presión)": { key: "OLLAG", cap: 2 },
+    Vitro: { key: "VITRO", cap: 9 },
+    "Fuego de gas": { key: "GAS", cap: 2 },
+    "Vitro/fuego (cualquiera)": { key: "VITRO", cap: 9 },
+    "Inducción IsEasy": { key: "IH", cap: 1 },
+    Horno: { key: "HORNO", cap: 1 },
+    Airfryer: { key: "AIR", cap: 1 },
+    Freidora: { key: "FREID", cap: 1 },
+    Panificadora: { key: "PAN", cap: 1 },
+    Envasadora: { key: "ENV", cap: 1 },
+    Microondas: { key: "MICRO", cap: 1 },
+    Soplete: { key: "SOPLETE", cap: 1 },
+  };
+  const POOLS = { TMX_G: 1, TMX_P: 1, OLLA25: 2, OLLAP: 3, OLLAG: 2, VITRO: 9, GAS: 2, IH: 1, HORNO: 1, AIR: 1, FREID: 1, PAN: 1, ENV: 1, MICRO: 1, SOPLETE: 1 };
+  const LABELS = {
+    TMX_G: "Thermomix grande", TMX_P: "Thermomix pequeña", OLLA25: "Olla 25 L", OLLAP: "Olla pequeña",
+    OLLAG: "Olla grande", VITRO: "Vitro / fuego", GAS: "Fuego de gas", IH: "Inducción IsEasy", HORNO: "Horno",
+    AIR: "Airfryer", FREID: "Freidora", PAN: "Panificadora", ENV: "Envasadora", MICRO: "Microondas", SOPLETE: "Soplete",
+  };
+
+  const DEFAULTS = {
+    people: 1,
+    startMin: 8 * 60, // hora de inicio de la jornada (minutos desde las 00:00)
+    shiftMin: 8 * 60, // duración de la jornada
+    assumedPersonMin: 5, // paso con persona sin tiempo
+    assumedMachineMin: 5, // paso de máquina sin tiempo
+    assumedWaitMin: 30, // espera sin tiempo
+    horizonDays: 14,
+  };
+
+  function num(v) {
+    return typeof v === "number" && isFinite(v) ? v : null;
+  }
+
+  function hasPlan(recipe) {
+    return !!(recipe && recipe.plan && Array.isArray(recipe.plan.steps) && recipe.plan.steps.length);
+  }
+
+  /* Interpola la espera según la cantidad (columnas "Otra cantidad"/"Min a esa
+     cantidad"). Sin escala de cantidad en esta versión, devuelve el valor base. */
+  function waitMinutes(step) {
+    return num(step.mm);
+  }
+
+  function buildTasks(recipe, opts, assumptions) {
+    const stepsOut = [];
+    const plan = recipe.plan;
+    const rows = plan.steps.slice().sort((a, b) => a.b - b.b || a.s - b.s);
+    const yieldAmount = num(recipe.yieldAmount) || 1;
+    rows.forEach((row) => {
+      const stage = recipe.stages[row.b - 1];
+      const text = stage && stage.steps[row.s - 1];
+      if (!text) return;
+      let mult = 1;
+      if (row.rp && row.ub) {
+        const n = Math.max(1, Math.ceil(yieldAmount / row.ub));
+        mult = row.rp === "ENTRE TANDAS" ? Math.max(0, n - 1) : n;
+      }
+      let personMin = 0;
+      let totalMin = 0;
+      let assumed = false;
+      switch (row.t) {
+        case "Activo":
+        case "Cocción atendida": {
+          const pm = num(row.pm);
+          personMin = (pm === null ? opts.assumedPersonMin : pm) * mult;
+          totalMin = personMin;
+          assumed = pm === null;
+          break;
+        }
+        case "Máquina": {
+          const mm = waitMinutes(row);
+          totalMin = (mm === null ? opts.assumedMachineMin : mm) * mult;
+          assumed = mm === null;
+          break;
+        }
+        case "Espera": {
+          const mm = waitMinutes(row);
+          totalMin = (mm === null ? opts.assumedWaitMin : mm) * mult;
+          assumed = mm === null;
+          break;
+        }
+        default: {
+          // Activo + espera: la persona hace algo y después queda una espera.
+          const pm = num(row.pm);
+          const mm = waitMinutes(row);
+          personMin = (pm === null ? opts.assumedPersonMin : pm) * mult;
+          totalMin = personMin + (mm === null ? opts.assumedWaitMin : mm) * mult;
+          assumed = pm === null || mm === null;
+        }
+      }
+      if (assumed) {
+        assumptions.push({
+          recipeId: recipe.id, code: recipe.code, name: recipe.name,
+          block: row.b, step: row.s, type: row.t,
+        });
+      }
+      stepsOut.push({
+        recipeId: recipe.id,
+        code: recipe.code,
+        recipeName: recipe.name,
+        block: row.b,
+        step: row.s,
+        text: String(text).trim(),
+        day: num(row.d) || 1,
+        equipment: row.eq,
+        type: row.t,
+        personMin,
+        totalMin,
+        scales: row.sc,
+        pending: !!row.pend,
+        note: row.n || null,
+        assumed,
+      });
+    });
+    return stepsOut;
+  }
+
+  function buildPlan(recipes, selectedIds, options) {
+    const opts = Object.assign({}, DEFAULTS, options || {});
+    opts.people = Math.max(1, Math.min(8, Math.round(opts.people)));
+    opts.shiftMin = Math.max(60, Math.min(opts.shiftMin, DAY - opts.startMin));
+
+    const byId = new Map(recipes.map((r) => [r.id, r]));
+    const selected = [];
+    const skipped = [];
+    selectedIds.forEach((id) => {
+      const r = byId.get(id);
+      if (!r) return;
+      (hasPlan(r) ? selected : skipped).push(r);
+    });
+
+    const result = {
+      ok: selected.length > 0,
+      options: opts,
+      tasks: [],
+      recipes: [],
+      spans: [],
+      persons: opts.people,
+      warnings: [],
+      assumptions: [],
+      stock: [],
+      skipped: skipped.map((r) => ({ id: r.id, code: r.code, name: r.name })),
+      blocked: {},
+      start: null,
+      end: null,
+    };
+    if (!selected.length) return result;
+
+    // ---- tareas
+    const tasks = [];
+    const firstOf = new Map();
+    const lastOf = new Map();
+    const selectedCodes = new Set(selected.map((r) => r.code));
+    selected.forEach((r) => {
+      const list = buildTasks(r, opts, result.assumptions);
+      list.forEach((t) => {
+        t.id = tasks.length;
+        t.preds = [];
+        t.succ = [];
+        tasks.push(t);
+      });
+      if (list.length) {
+        firstOf.set(r.id, list[0].id);
+        lastOf.set(r.id, list[list.length - 1].id);
+      }
+      (r.plan.warnings || []).forEach((w) => result.warnings.push(`${r.code}: ${w}`));
+    });
+
+    // ---- precedencias dentro de cada receta ("Mientras…" va en paralelo al anterior)
+    selected.forEach((r) => {
+      const mine = tasks.filter((t) => t.recipeId === r.id);
+      mine.forEach((t, i) => {
+        if (i === 0) return;
+        if (/^\s*mientras\b/i.test(t.text) && i >= 2) t.preds.push(mine[i - 2].id);
+        else t.preds.push(mine[i - 1].id);
+      });
+    });
+    // ---- precedencias entre recetas (regla del stock)
+    const codeToRecipe = new Map(selected.map((r) => [r.code, r]));
+    selected.forEach((r) => {
+      (r.plan.requires || []).forEach((code) => {
+        const prev = codeToRecipe.get(code);
+        if (prev && prev.id !== r.id && firstOf.has(r.id) && lastOf.has(prev.id)) {
+          tasks[firstOf.get(r.id)].preds.push(lastOf.get(prev.id));
+        } else if (!selectedCodes.has(code)) {
+          const name = (recipes.find((x) => x.code === code) || {}).name;
+          result.stock.push({ code, name: name || code, neededBy: r.code });
+        }
+      });
+    });
+    tasks.forEach((t) => t.preds.forEach((p) => tasks[p].succ.push(t.id)));
+
+    // ---- prioridad = camino crítico restante
+    const cp = new Array(tasks.length).fill(null);
+    const crit = (i) => {
+      if (cp[i] !== null) return cp[i];
+      cp[i] = tasks[i].totalMin + Math.max(0, ...tasks[i].succ.map(crit));
+      return cp[i];
+    };
+    tasks.forEach((t) => crit(t.id));
+
+    // ---- reservas de equipo: de su primer a su último paso en la misma etapa
+    const spans = [];
+    selected.forEach((r) => {
+      const groups = new Map();
+      tasks.filter((t) => t.recipeId === r.id).forEach((t) => {
+        const eq = EQUIPMENT[t.equipment];
+        if (!eq) return;
+        const k = `${t.block}|${eq.key}`;
+        if (!groups.has(k)) groups.set(k, { key: eq.key, ids: [] });
+        groups.get(k).ids.push(t.id);
+      });
+      groups.forEach((g) => {
+        spans.push({
+          key: g.key, recipeId: r.id, code: r.code,
+          first: g.ids[0], last: g.ids[g.ids.length - 1], unit: null, start: null, end: null, active: false,
+        });
+      });
+    });
+    const firstSpan = new Map(spans.map((s) => [s.first, s]));
+
+    // ---- simulación minuto a minuto
+    const held = {};
+    Object.keys(POOLS).forEach((k) => (held[k] = 0));
+    const busy = new Array(opts.people).fill(0);
+    const freeAt = new Array(opts.people).fill(0);
+    const lastPerson = new Map();
+    const blocked = {};
+    const pending = new Set(tasks.map((t) => t.id));
+    const shiftEnd = opts.startMin + opts.shiftMin;
+    const limit = opts.startMin + opts.horizonDays * DAY;
+
+    for (let t = opts.startMin; pending.size && t < limit; t++) {
+      spans.forEach((sp) => {
+        if (sp.active && tasks[sp.last].end !== null && tasks[sp.last].end <= t) {
+          held[sp.unit] -= 1;
+          sp.active = false;
+          sp.end = tasks[sp.last].end;
+        }
+      });
+      const ready = [];
+      pending.forEach((id) => {
+        const task = tasks[id];
+        if (task.preds.every((p) => tasks[p].end !== null && tasks[p].end <= t) && t >= (task.day - 1) * DAY + opts.startMin) {
+          ready.push(task);
+        }
+      });
+      ready.sort((a, b) => cp[b.id] - cp[a.id] || a.day - b.day || a.id - b.id);
+      for (const task of ready) {
+        let person = null;
+        if (task.personMin > 0) {
+          const tm = t % DAY;
+          const fits =
+            tm >= opts.startMin && (tm + task.personMin <= shiftEnd || (task.personMin > opts.shiftMin && tm < shiftEnd));
+          if (!fits) continue;
+          const free = [];
+          for (let p = 0; p < opts.people; p++) if (freeAt[p] <= t) free.push(p);
+          if (!free.length) {
+            blocked["Personas"] = (blocked["Personas"] || 0) + 1;
+            continue;
+          }
+          const prev = lastPerson.get(task.recipeId);
+          person = free.includes(prev) ? prev : free.reduce((a, b) => (busy[b] < busy[a] ? b : a), free[0]);
+        }
+        const sp = firstSpan.get(task.id);
+        if (sp) {
+          let unit = sp.key;
+          if (sp.key === "TMX_ANY") unit = held.TMX_P < POOLS.TMX_P ? "TMX_P" : held.TMX_G < POOLS.TMX_G ? "TMX_G" : null;
+          if (unit === null || held[unit] >= POOLS[unit]) {
+            const label = LABELS[sp.key] || (sp.key === "TMX_ANY" ? "Thermomix" : sp.key);
+            blocked[label] = (blocked[label] || 0) + 1;
+            continue;
+          }
+          held[unit] += 1;
+          sp.unit = unit;
+          sp.active = true;
+          sp.start = t;
+        }
+        task.start = t;
+        task.end = t + task.totalMin;
+        task.person = person;
+        if (person !== null) {
+          freeAt[person] = t + task.personMin;
+          busy[person] += task.personMin;
+          lastPerson.set(task.recipeId, person);
+        }
+        pending.delete(task.id);
+      }
+    }
+    if (pending.size) {
+      result.ok = false;
+      result.warnings.push("No se pudo colocar todo el trabajo en el horizonte de planificación.");
+    }
+    spans.forEach((sp) => {
+      if (sp.start !== null && sp.end === null) sp.end = tasks[sp.last].end;
+    });
+
+    // ---- resultado
+    const done = tasks.filter((t) => t.start !== null);
+    result.tasks = done.sort((a, b) => a.start - b.start || a.id - b.id);
+    result.spans = spans
+      .filter((s) => s.start !== null)
+      .map((s) => ({ key: s.unit || s.key, label: LABELS[s.unit || s.key] || s.key, recipeId: s.recipeId, code: s.code, start: s.start, end: s.end }));
+    result.blocked = blocked;
+    result.busy = busy;
+    result.start = Math.min(...done.map((t) => t.start));
+    result.end = Math.max(...done.map((t) => t.end));
+    result.days = Math.floor((result.end - 1) / DAY) + 1;
+    result.recipes = selected.map((r) => {
+      const mine = done.filter((t) => t.recipeId === r.id);
+      return {
+        id: r.id, code: r.code, name: r.name,
+        start: mine.length ? Math.min(...mine.map((t) => t.start)) : null,
+        end: mine.length ? Math.max(...mine.map((t) => t.end)) : null,
+        steps: mine.length,
+        requires: (r.plan.requires || []).filter((c) => selectedCodes.has(c)),
+      };
+    });
+    result.personMinutes = busy.slice();
+    return result;
+  }
+
+  // "08:05" / día 2 = "08:05 · día 2"
+  function fmtClock(absMin) {
+    const m = ((Math.round(absMin) % DAY) + DAY) % DAY;
+    return String(Math.floor(m / 60)).padStart(2, "0") + ":" + String(m % 60).padStart(2, "0");
+  }
+  function dayOf(absMin) {
+    return Math.floor(Math.round(absMin) / DAY) + 1;
+  }
+  function fmtDuration(min) {
+    if (min < 1) return Math.max(1, Math.round(min * 60)) + " s";
+    const m = Math.round(min);
+    if (m < 60) return m + " min";
+    const h = Math.floor(m / 60);
+    const r = m % 60;
+    if (h >= 24 && r === 0 && h % 24 === 0) return h / 24 + (h / 24 === 1 ? " día" : " días");
+    return r ? `${h} h ${r} min` : `${h} h`;
+  }
+
+  const api = { buildPlan, hasPlan, fmtClock, fmtDuration, dayOf, DEFAULTS, EQUIPMENT, DAY };
+  if (typeof module !== "undefined" && module.exports) module.exports = api;
+  else root.RTMYPlanner = api;
+})(typeof window !== "undefined" ? window : globalThis);

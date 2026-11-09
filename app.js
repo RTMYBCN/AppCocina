@@ -15,6 +15,8 @@ const CONFIG = {
   // que recipes.json.
   LAST_GOOD_KEY: "rtmy_recipes_lastgood_v1",
   RUNTIME_KEY: "rtmy_runtime_v2",
+  // Selección, personas y tareas hechas del planificador de jornada.
+  PLAN_KEY: "rtmy_plan_v1",
   // Si el Apps Script no responde a tiempo se usa el respaldo local en vez
   // de dejar la app en "Cargando recetas…" indefinidamente.
   FETCH_TIMEOUT_MS: 10000,
@@ -26,7 +28,7 @@ const CONFIG = {
 const MAX_SESSIONS = 4;
 
 const state = {
-  view: "loading", // loading | error | list | detail | steps | final
+  view: "loading", // loading | error | list | detail | steps | final | plan-setup | plan
   recipes: [],
   updatedAt: null, // última edición del Sheet (la informa el script)
   fetchedAt: null, // cuándo recibió la app estos datos
@@ -56,6 +58,19 @@ const state = {
   // session finishes (the session itself is removed right away so its
   // slot frees up for another recipe).
   finishedSession: null,
+
+  // Planificador de jornada: qué recetas se preparan hoy, cuántas personas
+  // y a qué hora empieza el turno. `result` es el plan calculado.
+  planUi: {
+    selected: [],
+    people: 2,
+    start: "08:00",
+    shiftH: 8,
+    view: "persona", // persona | linea
+    day: 1,
+    done: {},
+    result: null,
+  },
 };
 
 const root = document.getElementById("app");
@@ -668,6 +683,12 @@ function onHashChange() {
 
   if (hash === "#/" || hash === "") {
     state.view = "list";
+  } else if (hash === "#/planificar") {
+    state.view = "plan-setup";
+  } else if (hash === "#/planificar/plan") {
+    // Sin recetas elegidas no hay plan: se vuelve a la selección.
+    state.planUi.result = null;
+    state.view = planSelectedValid().length ? "plan" : "plan-setup";
   } else if (sesionMatch) {
     const id = decodeURIComponent(sesionMatch[1]);
     const s = findSession(id);
@@ -868,6 +889,8 @@ function render() {
   if (state.view === "detail") return renderDetail();
   if (state.view === "steps") return renderSteps();
   if (state.view === "final") return renderFinal();
+  if (state.view === "plan-setup") return renderPlanSetup();
+  if (state.view === "plan") return renderPlan();
 }
 
 function header(showBack, backHash, title) {
@@ -995,6 +1018,7 @@ function renderList() {
       </button>
     </div>
     ${errorText ? `<div class="rtmy-refresh-error" role="status">${escapeHtml(errorText)}</div>` : ""}
+    ${planEntryHtml()}
     <label class="rtmy-sr-only" for="recipe-search">Buscar receta</label>
     <input id="recipe-search" class="rtmy-search" placeholder="Buscar receta…" value="${escapeHtml(
       state.search
@@ -1368,6 +1392,574 @@ function renderSessionBar() {
   `;
 }
 
+/* ---------------- Planificador de jornada ----------------
+   Dos pantallas: elegir qué se prepara (y cuántas personas hay) y ver el
+   plan resultante, por persona o en línea de tiempo. La lógica de reparto
+   vive en planner.js; aquí solo se pinta y se guardan las preferencias.
+------------------------------------------------- */
+
+const PLAN_COLORS = ["#7a2426", "#5b3a2c", "#5a8a52", "#b5593a", "#c98a1b", "#7d8452", "#8a5a7a", "#3f6f7a"];
+const planSoloCache = new WeakMap();
+
+function planRecipes() {
+  return window.RTMYPlanner ? state.recipes.filter(RTMYPlanner.hasPlan) : [];
+}
+
+function savePlanState() {
+  try {
+    const ui = state.planUi;
+    localStorage.setItem(
+      CONFIG.PLAN_KEY,
+      JSON.stringify({ selected: ui.selected, people: ui.people, start: ui.start, shiftH: ui.shiftH, view: ui.view, done: ui.done })
+    );
+  } catch (e) {
+    console.warn("No se pudo guardar el planificador.", e);
+  }
+}
+
+function restorePlanState() {
+  try {
+    const saved = JSON.parse(localStorage.getItem(CONFIG.PLAN_KEY) || "null");
+    if (!saved) return;
+    const ui = state.planUi;
+    if (Array.isArray(saved.selected)) ui.selected = saved.selected.filter((id) => typeof id === "string");
+    if (Number.isFinite(saved.people)) ui.people = Math.max(1, Math.min(8, Math.round(saved.people)));
+    if (/^\d{2}:\d{2}$/.test(saved.start || "")) ui.start = saved.start;
+    if (Number.isFinite(saved.shiftH)) ui.shiftH = Math.max(2, Math.min(14, Math.round(saved.shiftH)));
+    if (saved.view === "linea" || saved.view === "persona") ui.view = saved.view;
+    if (saved.done && typeof saved.done === "object") ui.done = saved.done;
+  } catch (e) {
+    console.warn("No se pudo restaurar el planificador.", e);
+  }
+}
+
+function planOptions() {
+  const [h, m] = state.planUi.start.split(":").map(Number);
+  return { people: state.planUi.people, startMin: h * 60 + m, shiftMin: state.planUi.shiftH * 60 };
+}
+
+// La selección guardada nunca se recorta aquí: si por un momento las recetas no
+// traen datos de planificación (p. ej. durante una recarga), se conserva y el
+// plan se calcula solo con las que sí los traen.
+function computePlan() {
+  const ui = state.planUi;
+  ui.result = RTMYPlanner.buildPlan(state.recipes, ui.selected, planOptions());
+  return ui.result;
+}
+
+function planSelectedValid() {
+  const valid = new Set(planRecipes().map((r) => r.id));
+  return state.planUi.selected.filter((id) => valid.has(id));
+}
+
+// Duración de una receta trabajando una sola persona (para orientar al elegir).
+function planSoloText(recipe) {
+  let text = planSoloCache.get(recipe);
+  if (text === undefined) {
+    const p = RTMYPlanner.buildPlan([recipe], [recipe.id], { people: 1 });
+    text = p.ok ? (p.days > 1 ? p.days + " días" : RTMYPlanner.fmtDuration(p.end - p.start)) : "";
+    planSoloCache.set(recipe, text);
+  }
+  return text;
+}
+
+function planEntryHtml() {
+  if (!planRecipes().length) return "";
+  const n = planSelectedValid().length;
+  return `
+    <button class="rtmy-plan-entry" onclick="goto('#/planificar')">
+      <span class="rtmy-plan-entry-icon" aria-hidden="true">
+        <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><circle cx="12" cy="12" r="9"/><path d="M12 7v5l3 2"/></svg>
+      </span>
+      <span class="rtmy-plan-entry-text">
+        <b>Planificar jornada</b>
+        <small>${n ? n + " receta" + (n === 1 ? "" : "s") + " elegida" + (n === 1 ? "" : "s") : "Reparte el trabajo entre personas y equipos"}</small>
+      </span>
+      <svg class="rtmy-card-arrow" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><path d="M9 6l6 6-6 6"/></svg>
+    </button>`;
+}
+
+function planGroupBySection(list) {
+  const groups = [];
+  list.forEach((r) => {
+    const title = r.section || "Otras recetas";
+    let g = groups[groups.length - 1];
+    if (!g || g.title !== title) {
+      g = { title, items: [] };
+      groups.push(g);
+    }
+    g.items.push(r);
+  });
+  return groups;
+}
+
+/* ----- Pantalla 1: elegir recetas y jornada ----- */
+
+function renderPlanSetup() {
+  const ui = state.planUi;
+  const withPlan = planRecipes();
+  const missing = state.recipes.filter((r) => !withPlan.includes(r));
+  const selected = new Set(planSelectedValid());
+  const n = selected.size;
+
+  const stockNames = [];
+  withPlan.forEach((r) => {
+    if (!selected.has(r.id)) return;
+    (r.plan.requires || []).forEach((code) => {
+      const dep = state.recipes.find((x) => x.code === code);
+      if (dep && !selected.has(dep.id) && !stockNames.includes(titleCase(dep.name))) stockNames.push(titleCase(dep.name));
+    });
+  });
+
+  const pick = (r) => {
+    const on = selected.has(r.id);
+    const solo = planSoloText(r);
+    return `
+      <button type="button" class="rtmy-plan-pick ${on ? "selected" : ""}" role="checkbox" aria-checked="${on}" onclick="onPlanToggle('${escapeHtml(r.id)}')">
+        <span class="rtmy-plan-check" aria-hidden="true"></span>
+        <span class="rtmy-plan-pick-body">
+          <span class="rtmy-card-name">${escapeHtml(titleCase(r.name))}</span>
+          <span class="rtmy-card-meta">${r.yieldAmount ?? ""} ${escapeHtml(r.yieldUnit || "")} · ${r.plan.steps.length} pasos${solo ? " · " + solo + " en solitario" : ""}</span>
+        </span>
+      </button>`;
+  };
+
+  const groups = planGroupBySection(withPlan)
+    .map(
+      (g) => `
+      <section class="rtmy-section" aria-label="${escapeHtml(g.title)}">
+        <h2 class="rtmy-section-title">${escapeHtml(g.title)}<span class="rtmy-section-count">${g.items.length}</span></h2>
+        <div class="rtmy-section-items">${g.items.map(pick).join("")}</div>
+      </section>`
+    )
+    .join("");
+
+  const hours = [4, 5, 6, 7, 8, 9, 10, 12]
+    .map((h) => `<option value="${h}" ${h === ui.shiftH ? "selected" : ""}>${h} h</option>`)
+    .join("");
+
+  root.innerHTML = `
+    ${header(true, "#/", "Planificar jornada")}
+    <p class="rtmy-plan-intro">Elige lo que se prepara hoy. Lo que no marques se da por hecho que ya está en stock.</p>
+
+    <div class="rtmy-panel rtmy-plan-config">
+      <h2 class="rtmy-plan-h">Jornada</h2>
+      <div class="rtmy-plan-row">
+        <span class="rtmy-plan-label" id="lbl-people">Personas cocinando</span>
+        <div class="rtmy-stepper" role="group" aria-labelledby="lbl-people">
+          <button type="button" onclick="onPlanPeople(-1)" aria-label="Una persona menos" ${ui.people <= 1 ? "disabled" : ""}>−</button>
+          <output aria-live="polite">${ui.people}</output>
+          <button type="button" onclick="onPlanPeople(1)" aria-label="Una persona más" ${ui.people >= 8 ? "disabled" : ""}>+</button>
+        </div>
+      </div>
+      <div class="rtmy-plan-row">
+        <label class="rtmy-plan-label" for="plan-start">Empieza a las</label>
+        <input id="plan-start" class="rtmy-plan-input" type="time" value="${escapeHtml(ui.start)}" onchange="onPlanStart(this.value)">
+      </div>
+      <div class="rtmy-plan-row">
+        <label class="rtmy-plan-label" for="plan-shift">Duración del turno</label>
+        <select id="plan-shift" class="rtmy-plan-input" onchange="onPlanShift(this.value)">${hours}</select>
+      </div>
+    </div>
+
+    ${
+      withPlan.length
+        ? groups
+        : `<div class="rtmy-empty">Aún no hay recetas con datos de planificación.</div>`
+    }
+
+    ${
+      missing.length
+        ? `<details class="rtmy-plan-missing">
+            <summary>Sin datos de planificación todavía (${missing.length})</summary>
+            <p>Estas recetas se irán sumando cuando tengan su bloque de planificación en el Excel.</p>
+            <ul>${missing.map((r) => `<li>${escapeHtml(titleCase(r.name))}</li>`).join("")}</ul>
+          </details>`
+        : ""
+    }
+
+    ${
+      stockNames.length
+        ? `<div class="rtmy-plan-note stock" role="status"><b>Se da por hecho que hay en stock:</b> ${stockNames.map(escapeHtml).join(", ")}. Si hoy hay que prepararlo, márcalo arriba.</div>`
+        : ""
+    }
+
+    <button class="rtmy-cta" onclick="goPlan()" ${n ? "" : "disabled"}>
+      ${n ? `Ver el plan · ${n} receta${n === 1 ? "" : "s"} · ${ui.people} persona${ui.people === 1 ? "" : "s"}` : "Elige al menos una receta"}
+    </button>
+    ${n ? `<button class="rtmy-cta secondary" onclick="onPlanClear()">Quitar selección</button>` : ""}
+  `;
+}
+
+window.onPlanToggle = function (id) {
+  const ui = state.planUi;
+  ui.selected = ui.selected.includes(id) ? ui.selected.filter((x) => x !== id) : ui.selected.concat(id);
+  savePlanState();
+  renderPlanSetup();
+};
+window.onPlanClear = function () {
+  state.planUi.selected = [];
+  savePlanState();
+  renderPlanSetup();
+};
+window.onPlanPeople = function (delta) {
+  const ui = state.planUi;
+  ui.people = Math.max(1, Math.min(8, ui.people + delta));
+  savePlanState();
+  renderPlanSetup();
+};
+// Hora y duración se guardan sin repintar: así no se pierde el foco del campo.
+window.onPlanStart = function (value) {
+  if (!/^\d{2}:\d{2}$/.test(value || "")) return;
+  state.planUi.start = value;
+  savePlanState();
+};
+window.onPlanShift = function (value) {
+  state.planUi.shiftH = Number(value) || 8;
+  savePlanState();
+};
+window.goPlan = function () {
+  if (!planSelectedValid().length) return;
+  state.planUi.day = 1;
+  goto("#/planificar/plan");
+};
+
+/* ----- Pantalla 2: el plan ----- */
+
+function planTaskKey(t) {
+  return t.recipeId + "|" + t.block + "|" + t.step;
+}
+
+function planColorMap(plan) {
+  const map = {};
+  plan.recipes.forEach((r, i) => (map[r.id] = PLAN_COLORS[i % PLAN_COLORS.length]));
+  return map;
+}
+
+function planClock(plan, abs) {
+  return RTMYPlanner.fmtClock(abs);
+}
+
+// "08:00–09:42"; si cruza de día: "día 1 08:00 → día 2 08:05".
+function planRangeText(start, end) {
+  const d1 = RTMYPlanner.dayOf(start);
+  const d2 = RTMYPlanner.dayOf(end - 1);
+  const a = RTMYPlanner.fmtClock(start);
+  const b = RTMYPlanner.fmtClock(end);
+  if (d1 === d2) return d1 > 1 ? `día ${d1} · ${a}–${b}` : `${a}–${b}`;
+  return `día ${d1} ${a} → día ${d2} ${b}`;
+}
+
+function planWaitMin(t) {
+  return t.type === "Activo + espera" ? t.totalMin - t.personMin : 0;
+}
+
+function planTaskHtml(t, plan, colors) {
+  const done = !!state.planUi.done[planTaskKey(t)];
+  const dur = (t.assumed ? "~" : "") + RTMYPlanner.fmtDuration(t.person !== null ? t.personMin : t.totalMin);
+  const wait = planWaitMin(t);
+  const timerBtn = () =>
+    `<button class="rtmy-plan-timer" onclick="planTimer(${t.id})" aria-label="Iniciar temporizador de ${RTMYPlanner.fmtDuration(wait)}"><span aria-hidden="true">⏱</span> Temporizador</button>`;
+  return `
+    <li class="rtmy-plan-task ${done ? "done" : ""}" style="--rc:${colors[t.recipeId]}">
+      <button class="rtmy-plan-tick" onclick="onPlanDone('${escapeHtml(planTaskKey(t))}')" aria-pressed="${done}" aria-label="${done ? "Marcar como pendiente" : "Marcar como hecho"}">
+        <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="3" stroke-linecap="round" stroke-linejoin="round"><path d="M5 12.5l4.5 4.5L19 7.5"/></svg>
+      </button>
+      <div class="rtmy-plan-time"><b>${planClock(plan, t.start)}</b><small>${dur}</small></div>
+      <div class="rtmy-plan-task-body">
+        <div class="rtmy-plan-tags">
+          <span class="rtmy-plan-code">${escapeHtml(t.code)} · ${t.step}</span>
+          <span class="rtmy-plan-eq">${escapeHtml(t.equipment)}</span>
+        </div>
+        <p>${escapeHtml(t.text)}</p>
+        ${
+          wait
+            ? `<div class="rtmy-plan-wait">Después, ${t.assumed ? "~" : ""}${RTMYPlanner.fmtDuration(wait)} de espera · listo a las ${planClock(plan, t.end)} ${timerBtn()}</div>`
+            : ""
+        }
+      </div>
+    </li>`;
+}
+
+function planMachineHtml(t, plan, colors) {
+  const done = !!state.planUi.done[planTaskKey(t)];
+  const dur = (t.assumed ? "~" : "") + RTMYPlanner.fmtDuration(t.totalMin);
+  return `
+    <li class="rtmy-plan-task machine ${done ? "done" : ""}" style="--rc:${colors[t.recipeId]}">
+      <button class="rtmy-plan-tick" onclick="onPlanDone('${escapeHtml(planTaskKey(t))}')" aria-pressed="${done}" aria-label="${done ? "Marcar como pendiente" : "Marcar como hecho"}">
+        <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="3" stroke-linecap="round" stroke-linejoin="round"><path d="M5 12.5l4.5 4.5L19 7.5"/></svg>
+      </button>
+      <div class="rtmy-plan-time"><b>${planClock(plan, t.start)}</b><small>hasta ${planClock(plan, t.end)}</small></div>
+      <div class="rtmy-plan-task-body">
+        <div class="rtmy-plan-tags">
+          <span class="rtmy-plan-code">${escapeHtml(t.code)} · ${t.step}</span>
+          <span class="rtmy-plan-eq">${escapeHtml(t.equipment)}</span>
+          <span class="rtmy-plan-eq">${dur}</span>
+        </div>
+        <p>${escapeHtml(t.text)}</p>
+        <div class="rtmy-plan-wait"><button class="rtmy-plan-timer" onclick="planTimer(${t.id})" aria-label="Iniciar temporizador de ${dur}"><span aria-hidden="true">⏱</span> Temporizador de ${dur}</button></div>
+      </div>
+    </li>`;
+}
+
+function planByPersonHtml(plan, colors) {
+  const ui = state.planUi;
+  const day = ui.day;
+  const inDay = (t) => RTMYPlanner.dayOf(t.start) === day;
+  let html = "";
+  for (let p = 0; p < plan.persons; p++) {
+    const mine = plan.tasks.filter((t) => t.person === p && inDay(t));
+    const total = plan.tasks.filter((t) => t.person === p).reduce((s, t) => s + t.personMin, 0);
+    html += `
+      <section class="rtmy-plan-person" aria-label="Persona ${p + 1}">
+        <h2 class="rtmy-section-title">Persona ${p + 1}<span class="rtmy-section-count">${RTMYPlanner.fmtDuration(total)} de trabajo</span></h2>
+        ${
+          mine.length
+            ? `<ol class="rtmy-plan-tasks">${mine.map((t) => planTaskHtml(t, plan, colors)).join("")}</ol>`
+            : `<p class="rtmy-plan-none">${total ? "Nada que hacer este día." : "Sin tareas: con este lote no hace falta una persona más."}</p>`
+        }
+      </section>`;
+  }
+  const machines = plan.tasks.filter((t) => t.person === null && inDay(t));
+  if (machines.length) {
+    html += `
+      <section class="rtmy-plan-person" aria-label="Máquinas y esperas">
+        <h2 class="rtmy-section-title">Mientras tanto, solos<span class="rtmy-section-count">${machines.length}</span></h2>
+        <p class="rtmy-plan-hint">Pasos en los que la máquina o el reposo trabajan sin nadie al lado.</p>
+        <ol class="rtmy-plan-tasks">${machines.map((t) => planMachineHtml(t, plan, colors)).join("")}</ol>
+      </section>`;
+  }
+  return html;
+}
+
+function planTimelineHtml(plan, colors) {
+  // Eje comprimido: los huecos largos sin actividad (la noche entre dos días)
+  // se pliegan en una marca, y las esperas de horas se dibujan cruzándolos.
+  const GAP_MIN = 180; // hueco a partir del cual se pliega
+  const GAP_PX = 46; // ancho de la marca plegada
+  const LONG = 240; // una espera más larga que esto no cuenta como actividad
+  const items = [];
+  plan.tasks.forEach((t) => items.push([t.start, t.end]));
+  plan.spans.forEach((sp) => items.push([sp.start, sp.end]));
+  const keep = [];
+  items.forEach(([s, e]) => {
+    if (e - s <= LONG) keep.push([s, e]);
+    else keep.push([s, s + 5], [e - 5, e]);
+  });
+  keep.sort((x, y) => x[0] - y[0]);
+  const segs = [];
+  keep.forEach(([s, e]) => {
+    const last = segs[segs.length - 1];
+    if (last && s - last.b <= GAP_MIN) last.b = Math.max(last.b, e);
+    else segs.push({ a: s, b: e });
+  });
+  const active = segs.reduce((sum, g) => sum + (g.b - g.a), 0);
+  const px = Math.max(0.45, Math.min(4, 760 / Math.max(60, active)));
+  let x = 0;
+  segs.forEach((g) => {
+    g.x0 = x;
+    g.w = Math.round((g.b - g.a) * px);
+    x += g.w + GAP_PX;
+  });
+  const W = x - GAP_PX;
+  const pos = (m) => {
+    let g = segs.find((sg) => m >= sg.a && m <= sg.b);
+    if (!g) g = segs.filter((sg) => sg.b < m).pop() || segs[0];
+    return Math.round(g.x0 + (Math.max(g.a, Math.min(m, g.b)) - g.a) * px);
+  };
+  const step = px * 60 >= 44 ? 60 : px * 120 >= 44 ? 120 : 360;
+
+  let ticks = "";
+  let grid = "";
+  segs.forEach((g, i) => {
+    for (let m = Math.ceil(g.a / step) * step; m <= g.b; m += step) {
+      ticks += `<span class="rtmy-tl-tick" style="left:${pos(m)}px">${RTMYPlanner.fmtClock(m)}</span>`;
+    }
+    const d = RTMYPlanner.dayOf(g.a);
+    const prevDay = i ? RTMYPlanner.dayOf(segs[i - 1].b) : 1;
+    if (i && d !== prevDay) {
+      grid += `<span class="rtmy-tl-day" style="left:${g.x0 - Math.round(GAP_PX / 2)}px"><i>Día ${d}</i></span>`;
+    }
+  });
+  grid = `<div class="rtmy-tl-grid" style="width:${W}px">${grid}</div>`;
+
+  const bar = (start, end, cls, color, label, title) => {
+    const l = pos(start);
+    const w = Math.max(5, pos(end) - l);
+    return `<span class="rtmy-tl-bar ${cls}" style="left:${l}px;width:${w}px;--rc:${color}" title="${escapeHtml(title)}">${w >= 34 ? escapeHtml(label) : ""}</span>`;
+  };
+
+  const lanes = [];
+  for (let p = 0; p < plan.persons; p++) {
+    const bars = plan.tasks
+      .filter((t) => t.person === p)
+      .map((t) => {
+        const title = `${RTMYPlanner.fmtClock(t.start)} · ${t.code} paso ${t.step}: ${t.text}`;
+        let b = bar(t.start, t.start + t.personMin, "", colors[t.recipeId], `${t.code}.${t.step}`, title);
+        if (planWaitMin(t)) b += bar(t.start + t.personMin, t.end, "wait", colors[t.recipeId], "", `Espera tras ${t.code}.${t.step}`);
+        return b;
+      })
+      .join("");
+    lanes.push({ label: "Persona " + (p + 1), bars });
+  }
+  const eqLabels = [];
+  plan.spans.forEach((sp) => {
+    if (!eqLabels.includes(sp.label)) eqLabels.push(sp.label);
+  });
+  eqLabels.forEach((label) => {
+    const bars = plan.spans
+      .filter((sp) => sp.label === label)
+      .map((sp) => bar(sp.start, sp.end, "equip", colors[sp.recipeId], sp.code, `${label}: ${sp.code} de ${RTMYPlanner.fmtClock(sp.start)} a ${RTMYPlanner.fmtClock(sp.end)}`))
+      .join("");
+    lanes.push({ label, bars, equip: true });
+  });
+  const free = plan.tasks.filter((t) => t.person === null && !RTMYPlanner.EQUIPMENT[t.equipment]);
+  if (free.length) {
+    lanes.push({
+      label: "Reposos",
+      equip: true,
+      bars: free.map((t) => bar(t.start, t.end, "wait", colors[t.recipeId], `${t.code}.${t.step}`, `${t.code} paso ${t.step}: ${t.text}`)).join(""),
+    });
+  }
+
+  const legend = plan.recipes
+    .map((r) => `<span class="rtmy-tl-key"><i style="background:${colors[r.id]}"></i>${escapeHtml(r.code)} ${escapeHtml(titleCase(r.name))}</span>`)
+    .join("");
+
+  return `
+    <div class="rtmy-tl-legend">${legend}</div>
+    <div class="rtmy-tl-scroll" tabindex="0" aria-label="Línea de tiempo del plan">
+      <div class="rtmy-tl" style="width:${W + 112}px">
+        <div class="rtmy-tl-axis"><span class="rtmy-tl-label"></span><div class="rtmy-tl-track" style="width:${W}px">${ticks}</div></div>
+        ${lanes
+          .map(
+            (l) => `
+          <div class="rtmy-tl-lane ${l.equip ? "equip" : ""}">
+            <span class="rtmy-tl-label">${escapeHtml(l.label)}</span>
+            <div class="rtmy-tl-track" style="width:${W}px">${l.bars}</div>
+          </div>`
+          )
+          .join("")}
+        ${grid}
+      </div>
+    </div>
+    <p class="rtmy-plan-hint">Desliza hacia los lados para recorrer la jornada. Barra llena: trabajo de una persona. Barra clara: espera sin nadie al lado. Las filas de equipo muestran cuándo está ocupado.${segs.length > 1 ? " Los huecos sin actividad entre días se han plegado." : ""}</p>`;
+}
+
+function planNotesHtml(plan) {
+  const notes = [];
+  if (plan.assumptions.length) {
+    notes.push(
+      `<div class="rtmy-plan-note warn"><b>${plan.assumptions.length} paso${plan.assumptions.length === 1 ? "" : "s"} sin tiempo en la ficha.</b> Se han supuesto ${plan.options.assumedPersonMin} min de trabajo, ${plan.options.assumedMachineMin} min de máquina o ${plan.options.assumedWaitMin} min de espera (se marcan con ~).</div>`
+    );
+  }
+  if (plan.stock.length) {
+    const names = [...new Set(plan.stock.map((s) => titleCase(s.name)))];
+    notes.push(`<div class="rtmy-plan-note stock"><b>En stock (no se prepara hoy):</b> ${names.map(escapeHtml).join(", ")}.</div>`);
+  }
+  const queues = Object.entries(plan.blocked).filter(([, v]) => v > 0);
+  if (queues.some(([k]) => k === "Personas")) {
+    notes.push(`<div class="rtmy-plan-note info">Hay pasos esperando a que quede una persona libre. Con una persona más se adelantaría el final.</div>`);
+  }
+  const eq = queues.filter(([k]) => k !== "Personas").sort((a, b) => b[1] - a[1]);
+  if (eq.length) {
+    notes.push(`<div class="rtmy-plan-note info"><b>Cola por equipo:</b> ${eq.slice(0, 3).map(([k]) => escapeHtml(k)).join(", ")}. Dos pasos necesitaban la misma máquina a la vez, así que uno espera.</div>`);
+  }
+  plan.warnings.forEach((w) => notes.push(`<div class="rtmy-plan-note warn">${escapeHtml(w)}</div>`));
+  return notes.join("");
+}
+
+function renderPlan() {
+  const ui = state.planUi;
+  const plan = ui.result || computePlan();
+  if (!plan.ok) {
+    root.innerHTML = `
+      ${header(true, "#/planificar", "Plan de la jornada")}
+      <div class="rtmy-panel"><p><strong>No se pudo montar el plan.</strong></p>
+      <p style="font-size:13px;opacity:.75">${escapeHtml(plan.warnings.join(" ") || "Elige al menos una receta con datos de planificación.")}</p></div>`;
+    return;
+  }
+  const colors = planColorMap(plan);
+  if (ui.day > plan.days) ui.day = 1;
+  const endDay = RTMYPlanner.dayOf(plan.end - 1);
+  const doneCount = plan.tasks.filter((t) => ui.done[planTaskKey(t)]).length;
+
+  const recipesHtml = plan.recipes
+    .map(
+      (r) => `
+      <li style="--rc:${colors[r.id]}">
+        <span class="rtmy-plan-dot" aria-hidden="true"></span>
+        <span class="rtmy-plan-recipe-name"><b>${escapeHtml(r.code)}</b> ${escapeHtml(titleCase(r.name))}</span>
+        <span class="rtmy-plan-recipe-time">${planRangeText(r.start, r.end)}</span>
+        <a class="rtmy-plan-open" href="#/receta/${encodeURIComponent(r.id)}">Abrir receta</a>
+      </li>`
+    )
+    .join("");
+
+  const dayTabs =
+    plan.days > 1
+      ? `<div class="rtmy-plan-tabs days" role="tablist" aria-label="Día">${Array.from({ length: plan.days }, (_, i) => i + 1)
+          .map((d) => `<button role="tab" aria-selected="${d === ui.day}" class="${d === ui.day ? "active" : ""}" onclick="onPlanDay(${d})">Día ${d}</button>`)
+          .join("")}</div>`
+      : "";
+
+  root.innerHTML = `
+    ${header(true, "#/planificar", "Plan de la jornada")}
+
+    <div class="rtmy-panel rtmy-plan-summary">
+      <div class="rtmy-plan-kicker">${endDay > 1 ? "Termina el día " + endDay + " a las" : "Todo listo a las"}</div>
+      <div class="rtmy-plan-endtime">${RTMYPlanner.fmtClock(plan.end)}</div>
+      <div class="rtmy-plan-meta">${RTMYPlanner.fmtDuration(plan.end - plan.start)} desde las ${RTMYPlanner.fmtClock(plan.start)} · ${plan.persons} persona${plan.persons === 1 ? "" : "s"} · ${plan.tasks.length} pasos</div>
+      <ul class="rtmy-plan-recipes">${recipesHtml}</ul>
+      <div class="rtmy-plan-progress" role="progressbar" aria-valuemin="0" aria-valuemax="${plan.tasks.length}" aria-valuenow="${doneCount}"><span style="width:${Math.round((doneCount / plan.tasks.length) * 100)}%"></span></div>
+      <div class="rtmy-plan-progress-text">${doneCount} de ${plan.tasks.length} pasos hechos</div>
+    </div>
+
+    ${planNotesHtml(plan)}
+
+    <div class="rtmy-plan-tabs" role="tablist" aria-label="Vista del plan">
+      <button role="tab" aria-selected="${ui.view === "persona"}" class="${ui.view === "persona" ? "active" : ""}" onclick="onPlanView('persona')">Por persona</button>
+      <button role="tab" aria-selected="${ui.view === "linea"}" class="${ui.view === "linea" ? "active" : ""}" onclick="onPlanView('linea')">Línea de tiempo</button>
+    </div>
+    ${ui.view === "persona" ? dayTabs : ""}
+    ${ui.view === "persona" ? planByPersonHtml(plan, colors) : planTimelineHtml(plan, colors)}
+
+    <button class="rtmy-cta secondary" onclick="goto('#/planificar')">Cambiar recetas o personas</button>
+    <button class="rtmy-plan-reset" onclick="onPlanResetDone()">Borrar lo marcado como hecho</button>
+  `;
+}
+
+window.onPlanView = function (view) {
+  state.planUi.view = view;
+  savePlanState();
+  renderPlan();
+};
+window.onPlanDay = function (day) {
+  state.planUi.day = day;
+  renderPlan();
+};
+window.onPlanDone = function (key) {
+  const done = state.planUi.done;
+  if (done[key]) delete done[key];
+  else done[key] = 1;
+  savePlanState();
+  renderPlan();
+};
+window.onPlanResetDone = function () {
+  state.planUi.done = {};
+  savePlanState();
+  renderPlan();
+};
+// Lanza el temporizador de un paso del plan en la barra de abajo.
+window.planTimer = function (taskId) {
+  const plan = state.planUi.result;
+  const t = plan && plan.tasks.find((x) => x.id === taskId);
+  if (!t) return;
+  const minutes = t.type === "Activo + espera" ? t.totalMin - t.personMin : t.totalMin;
+  const short = t.text.length > 34 ? t.text.slice(0, 33).trimEnd() + "…" : t.text;
+  startTimer(`${t.code}.${t.step} · ${short}`, Math.max(1, Math.round(minutes * 60)), null, t.recipeName);
+};
+
 /* ---------------- Boot ---------------- */
 
 window.goto = goto;
@@ -1378,6 +1970,7 @@ window.refreshRecipes = refreshRecipes;
 window.addEventListener("hashchange", onHashChange);
 loadRecipes().then(() => {
   restoreRuntimeState();
+  restorePlanState();
   if (state.timers.some((timer) => timer.running && !timer.done)) ensureTimerTick();
   renderTimerBar();
   renderSessionBar();

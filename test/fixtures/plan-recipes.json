@@ -1,0 +1,261 @@
+{
+  "recipes": [
+    {
+      "id": "sofrito-base",
+      "name": "SOFRITO BASE",
+      "code": "B01",
+      "section": "Preparaciones base",
+      "sectionOrder": 1,
+      "yieldAmount": 450,
+      "yieldUnit": "g",
+      "stages": [
+        {
+          "title": "PROCEDIMIENTO",
+          "procedureTitle": null,
+          "description": "Base de sofrito RTMY para las paellas.",
+          "ingredients": [
+            {
+              "qty": 800,
+              "unit": "g",
+              "name": "Cebolla blanca"
+            },
+            {
+              "qty": 300,
+              "unit": "g",
+              "name": "Pimiento"
+            },
+            {
+              "qty": 100,
+              "unit": "g",
+              "name": "Aceite de Oliva"
+            }
+          ],
+          "steps": [
+            "Cortar la cebolla y el pimiento en trozos de tamaño mediano.",
+            "Colocar los trozos de verdura en el vaso de la Thermomix grande.",
+            "Picar las verduras: 30 segundos, velocidad 4, sin temperatura.",
+            "Agregar los 100 gramos de aceite.",
+            "Sofreír 45 minutos a 130 °C, velocidad 1, marcha atrás, con el cubilete puesto del revés para que salga el vapor.",
+            "Pasar el sofrito a un túper y dejar atemperar.",
+            "Tapar el túper, etiquetar, fechar y guardar en nevera un máximo de 5 días."
+          ]
+        }
+      ],
+      "plan": {
+        "phase": "Producción",
+        "shelfLifeDays": 5,
+        "storage": "Nevera",
+        "requires": [],
+        "steps": [
+          {
+            "b": 1,
+            "s": 1,
+            "d": 1,
+            "eq": "Manual",
+            "t": "Activo",
+            "pm": 10,
+            "mm": null,
+            "sc": true,
+            "n": "Incluye limpiar, lavar y cortar toda la verdura"
+          },
+          {
+            "b": 1,
+            "s": 2,
+            "d": 1,
+            "eq": "Thermomix grande",
+            "t": "Activo",
+            "pm": 5,
+            "mm": null,
+            "sc": false
+          },
+          {
+            "b": 1,
+            "s": 3,
+            "d": 1,
+            "eq": "Thermomix grande",
+            "t": "Máquina",
+            "pm": null,
+            "mm": 0.5,
+            "sc": false
+          },
+          {
+            "b": 1,
+            "s": 4,
+            "d": 1,
+            "eq": "Thermomix grande",
+            "t": "Activo",
+            "pm": 1,
+            "mm": null,
+            "sc": false
+          },
+          {
+            "b": 1,
+            "s": 5,
+            "d": 1,
+            "eq": "Thermomix grande",
+            "t": "Máquina",
+            "pm": null,
+            "mm": 45,
+            "sc": false
+          },
+          {
+            "b": 1,
+            "s": 6,
+            "d": 1,
+            "eq": "Manual",
+            "t": "Activo + espera",
+            "pm": 5,
+            "mm": 30,
+            "sc": true,
+            "n": "Atemperado desatendido; cada lote se atempera y se guarda por separado. Valor inicial, ajustar cuando se mida"
+          },
+          {
+            "b": 1,
+            "s": 7,
+            "d": 1,
+            "eq": "Manual",
+            "t": "Activo",
+            "pm": 5,
+            "mm": null,
+            "sc": false
+          }
+        ]
+      },
+      "sourceSheet": "B01 SOFRITO BASE"
+    },
+    {
+      "id": "cebolla-pochada",
+      "name": "CEBOLLA POCHADA",
+      "code": "B02",
+      "section": "Preparaciones base",
+      "sectionOrder": 1,
+      "yieldAmount": 530,
+      "yieldUnit": "g",
+      "stages": [
+        {
+          "title": "PROCEDIMIENTO",
+          "procedureTitle": null,
+          "description": "Cebolla pochada para la base de tortilla y la salsa brava. Alternativa en la paella si se acaba el sofrito B01 durante el servicio: sustituye solo a la cebolla cruda y ahorra unos 6 minutos de pochado.",
+          "ingredients": [
+            {
+              "qty": 1000,
+              "unit": "g",
+              "name": "Cebolla blanca"
+            },
+            {
+              "qty": 40,
+              "unit": "g",
+              "name": "Aceite de Oliva"
+            },
+            {
+              "qty": 5,
+              "unit": "g",
+              "name": "Sal"
+            }
+          ],
+          "steps": [
+            "Pelar las cebollas, cortarlas en trozos medianos y colocarlas en el vaso de la Thermomix (grande o pequeña, la que esté libre).",
+            "Picar 20 segundos, velocidad 4. Bajar con una espátula la cebolla de las paredes del vaso y picar otros 20 segundos, velocidad 4. La cebolla debe quedar en trozos muy pequeños.",
+            "Agregar los 40 gramos de aceite y los 5 gramos de sal.",
+            "Programar 30 minutos, 105 °C, velocidad 1, con el cubilete puesto del revés para que salga el vapor.",
+            "Abrir la tapa, bajar la cebolla que quede en las paredes del vaso y volver a cerrar.",
+            "Programar otros 20 minutos, 105 °C, velocidad 1, con el cubilete del revés. La cebolla debe reducir y quedar bien transparente.",
+            "Pasar la cebolla a un túper y dejar atemperar.",
+            "Envasar al vacío, etiquetar, fechar y guardar en nevera un máximo de 7 días."
+          ]
+        }
+      ],
+      "plan": {
+        "phase": "Producción",
+        "shelfLifeDays": 7,
+        "storage": "Vacío en nevera",
+        "requires": [],
+        "steps": [
+          {
+            "b": 1,
+            "s": 1,
+            "d": 1,
+            "eq": "Manual",
+            "t": "Activo",
+            "pm": 10,
+            "mm": null,
+            "sc": true
+          },
+          {
+            "b": 1,
+            "s": 2,
+            "d": 1,
+            "eq": "Thermomix (cualquiera)",
+            "t": "Activo",
+            "pm": 2,
+            "mm": null,
+            "sc": false
+          },
+          {
+            "b": 1,
+            "s": 3,
+            "d": 1,
+            "eq": "Thermomix (cualquiera)",
+            "t": "Activo",
+            "pm": 1,
+            "mm": null,
+            "sc": false
+          },
+          {
+            "b": 1,
+            "s": 4,
+            "d": 1,
+            "eq": "Thermomix (cualquiera)",
+            "t": "Máquina",
+            "pm": null,
+            "mm": 30,
+            "sc": false
+          },
+          {
+            "b": 1,
+            "s": 5,
+            "d": 1,
+            "eq": "Thermomix (cualquiera)",
+            "t": "Activo",
+            "pm": 1,
+            "mm": null,
+            "sc": false
+          },
+          {
+            "b": 1,
+            "s": 6,
+            "d": 1,
+            "eq": "Thermomix (cualquiera)",
+            "t": "Máquina",
+            "pm": null,
+            "mm": 20,
+            "sc": false
+          },
+          {
+            "b": 1,
+            "s": 7,
+            "d": 1,
+            "eq": "Manual",
+            "t": "Activo + espera",
+            "pm": 5,
+            "mm": 30,
+            "sc": true,
+            "n": "Atemperado desatendido. Valor inicial, ajustar cuando se mida"
+          },
+          {
+            "b": 1,
+            "s": 8,
+            "d": 1,
+            "eq": "Envasadora",
+            "t": "Activo",
+            "pm": 10,
+            "mm": null,
+            "sc": true,
+            "n": "Se envasa en varias bolsas"
+          }
+        ]
+      },
+      "sourceSheet": "B02 CEBOLLA POCHADA"
+    }
+  ]
+}
