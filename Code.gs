@@ -22,7 +22,8 @@
  */
 
 var SPREADSHEET_ID = '1OhUs4RJdkgbZuFM0DcmgqDPI4QxQP7dP-6jTtLjQtbY';
-var CACHE_KEY = 'recipes-v3';
+var CACHE_KEY = 'recipes-v4';
+var CACHE_CHUNK = 30000; // caracteres por trozo (límite de CacheService: 100 KB por valor)
 
 // Código de la pestaña (B01, S02, C09…) -> sección del listado.
 var SECTIONS = {
@@ -37,13 +38,13 @@ function doGet(e) {
   // el Sheet y deja la caché al día para los demás.
   var fresh = !!(e && e.parameter && e.parameter.fresh);
   var cache = CacheService.getScriptCache();
-  var cached = fresh ? null : cache.get(CACHE_KEY);
-  var recipes = cached ? JSON.parse(cached) : buildRecipes();
+  var cached = fresh ? null : cacheGetRecipes(cache);
+  var recipes = cached || buildRecipes();
   if (!cached) {
     try {
-      cache.put(CACHE_KEY, JSON.stringify(recipes), 300);
+      cachePutRecipes(cache, recipes);
     } catch (err) {
-      // JSON demasiado grande para la caché (límite 100 KB): se sirve sin caché.
+      // No se pudo guardar en la caché: se sirve igualmente, sin caché.
     }
   }
   var payload = {
@@ -54,6 +55,35 @@ function doGet(e) {
   return ContentService
     .createTextOutput(JSON.stringify(payload))
     .setMimeType(ContentService.MimeType.JSON);
+}
+
+// El JSON con los datos de planificación supera los 100 KB de un valor de caché:
+// se guarda troceado (recipes-v4:0, :1…) más una clave con el número de trozos.
+function cacheGetRecipes(cache) {
+  var n = parseInt(cache.get(CACHE_KEY + ':n'), 10);
+  if (!n) return null;
+  var keys = [];
+  for (var i = 0; i < n; i++) keys.push(CACHE_KEY + ':' + i);
+  var parts = cache.getAll(keys);
+  var json = '';
+  for (var j = 0; j < n; j++) {
+    if (parts[keys[j]] === null || parts[keys[j]] === undefined) return null; // trozo caducado
+    json += parts[keys[j]];
+  }
+  try {
+    return JSON.parse(json);
+  } catch (err) {
+    return null;
+  }
+}
+
+function cachePutRecipes(cache, recipes) {
+  var json = JSON.stringify(recipes);
+  var n = Math.ceil(json.length / CACHE_CHUNK);
+  var items = {};
+  for (var i = 0; i < n; i++) items[CACHE_KEY + ':' + i] = json.substr(i * CACHE_CHUNK, CACHE_CHUNK);
+  items[CACHE_KEY + ':n'] = String(n);
+  cache.putAll(items, 300);
 }
 
 function buildRecipes() {
@@ -234,7 +264,7 @@ function parseSheet(sheetName, sectionKey, code, values) {
   }
   if (!stages.length) return null;
 
-  return {
+  var recipe = {
     id: slugify(name),
     name: name,
     code: code,
@@ -244,6 +274,163 @@ function parseSheet(sheetName, sectionKey, code, values) {
     yieldUnit: yieldUnit,
     stages: stages,
   };
+  // Datos de planificación (columnas M:Z de la ficha). Opcionales: una ficha sin
+  // bloque, o con errores en él, se publica igual y la app sigue funcionando.
+  var plan = parsePlan(values, stages);
+  if (plan) recipe.plan = plan;
+  return recipe;
+}
+
+/* ---------------- Planificación (bloque M:Z de cada ficha) ----------------
+ * M1 = "PLANIFICACIÓN"; M2:N5 = cabecera (fase, vida útil, conservación,
+ * fichas previas); fila de encabezados con "Bloque" en M; una fila por paso
+ * de producción debajo. Se valida contra el texto real de los pasos: si una
+ * fila no encaja se descarta y queda anotada en plan.warnings.
+ * Claves de cada paso (cortas para que el JSON quepa en la caché):
+ *   b bloque · s paso · d día · eq equipo · t tipo · pm min persona ·
+ *   mm min máquina/espera · sc escala · rp repetición · ub uds por tanda ·
+ *   aq otra cantidad · am min a esa cantidad · n notas · pend pendiente
+ */
+var PLAN_COL = 13; // columna M
+var PLAN_HEADERS = ['Bloque', 'Paso', 'Inicio del paso', 'Día', 'Equipo', 'Tipo', 'Min persona',
+  'Min máquina/espera', 'Escala', 'Repetición', 'Uds por tanda', 'Otra cantidad', 'Min a esa cantidad', 'Notas'];
+var PLAN_EQUIPOS = ['Thermomix grande', 'Thermomix pequeña', 'Thermomix (cualquiera)', 'Olla 25 L',
+  'Olla pequeña', 'Olla grande (sin presión)', 'Vitro', 'Fuego de gas', 'Vitro/fuego (cualquiera)',
+  'Inducción IsEasy', 'Horno', 'Airfryer', 'Freidora', 'Panificadora', 'Envasadora', 'Microondas',
+  'Soplete', 'Nevera', 'Congelador', 'Manual'];
+var PLAN_TIPOS = ['Activo', 'Máquina', 'Cocción atendida', 'Espera', 'Activo + espera'];
+var PLAN_FASES = ['Producción', 'Servicio', 'Mixta'];
+var PLAN_CONSERVACION = ['Nevera', 'Congelador', 'Ambiente', 'Vacío en nevera', 'Mixta'];
+
+function planKey(s) {
+  return String(s === null || s === undefined ? '' : s).trim().toLowerCase();
+}
+
+function planNumber(v) {
+  if (isNumber(v)) return v;
+  if (typeof v === 'string' && v.trim() !== '' && !isNaN(Number(v.replace(',', '.')))) {
+    return Number(v.replace(',', '.'));
+  }
+  return null;
+}
+
+function planPick(v, list) {
+  var k = planKey(v);
+  for (var i = 0; i < list.length; i++) if (planKey(list[i]) === k) return list[i];
+  return null;
+}
+
+function parsePlan(values, stages) {
+  var warnings = [];
+  var markerRow = null;
+  for (var r = 1; r <= Math.min(values.length, 12); r++) {
+    if (planKey(valueAt(values, r, PLAN_COL)) === 'planificación') { markerRow = r; break; }
+  }
+  if (!markerRow) return null;
+
+  var plan = { phase: null, shelfLifeDays: null, storage: null, requires: [], steps: [] };
+
+  // Cabecera: etiquetas en M, valores en N (las 6 filas siguientes al marcador).
+  for (r = markerRow + 1; r <= markerRow + 6; r++) {
+    var label = planKey(valueAt(values, r, PLAN_COL));
+    var val = valueAt(values, r, PLAN_COL + 1);
+    if (label === 'fase de la ficha') {
+      plan.phase = planPick(val, PLAN_FASES);
+      if (val !== null && !plan.phase) warnings.push('Fase de la ficha no válida: ' + val);
+    } else if (label === 'vida útil (días)') {
+      plan.shelfLifeDays = planNumber(val);
+    } else if (label === 'conservación') {
+      plan.storage = planPick(val, PLAN_CONSERVACION);
+      if (val !== null && !plan.storage) warnings.push('Conservación no válida: ' + val);
+    } else if (label === 'requiere fichas previas') {
+      var codes = String(val === null ? '' : val).split(/[,;\s]+/);
+      for (var c = 0; c < codes.length; c++) {
+        var code = codes[c].trim().toUpperCase();
+        if (!code) continue;
+        if (/^[BSC]\d{2}$/.test(code)) plan.requires.push(code);
+        else warnings.push('Ficha previa no válida: ' + codes[c]);
+      }
+    }
+  }
+
+  // Fila de encabezados de la tabla (col. M = "Bloque").
+  var headerRow = null;
+  for (r = markerRow + 1; r <= Math.min(values.length, markerRow + 15); r++) {
+    if (planKey(valueAt(values, r, PLAN_COL)) === 'bloque') { headerRow = r; break; }
+  }
+  if (!headerRow) {
+    warnings.push('No se encuentra la tabla de pasos (encabezado "Bloque" en la columna M).');
+    plan.warnings = warnings;
+    return plan;
+  }
+  for (var h = 0; h < PLAN_HEADERS.length; h++) {
+    if (planKey(valueAt(values, headerRow, PLAN_COL + h)) !== planKey(PLAN_HEADERS[h])) {
+      warnings.push('Encabezado inesperado en la columna ' + (PLAN_COL + h) + ': se esperaba "' + PLAN_HEADERS[h] + '".');
+      plan.warnings = warnings;
+      return plan;
+    }
+  }
+
+  for (r = headerRow + 1; r <= values.length; r++) {
+    var bRaw = valueAt(values, r, PLAN_COL);
+    var sRaw = valueAt(values, r, PLAN_COL + 1);
+    if (bRaw === null && sRaw === null) continue;
+    var where = 'fila ' + r;
+    var b = planNumber(bRaw);
+    var s = planNumber(sRaw);
+    if (b === null || s === null || b < 1 || s < 1 || b % 1 || s % 1) {
+      warnings.push(where + ': Bloque y Paso deben ser enteros.');
+      continue;
+    }
+    var stage = stages[b - 1];
+    var stepText = stage ? stage.steps[s - 1] : null;
+    if (!stepText) {
+      warnings.push(where + ': el bloque ' + b + ' paso ' + s + ' no existe en la ficha.');
+      continue;
+    }
+    var ini = cleanText(valueAt(values, r, PLAN_COL + 2));
+    if (ini && stepText.toLowerCase().indexOf(ini.toLowerCase()) !== 0) {
+      warnings.push(where + ': el texto del paso ' + b + '.' + s + ' ya no empieza por "' + ini + '" (¿cambió el texto?). Fila ignorada.');
+      continue;
+    }
+    var eq = planPick(valueAt(values, r, PLAN_COL + 4), PLAN_EQUIPOS);
+    var tipo = planPick(valueAt(values, r, PLAN_COL + 5), PLAN_TIPOS);
+    if (!eq) { warnings.push(where + ': Equipo no válido (' + valueAt(values, r, PLAN_COL + 4) + '). Fila ignorada.'); continue; }
+    if (!tipo) { warnings.push(where + ': Tipo no válido (' + valueAt(values, r, PLAN_COL + 5) + '). Fila ignorada.'); continue; }
+
+    var pm = planNumber(valueAt(values, r, PLAN_COL + 6));
+    var mm = planNumber(valueAt(values, r, PLAN_COL + 7));
+    var needsPm = tipo === 'Activo' || tipo === 'Cocción atendida' || tipo === 'Activo + espera';
+    var needsMm = tipo === 'Máquina' || tipo === 'Espera' || tipo === 'Activo + espera';
+    if ((needsPm && pm === null) || (needsMm && mm === null)) {
+      warnings.push(where + ' (' + b + '.' + s + '): falta tiempo para el tipo "' + tipo + '".');
+    }
+    var rp = valueAt(values, r, PLAN_COL + 9);
+    var rpOk = rp === null ? null : planPick(rp, ['POR TANDA', 'ENTRE TANDAS']);
+    if (rp !== null && !rpOk) warnings.push(where + ': Repetición no válida (' + rp + ').');
+    var scRaw = planKey(valueAt(values, r, PLAN_COL + 8));
+    var notes = cleanText(valueAt(values, r, PLAN_COL + 13));
+    var day = planNumber(valueAt(values, r, PLAN_COL + 3));
+
+    var step = {
+      b: b, s: s,
+      d: day === null ? 1 : day,
+      eq: eq, t: tipo,
+      pm: pm, mm: mm,
+      sc: scRaw === 'sí' || scRaw === 'si' ? true : scRaw === 'no' ? false : null,
+    };
+    if (rpOk) step.rp = rpOk;
+    var ub = planNumber(valueAt(values, r, PLAN_COL + 10));
+    var aq = planNumber(valueAt(values, r, PLAN_COL + 11));
+    var am = planNumber(valueAt(values, r, PLAN_COL + 12));
+    if (ub !== null) step.ub = ub;
+    if (aq !== null && am !== null) { step.aq = aq; step.am = am; }
+    if (notes) step.n = notes;
+    if (notes && /PENDIENTE/i.test(notes)) step.pend = true;
+    plan.steps.push(step);
+  }
+  if (warnings.length) plan.warnings = warnings;
+  return plan;
 }
 
 /**
@@ -254,7 +441,11 @@ function testParse() {
   var recipes = buildRecipes();
   Logger.log('Recetas encontradas: ' + recipes.length);
   recipes.forEach(function (r) {
+    var planInfo = r.plan
+      ? ' | plan: ' + r.plan.steps.length + ' pasos' + (r.plan.warnings ? ', ' + r.plan.warnings.length + ' AVISOS' : '')
+      : '';
     Logger.log(r.code + ' ' + r.name + ' -> ' + r.stages.length + ' etapas, ' +
-      r.stages[0].ingredients.length + ' ingredientes');
+      r.stages[0].ingredients.length + ' ingredientes' + planInfo);
+    if (r.plan && r.plan.warnings) r.plan.warnings.forEach(function (w) { Logger.log('    ! ' + w); });
   });
 }
