@@ -43,9 +43,9 @@ test("recipes.json has valid unique recipes and executable stages", () => {
 
 test("HTML references the current cache-busted assets and accessibility regions", () => {
   const html = fs.readFileSync(path.join(root, "index.html"), "utf8");
-  assert.match(html, /styles\.css\?v=10/);
-  assert.match(html, /planner\.js\?v=10/);
-  assert.match(html, /app\.js\?v=10/);
+  assert.match(html, /styles\.css\?v=11/);
+  assert.match(html, /planner\.js\?v=11/);
+  assert.match(html, /app\.js\?v=11/);
   assert.match(html, /id="timer-bar"[^>]+aria-live="assertive"/);
 });
 
@@ -74,4 +74,16 @@ test("active preparations are highlighted and can start a new preparation", () =
   assert.match(source, /rtmy-card \$\{inProgress \? "in-progress"/);
   assert.match(css, /\.rtmy-card\.in-progress/);
   assert.match(css, /\.rtmy-new-prep-btn/);
+});
+
+test("the planner shows one column per cook and names the recipe on each card", () => {
+  const source = fs.readFileSync(path.join(root, "app.js"), "utf8");
+  const css = fs.readFileSync(path.join(root, "styles.css"), "utf8");
+  assert.match(source, /rtmy-plan-cols/);
+  assert.match(source, /class="rtmy-plan-col /);
+  assert.match(source, /rtmy-plan-recipe-tag/);
+  assert.match(css, /\.rtmy-plan-cols\{[^}]*overflow-x:auto/s);
+  assert.match(css, /\.rtmy-plan-col-head\{[^}]*position:sticky/s);
+  // "SALMORRETA RTMY" debe quedar como "Salmorreta RTMY", no "Salmorreta Rtmy"
+  assert.match(source, /const ACRONYMS = new Set\(\["RTMY"/);
 });

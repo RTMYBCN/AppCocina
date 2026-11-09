@@ -336,9 +336,13 @@ function fmtQty(n) {
   return rounded.toString().replace(".", ",");
 }
 
+// "SALMORRETA RTMY" -> "Salmorreta RTMY". Las siglas van en una lista cerrada:
+// una regla por longitud confundiría "DE" o "PAN" con siglas.
+const ACRONYMS = new Set(["RTMY", "AOVE", "MCC", "APPCC", "PVP", "IVA", "IH"]);
 function titleCase(s) {
   if (!s) return "";
-  return s.charAt(0) + s.slice(1).toLowerCase();
+  const out = s.replace(/[^\s]+/g, (w) => (ACRONYMS.has(w) ? w : w.toLowerCase()));
+  return out.charAt(0).toUpperCase() + out.slice(1);
 }
 
 // Detect ALL-CAPS warning clauses and parenthetical notes inside a step.
@@ -883,6 +887,8 @@ function startFlow(recipe, startStageIndex) {
 
 function render() {
   root.dataset.rendered = "1";
+  // El plan se ve mejor ancho en tablet/ordenador: las franjas caben a la vez.
+  document.body.classList.toggle("view-plan", state.view === "plan");
   if (state.view === "loading") return renderLoading();
   if (state.view === "error") return renderError();
   if (state.view === "list") return renderList();
@@ -1654,82 +1660,103 @@ function planWaitMin(t) {
   return t.type === "Activo + espera" ? t.totalMin - t.personMin : 0;
 }
 
-function planTaskHtml(t, plan, colors) {
+// Una tarjeta de paso dentro de la franja de una persona (o de "sin nadie").
+function planCardHtml(t, plan, colors, opts) {
   const done = !!state.planUi.done[planTaskKey(t)];
-  const dur = (t.assumed ? "~" : "") + RTMYPlanner.fmtDuration(t.person !== null ? t.personMin : t.totalMin);
+  const machine = t.person === null;
   const wait = planWaitMin(t);
-  const timerBtn = () =>
-    `<button class="rtmy-plan-timer" onclick="planTimer(${t.id})" aria-label="Iniciar temporizador de ${RTMYPlanner.fmtDuration(wait)}"><span aria-hidden="true">⏱</span> Temporizador</button>`;
+  const dur = (t.assumed ? "~" : "") + RTMYPlanner.fmtDuration(machine ? t.totalMin : t.personMin);
+  const showRecipe = !opts || opts.showRecipe !== false;
   return `
-    <li class="rtmy-plan-task ${done ? "done" : ""}" style="--rc:${colors[t.recipeId]}">
-      <button class="rtmy-plan-tick" onclick="onPlanDone('${escapeHtml(planTaskKey(t))}')" aria-pressed="${done}" aria-label="${done ? "Marcar como pendiente" : "Marcar como hecho"}">
-        <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="3" stroke-linecap="round" stroke-linejoin="round"><path d="M5 12.5l4.5 4.5L19 7.5"/></svg>
-      </button>
-      <div class="rtmy-plan-time"><b>${planClock(plan, t.start)}</b><small>${dur}</small></div>
-      <div class="rtmy-plan-task-body">
-        <div class="rtmy-plan-tags">
-          <span class="rtmy-plan-code">${escapeHtml(t.code)} · ${t.step}</span>
-          <span class="rtmy-plan-eq">${escapeHtml(t.equipment)}</span>
-        </div>
-        <p>${escapeHtml(t.text)}</p>
-        ${
-          wait
-            ? `<div class="rtmy-plan-wait">Después, ${t.assumed ? "~" : ""}${RTMYPlanner.fmtDuration(wait)} de espera · listo a las ${planClock(plan, t.end)} ${timerBtn()}</div>`
+    <li class="rtmy-plan-task ${machine ? "machine" : ""} ${done ? "done" : ""}" style="--rc:${colors[t.recipeId]}">
+      <div class="rtmy-plan-head">
+        <span class="rtmy-plan-hour">${planClock(plan, t.start)}</span>
+        <span class="rtmy-plan-dur">${machine ? "hasta " + planClock(plan, t.end) + " · " + dur : dur}</span>
+        <button class="rtmy-plan-tick" onclick="onPlanDone('${escapeHtml(planTaskKey(t))}')" aria-pressed="${done}" aria-label="${done ? "Marcar como pendiente" : "Marcar como hecho"}">
+          <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="3" stroke-linecap="round" stroke-linejoin="round"><path d="M5 12.5l4.5 4.5L19 7.5"/></svg>
+        </button>
+      </div>
+      ${showRecipe ? `<div class="rtmy-plan-recipe-tag"><b>${escapeHtml(t.code)}</b> ${escapeHtml(titleCase(t.recipeName))} <span>· paso ${t.step}</span></div>` : `<div class="rtmy-plan-recipe-tag plain"><b>${escapeHtml(t.code)}</b> <span>· paso ${t.step}</span></div>`}
+      <div class="rtmy-plan-tags"><span class="rtmy-plan-eq">${escapeHtml(t.equipment)}</span></div>
+      <p>${escapeHtml(t.text)}</p>
+      ${
+        machine
+          ? `<div class="rtmy-plan-wait"><button class="rtmy-plan-timer" onclick="planTimer(${t.id})" aria-label="Iniciar temporizador de ${dur}"><span aria-hidden="true">⏱</span> Temporizador de ${dur}</button></div>`
+          : wait
+            ? `<div class="rtmy-plan-wait">Después, ${t.assumed ? "~" : ""}${RTMYPlanner.fmtDuration(wait)} de espera · listo a las ${planClock(plan, t.end)}
+                 <button class="rtmy-plan-timer" onclick="planTimer(${t.id})" aria-label="Iniciar temporizador de ${RTMYPlanner.fmtDuration(wait)}"><span aria-hidden="true">⏱</span> Temporizador</button></div>`
             : ""
-        }
-      </div>
+      }
     </li>`;
 }
 
-function planMachineHtml(t, plan, colors) {
-  const done = !!state.planUi.done[planTaskKey(t)];
-  const dur = (t.assumed ? "~" : "") + RTMYPlanner.fmtDuration(t.totalMin);
-  return `
-    <li class="rtmy-plan-task machine ${done ? "done" : ""}" style="--rc:${colors[t.recipeId]}">
-      <button class="rtmy-plan-tick" onclick="onPlanDone('${escapeHtml(planTaskKey(t))}')" aria-pressed="${done}" aria-label="${done ? "Marcar como pendiente" : "Marcar como hecho"}">
-        <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="3" stroke-linecap="round" stroke-linejoin="round"><path d="M5 12.5l4.5 4.5L19 7.5"/></svg>
-      </button>
-      <div class="rtmy-plan-time"><b>${planClock(plan, t.start)}</b><small>hasta ${planClock(plan, t.end)}</small></div>
-      <div class="rtmy-plan-task-body">
-        <div class="rtmy-plan-tags">
-          <span class="rtmy-plan-code">${escapeHtml(t.code)} · ${t.step}</span>
-          <span class="rtmy-plan-eq">${escapeHtml(t.equipment)}</span>
-          <span class="rtmy-plan-eq">${dur}</span>
-        </div>
-        <p>${escapeHtml(t.text)}</p>
-        <div class="rtmy-plan-wait"><button class="rtmy-plan-timer" onclick="planTimer(${t.id})" aria-label="Iniciar temporizador de ${dur}"><span aria-hidden="true">⏱</span> Temporizador de ${dur}</button></div>
-      </div>
-    </li>`;
+// Las recetas que toca una persona ese día, como chips de color.
+function planWhoChips(tasks, plan, colors) {
+  const seen = [];
+  tasks.forEach((t) => {
+    if (!seen.some((x) => x.id === t.recipeId)) seen.push({ id: t.recipeId, code: t.code, name: t.recipeName });
+  });
+  if (!seen.length) return "";
+  // Con más de dos recetas solo cabe el código; el nombre va en cada tarjeta.
+  const short = seen.length > 2;
+  return `<div class="rtmy-plan-who ${short ? "short" : ""}">${seen
+    .map(
+      (r) =>
+        `<span class="rtmy-plan-who-chip" style="--rc:${colors[r.id]}" title="${escapeHtml(titleCase(r.name))}"><i></i>${escapeHtml(r.code)}${short ? "" : " " + escapeHtml(titleCase(r.name))}</span>`
+    )
+    .join("")}</div>`;
 }
 
+/* Vista "por persona": una franja por cocinero, en horizontal. En el móvil se
+   desliza de una a otra (cada franja encaja en la pantalla); en pantalla ancha
+   se ven todas a la vez. La última franja recoge lo que va solo. */
 function planByPersonHtml(plan, colors) {
   const ui = state.planUi;
-  const day = ui.day;
-  const inDay = (t) => RTMYPlanner.dayOf(t.start) === day;
-  let html = "";
+  const inDay = (t) => RTMYPlanner.dayOf(t.start) === ui.day;
+  const cols = [];
+
   for (let p = 0; p < plan.persons; p++) {
     const mine = plan.tasks.filter((t) => t.person === p && inDay(t));
     const total = plan.tasks.filter((t) => t.person === p).reduce((s, t) => s + t.personMin, 0);
-    html += `
-      <section class="rtmy-plan-person" aria-label="Persona ${p + 1}">
-        <h2 class="rtmy-section-title">Persona ${p + 1}<span class="rtmy-section-count">${RTMYPlanner.fmtDuration(total)} de trabajo</span></h2>
-        ${
-          mine.length
-            ? `<ol class="rtmy-plan-tasks">${mine.map((t) => planTaskHtml(t, plan, colors)).join("")}</ol>`
-            : `<p class="rtmy-plan-none">${total ? "Nada que hacer este día." : "Sin tareas: con este lote no hace falta una persona más."}</p>`
-        }
-      </section>`;
+    cols.push({
+      title: "Persona " + (p + 1),
+      sub: total ? RTMYPlanner.fmtDuration(total) + " de trabajo" : "sin tareas",
+      chips: planWhoChips(mine, plan, colors),
+      body: mine.length
+        ? `<ol class="rtmy-plan-tasks">${mine.map((t) => planCardHtml(t, plan, colors)).join("")}</ol>`
+        : `<p class="rtmy-plan-none">${total ? "Nada que hacer este día." : "Con este lote no hace falta una persona más."}</p>`,
+    });
   }
+
   const machines = plan.tasks.filter((t) => t.person === null && inDay(t));
   if (machines.length) {
-    html += `
-      <section class="rtmy-plan-person" aria-label="Máquinas y esperas">
-        <h2 class="rtmy-section-title">Mientras tanto, solos<span class="rtmy-section-count">${machines.length}</span></h2>
-        <p class="rtmy-plan-hint">Pasos en los que la máquina o el reposo trabajan sin nadie al lado.</p>
-        <ol class="rtmy-plan-tasks">${machines.map((t) => planMachineHtml(t, plan, colors)).join("")}</ol>
-      </section>`;
+    cols.push({
+      title: "Sin nadie al lado",
+      sub: machines.length + " paso" + (machines.length === 1 ? "" : "s"),
+      machine: true,
+      chips: "",
+      body: `<p class="rtmy-plan-hint">La máquina o el reposo trabajan solos.</p>
+             <ol class="rtmy-plan-tasks">${machines.map((t) => planCardHtml(t, plan, colors)).join("")}</ol>`,
+    });
   }
-  return html;
+
+  return `
+    <div class="rtmy-plan-cols" style="--cols:${cols.length}">
+      ${cols
+        .map(
+          (c) => `
+        <section class="rtmy-plan-col ${c.machine ? "machine" : ""}" aria-label="${escapeHtml(c.title)}">
+          <header class="rtmy-plan-col-head">
+            <h2>${escapeHtml(c.title)}</h2>
+            <span class="rtmy-plan-col-sub">${escapeHtml(c.sub)}</span>
+            ${c.chips}
+          </header>
+          ${c.body}
+        </section>`
+        )
+        .join("")}
+    </div>
+    ${cols.length > 1 ? `<p class="rtmy-plan-hint swipe">Desliza a los lados para ver cada franja.</p>` : ""}`;
 }
 
 function planTimelineHtml(plan, colors) {
@@ -1954,6 +1981,34 @@ function renderPlan() {
     <button class="rtmy-cta secondary" onclick="goto('#/planificar')">Cambiar recetas o personas</button>
     <button class="rtmy-plan-reset" onclick="onPlanResetDone()">Borrar lo marcado como hecho</button>
   `;
+  syncPlanSwipeHint();
+}
+
+// La pista "desliza a los lados" solo tiene sentido si alguna franja se sale.
+// Se vigila con ResizeObserver: al girar el móvil o cambiar el ancho, el
+// evento "resize" llega antes de que el navegador recalcule el ancho real.
+let planColsObserver = null;
+function syncPlanSwipeHint() {
+  const cols = root.querySelector(".rtmy-plan-cols");
+  const hint = root.querySelector(".rtmy-plan-hint.swipe");
+  if (planColsObserver) {
+    planColsObserver.disconnect();
+    planColsObserver = null;
+  }
+  if (!hint || !cols) return;
+  const update = () => {
+    hint.hidden = cols.scrollWidth <= cols.clientWidth + 2;
+  };
+  update();
+  requestAnimationFrame(update); // tras aplicar estilos y media queries
+  if (typeof ResizeObserver === "function") {
+    planColsObserver = new ResizeObserver(() => requestAnimationFrame(update));
+    planColsObserver.observe(cols);
+    planColsObserver.observe(document.documentElement);
+  }
+  // Red de seguridad al girar el móvil, por si el observador no llega.
+  window.addEventListener("resize", () => requestAnimationFrame(update), { passive: true });
+  window.addEventListener("orientationchange", () => setTimeout(update, 180), { passive: true });
 }
 
 window.onPlanView = function (view) {
@@ -1995,6 +2050,7 @@ window.loadRecipes = loadRecipes;
 window.refreshRecipes = refreshRecipes;
 
 window.addEventListener("hashchange", onHashChange);
+
 loadRecipes().then(() => {
   restoreRuntimeState();
   restorePlanState();
