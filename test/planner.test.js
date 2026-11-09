@@ -174,3 +174,35 @@ test("si B01 y B03 compiten por la Thermomix grande, gana la que más tarda en t
   // Óptimo con una sola Thermomix grande: B03 primero y B01 después (10:44).
   assert.ok(plan.end <= 8 * 60 + 164, `el plan termina a las ${planner.fmtClock(plan.end)}, se esperaba 10:44 o antes`);
 });
+
+test("ningún paso del plan queda con un equipo 'a elegir': se nombra el aparato concreto", () => {
+  const plan = planner.buildPlan(withB03, withB03.map((r) => r.id), { people: 2 });
+  plan.tasks.forEach((t) => {
+    assert.ok(!/\(cualquiera\)/i.test(t.equipment), `${t.code}.${t.step} sigue diciendo "${t.equipment}"`);
+  });
+});
+
+test("si una receta necesita la Thermomix grande, la que admite cualquiera usa la pequeña", () => {
+  const plan = planner.buildPlan(withB03, [b01.id, b02.id], { people: 2 });
+  const b02Thermo = plan.tasks.filter((t) => t.code === "B02" && /Thermomix/.test(t.equipment));
+  assert.ok(b02Thermo.length > 0);
+  b02Thermo.forEach((t) => assert.equal(t.equipment, "Thermomix pequeña"));
+  plan.tasks.filter((t) => t.code === "B01" && /Thermomix/.test(t.equipment))
+    .forEach((t) => assert.equal(t.equipment, "Thermomix grande"));
+});
+
+test("dos personas nunca tienen a la vez el mismo aparato asignado", () => {
+  const plan = planner.buildPlan(withB03, withB03.map((r) => r.id), { people: 3 });
+  const byEq = {};
+  plan.tasks.filter((t) => /Thermomix|Olla|Horno|Freidora|Airfryer|Panificadora|Envasadora/.test(t.equipment))
+    .forEach((t) => (byEq[t.equipment] = (byEq[t.equipment] || []).concat(t)));
+  Object.entries(byEq).forEach(([eq, list]) => {
+    for (let i = 0; i < list.length; i++) {
+      for (let j = i + 1; j < list.length; j++) {
+        if (list[i].recipeId === list[j].recipeId) continue;
+        const a = list[i], b = list[j];
+        assert.ok(!(a.start < b.end && b.start < a.end), `${eq}: ${a.code}.${a.step} y ${b.code}.${b.step} se solapan`);
+      }
+    }
+  });
+});

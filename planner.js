@@ -49,6 +49,9 @@
     AIR: "Airfryer", FREID: "Freidora", PAN: "Panificadora", ENV: "Envasadora", MICRO: "Microondas", SOPLETE: "Soplete",
   };
 
+  // Equipos que la ficha deja a elección: el plan decide cuál se usa.
+  const AMBIGUOUS = { TMX_ANY: true };
+
   const DEFAULTS = {
     people: 1,
     startMin: 8 * 60, // hora de inicio de la jornada (minutos desde las 00:00)
@@ -163,7 +166,7 @@
 
   // Una simulación completa con una prioridad y un máximo de personas.
   // Devuelve null si el trabajo no cabe en el horizonte.
-  function simulate(ctx, prio, people, delays) {
+  function simulate(ctx, prio, people, delays, anyStrict) {
     const { tasks, spans, firstSpan, opts, firstIds } = ctx;
     // Primer instante en que puede empezar un paso (día + retraso de arranque de la receta).
     const earliestOf = (task) =>
@@ -218,7 +221,9 @@
         if (s) {
           const idx = ctx.spans.indexOf(s);
           let unit = s.key;
-          if (s.key === "TMX_ANY") unit = held.TMX_P < POOLS.TMX_P ? "TMX_P" : held.TMX_G < POOLS.TMX_G ? "TMX_G" : null;
+          if (s.key === "TMX_ANY") {
+            unit = held.TMX_P < POOLS.TMX_P ? "TMX_P" : anyStrict || held.TMX_G >= POOLS.TMX_G ? null : "TMX_G";
+          }
           if (unit === null || held[unit] >= POOLS[unit]) {
             const label = LABELS[s.key] || (s.key === "TMX_ANY" ? "Thermomix" : s.key);
             blocked[label] = (blocked[label] || 0) + 1;
@@ -356,7 +361,7 @@
       });
       groups.forEach((g) => {
         spans.push({
-          key: g.key, recipeId: r.id, code: r.code,
+          key: g.key, recipeId: r.id, code: r.code, ids: g.ids,
           first: g.ids[0], last: g.ids[g.ids.length - 1], unit: null, start: null, end: null, active: false,
         });
       });
@@ -385,11 +390,13 @@
     const clock = Date.now();
     for (let i = 0; i < variants.length && (i < 4 || Date.now() - clock < 1200); i++) {
       for (const size of sizes) {
-        const run = simulate(ctx, variants[i].prio, size, variants[i].delays);
-        if (!run) continue;
-        const spread = Math.max(...run.busy) - Math.min(...run.busy);
-        const score = run.last * 1e4 + (size === opts.people ? 0 : 1) + spread / 1e3;
-        if (!best || score < best.score) best = Object.assign(run, { score });
+        for (const strict of [false, true]) {
+          const run = simulate(ctx, variants[i].prio, size, variants[i].delays, strict);
+          if (!run) continue;
+          const spread = Math.max(...run.busy) - Math.min(...run.busy);
+          const score = run.last * 1e4 + (size === opts.people ? 0 : 1) + spread / 1e3;
+          if (!best || score < best.score) best = Object.assign(run, { score });
+        }
       }
     }
     if (!best) {
@@ -406,6 +413,12 @@
       sp.unit = best.spans[i].unit;
       sp.start = best.spans[i].start;
       sp.end = best.spans[i].end === null ? tasks[sp.last].end : best.spans[i].end;
+      // "Thermomix (cualquiera)" en la ficha -> el aparato concreto que le toca,
+      // para que dos personas no crean que pueden usar el mismo.
+      if (sp.unit && AMBIGUOUS[sp.key]) {
+        const label = LABELS[sp.unit];
+        if (label) sp.ids.forEach((id) => (tasks[id].equipment = label));
+      }
     });
     const busy = best.busy.concat(new Array(Math.max(0, opts.people - best.busy.length)).fill(0));
     const blocked = best.blocked;
