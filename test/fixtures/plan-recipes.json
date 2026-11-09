@@ -256,6 +256,187 @@
         ]
       },
       "sourceSheet": "B02 CEBOLLA POCHADA"
+    },
+    {
+      "id": "salmorreta-rtmy",
+      "name": "SALMORRETA RTMY",
+      "code": "B03",
+      "section": "Preparaciones base",
+      "sectionOrder": 1,
+      "yieldAmount": 1500,
+      "yieldUnit": "g",
+      "stages": [
+        {
+          "title": "PROCEDIMIENTO EN THERMOMIX GRANDE",
+          "procedureTitle": null,
+          "description": "Salmorreta RTMY. Base para las paellas (C23–C25), el tomate confitado (B08), las alcachofas (C11) y la burrata (C12).",
+          "ingredients": [
+            {
+              "qty": 1875,
+              "unit": "g",
+              "name": "Tomate"
+            },
+            {
+              "qty": 405,
+              "unit": "g",
+              "name": "Aceite de Oliva"
+            },
+            {
+              "qty": 95,
+              "unit": "g",
+              "name": "Ajo pelado"
+            },
+            {
+              "qty": 125,
+              "unit": "g",
+              "name": "Ñora"
+            },
+            {
+              "qty": 22,
+              "unit": "g",
+              "name": "Sal"
+            },
+            {
+              "qty": 9,
+              "unit": "g",
+              "name": "Pimentón dulce"
+            }
+          ],
+          "steps": [
+            "Lavar los tomates, cortarlos en cuartos y repartirlos en dos recipientes.",
+            "Pelar los ajos.",
+            "Colocar en el vaso de la Thermomix grande el aceite y el ajo. Programar 6 minutos, 120 °C, velocidad 1.",
+            "Agregar el pimentón. Programar 30 segundos, 120 °C, velocidad 1.",
+            "Agregar el bote de ñoras. Programar 3 minutos, 110 °C, velocidad 1.",
+            "Añadir la mitad del tomate. Programar 15 minutos, 100 °C, velocidad 1, sin cubilete.",
+            "Añadir el resto del tomate y la sal. Programar 20 minutos, 100 °C, velocidad 1, sin cubilete.",
+            "Dejar reposar completamente destapado 5 minutos para que baje la temperatura.",
+            "Tapar y triturar: 2 minutos a velocidad 5, 3 minutos a velocidad 8 y 5 minutos a velocidad 10.",
+            "Pasar la salmorreta a un túper y dejar atemperar.",
+            "Tapar el túper, etiquetar, fechar y guardar en nevera un máximo de 7 días."
+          ]
+        }
+      ],
+      "plan": {
+        "phase": "Producción",
+        "shelfLifeDays": 7,
+        "storage": "Nevera",
+        "requires": [],
+        "steps": [
+          {
+            "b": 1,
+            "s": 1,
+            "d": 1,
+            "eq": "Manual",
+            "t": "Activo",
+            "pm": 5,
+            "mm": null,
+            "sc": true
+          },
+          {
+            "b": 1,
+            "s": 2,
+            "d": 1,
+            "eq": "Manual",
+            "t": "Activo",
+            "pm": 7,
+            "mm": null,
+            "sc": true
+          },
+          {
+            "b": 1,
+            "s": 3,
+            "d": 1,
+            "eq": "Thermomix grande",
+            "t": "Máquina",
+            "pm": null,
+            "mm": 6,
+            "sc": false
+          },
+          {
+            "b": 1,
+            "s": 4,
+            "d": 1,
+            "eq": "Thermomix grande",
+            "t": "Máquina",
+            "pm": null,
+            "mm": 0.5,
+            "sc": false
+          },
+          {
+            "b": 1,
+            "s": 5,
+            "d": 1,
+            "eq": "Thermomix grande",
+            "t": "Máquina",
+            "pm": null,
+            "mm": 3,
+            "sc": false
+          },
+          {
+            "b": 1,
+            "s": 6,
+            "d": 1,
+            "eq": "Thermomix grande",
+            "t": "Máquina",
+            "pm": null,
+            "mm": 15,
+            "sc": false
+          },
+          {
+            "b": 1,
+            "s": 7,
+            "d": 1,
+            "eq": "Thermomix grande",
+            "t": "Máquina",
+            "pm": null,
+            "mm": 20,
+            "sc": false
+          },
+          {
+            "b": 1,
+            "s": 8,
+            "d": 1,
+            "eq": "Thermomix grande",
+            "t": "Espera",
+            "pm": null,
+            "mm": 5,
+            "sc": false
+          },
+          {
+            "b": 1,
+            "s": 9,
+            "d": 1,
+            "eq": "Thermomix grande",
+            "t": "Máquina",
+            "pm": null,
+            "mm": 10,
+            "sc": false
+          },
+          {
+            "b": 1,
+            "s": 10,
+            "d": 1,
+            "eq": "Manual",
+            "t": "Activo + espera",
+            "pm": 5,
+            "mm": 45,
+            "sc": true,
+            "n": "Atemperado desatendido. Mínimo 45 minutos para unos 1.500 g"
+          },
+          {
+            "b": 1,
+            "s": 11,
+            "d": 1,
+            "eq": "Manual",
+            "t": "Activo",
+            "pm": 5,
+            "mm": null,
+            "sc": false
+          }
+        ]
+      },
+      "sourceSheet": "B03 SALMORRETA"
     }
   ]
 }

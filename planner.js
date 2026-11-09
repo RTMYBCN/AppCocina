@@ -147,6 +147,118 @@
     return stepsOut;
   }
 
+  const SEARCH_RUNS = 150;
+  const EPS = 1e-9;
+
+  function mulberry32(seed) {
+    let a = seed >>> 0;
+    return function () {
+      a = (a + 0x6d2b79f5) >>> 0;
+      let t = a;
+      t = Math.imul(t ^ (t >>> 15), t | 1);
+      t ^= t + Math.imul(t ^ (t >>> 7), t | 61);
+      return ((t ^ (t >>> 14)) >>> 0) / 4294967296;
+    };
+  }
+
+  // Una simulación completa con una prioridad y un máximo de personas.
+  // Devuelve null si el trabajo no cabe en el horizonte.
+  function simulate(ctx, prio, people, delays) {
+    const { tasks, spans, firstSpan, opts, firstIds } = ctx;
+    // Primer instante en que puede empezar un paso (día + retraso de arranque de la receta).
+    const earliestOf = (task) =>
+      (task.day - 1) * DAY + opts.startMin + (delays && firstIds.has(task.id) ? delays[task.recipeId] || 0 : 0);
+    const n = tasks.length;
+    const start = new Array(n).fill(null);
+    const end = new Array(n).fill(null);
+    const person = new Array(n).fill(null);
+    const sp = spans.map(() => ({ unit: null, start: null, end: null, active: false }));
+    const held = {};
+    Object.keys(POOLS).forEach((k) => (held[k] = 0));
+    const busy = new Array(people).fill(0);
+    const freeAt = new Array(people).fill(0);
+    const lastPerson = new Map();
+    const blocked = {};
+    const pending = new Set(tasks.map((t) => t.id));
+    const shiftEnd = opts.startMin + opts.shiftMin;
+    const limit = opts.startMin + opts.horizonDays * DAY;
+
+    let t = opts.startMin;
+    while (pending.size && t < limit) {
+      spans.forEach((s, i) => {
+        const st = sp[i];
+        if (st.active && end[s.last] !== null && end[s.last] <= t + EPS) {
+          held[st.unit] -= 1;
+          st.active = false;
+          st.end = end[s.last];
+        }
+      });
+      const ready = [];
+      pending.forEach((id) => {
+        const task = tasks[id];
+        if (task.preds.every((p) => end[p] !== null && end[p] <= t + EPS) && t >= earliestOf(task) - EPS) ready.push(task);
+      });
+      ready.sort((a, b) => prio[b.id] - prio[a.id] || a.day - b.day || a.id - b.id);
+      for (const task of ready) {
+        let who = null;
+        if (task.personMin > 0) {
+          const tm = t % DAY;
+          const fits = tm >= opts.startMin && (tm + task.personMin <= shiftEnd || (task.personMin > opts.shiftMin && tm < shiftEnd));
+          if (!fits) continue;
+          const free = [];
+          for (let p = 0; p < people; p++) if (freeAt[p] <= t + EPS) free.push(p);
+          if (!free.length) {
+            blocked["Personas"] = (blocked["Personas"] || 0) + 1;
+            continue;
+          }
+          const prev = lastPerson.get(task.recipeId);
+          who = free.includes(prev) ? prev : free.reduce((a, b) => (busy[b] < busy[a] ? b : a), free[0]);
+        }
+        const s = firstSpan.get(task.id);
+        if (s) {
+          const idx = ctx.spans.indexOf(s);
+          let unit = s.key;
+          if (s.key === "TMX_ANY") unit = held.TMX_P < POOLS.TMX_P ? "TMX_P" : held.TMX_G < POOLS.TMX_G ? "TMX_G" : null;
+          if (unit === null || held[unit] >= POOLS[unit]) {
+            const label = LABELS[s.key] || (s.key === "TMX_ANY" ? "Thermomix" : s.key);
+            blocked[label] = (blocked[label] || 0) + 1;
+            continue;
+          }
+          held[unit] += 1;
+          sp[idx].unit = unit;
+          sp[idx].active = true;
+          sp[idx].start = t;
+        }
+        start[task.id] = t;
+        end[task.id] = t + task.totalMin;
+        person[task.id] = who;
+        if (who !== null) {
+          freeAt[who] = t + task.personMin;
+          busy[who] += task.personMin;
+          lastPerson.set(task.recipeId, who);
+        }
+        pending.delete(task.id);
+      }
+      if (!pending.size) break;
+      // Siguiente instante en que algo puede cambiar.
+      let next = Infinity;
+      for (let i = 0; i < n; i++) if (end[i] !== null && end[i] > t + EPS && end[i] < next) next = end[i];
+      for (let p = 0; p < people; p++) if (freeAt[p] > t + EPS && freeAt[p] < next) next = freeAt[p];
+      pending.forEach((id) => {
+        const e = earliestOf(tasks[id]);
+        if (e > t + EPS && e < next) next = e;
+      });
+      const nextShift = (Math.floor(t / DAY) + (t % DAY >= opts.startMin ? 1 : 0)) * DAY + opts.startMin;
+      if (nextShift > t + EPS && nextShift < next) next = nextShift;
+      if (next === Infinity) return null;
+      t = next;
+    }
+    if (pending.size) return null;
+    let last = 0;
+    for (let i = 0; i < n; i++) if (end[i] > last) last = end[i];
+    return { start, end, person, spans: sp, busy, blocked, last };
+  }
+
   function buildPlan(recipes, selectedIds, options) {
     const opts = Object.assign({}, DEFAULTS, options || {});
     opts.people = Math.max(1, Math.min(8, Math.round(opts.people)));
@@ -251,81 +363,52 @@
     });
     const firstSpan = new Map(spans.map((s) => [s.first, s]));
 
-    // ---- simulación minuto a minuto
-    const held = {};
-    Object.keys(POOLS).forEach((k) => (held[k] = 0));
-    const busy = new Array(opts.people).fill(0);
-    const freeAt = new Array(opts.people).fill(0);
-    const lastPerson = new Map();
-    const blocked = {};
-    const pending = new Set(tasks.map((t) => t.id));
-    const shiftEnd = opts.startMin + opts.shiftMin;
-    const limit = opts.startMin + opts.horizonDays * DAY;
-
-    for (let t = opts.startMin; pending.size && t < limit; t++) {
-      spans.forEach((sp) => {
-        if (sp.active && tasks[sp.last].end !== null && tasks[sp.last].end <= t) {
-          held[sp.unit] -= 1;
-          sp.active = false;
-          sp.end = tasks[sp.last].end;
-        }
+    // ---- simulación por eventos. Un reparto voraz puede dar una máquina a la
+    // receta equivocada (la que llega antes, no la que más tarda), así que se
+    // prueban varias prioridades y se queda la que termina antes. Es determinista
+    // (semillas fijas) y nunca empeora al añadir personas: siempre se prueba
+    // también con menos personas.
+    const ctx = { tasks, spans, firstSpan, opts, firstIds: new Set(firstOf.values()) };
+    const DELAY_CHOICES = [0, 0, 2, 3, 5, 8, 12, 20, 30];
+    const variants = [{ prio: cp, delays: null }];
+    for (let k = 1; k <= SEARCH_RUNS; k++) {
+      const rnd = mulberry32(k * 7919);
+      const delays = {};
+      selected.forEach((r) => {
+        delays[r.id] = k % 3 === 0 ? 0 : DELAY_CHOICES[Math.floor(rnd() * DELAY_CHOICES.length)];
       });
-      const ready = [];
-      pending.forEach((id) => {
-        const task = tasks[id];
-        if (task.preds.every((p) => tasks[p].end !== null && tasks[p].end <= t) && t >= (task.day - 1) * DAY + opts.startMin) {
-          ready.push(task);
-        }
-      });
-      ready.sort((a, b) => cp[b.id] - cp[a.id] || a.day - b.day || a.id - b.id);
-      for (const task of ready) {
-        let person = null;
-        if (task.personMin > 0) {
-          const tm = t % DAY;
-          const fits =
-            tm >= opts.startMin && (tm + task.personMin <= shiftEnd || (task.personMin > opts.shiftMin && tm < shiftEnd));
-          if (!fits) continue;
-          const free = [];
-          for (let p = 0; p < opts.people; p++) if (freeAt[p] <= t) free.push(p);
-          if (!free.length) {
-            blocked["Personas"] = (blocked["Personas"] || 0) + 1;
-            continue;
-          }
-          const prev = lastPerson.get(task.recipeId);
-          person = free.includes(prev) ? prev : free.reduce((a, b) => (busy[b] < busy[a] ? b : a), free[0]);
-        }
-        const sp = firstSpan.get(task.id);
-        if (sp) {
-          let unit = sp.key;
-          if (sp.key === "TMX_ANY") unit = held.TMX_P < POOLS.TMX_P ? "TMX_P" : held.TMX_G < POOLS.TMX_G ? "TMX_G" : null;
-          if (unit === null || held[unit] >= POOLS[unit]) {
-            const label = LABELS[sp.key] || (sp.key === "TMX_ANY" ? "Thermomix" : sp.key);
-            blocked[label] = (blocked[label] || 0) + 1;
-            continue;
-          }
-          held[unit] += 1;
-          sp.unit = unit;
-          sp.active = true;
-          sp.start = t;
-        }
-        task.start = t;
-        task.end = t + task.totalMin;
-        task.person = person;
-        if (person !== null) {
-          freeAt[person] = t + task.personMin;
-          busy[person] += task.personMin;
-          lastPerson.set(task.recipeId, person);
-        }
-        pending.delete(task.id);
+      variants.push({ prio: cp.map((c) => c * (0.55 + 0.9 * rnd())), delays });
+    }
+    const sizes = [];
+    for (let size = opts.people; size >= 1; size--) sizes.push(size);
+    let best = null;
+    const clock = Date.now();
+    for (let i = 0; i < variants.length && (i < 4 || Date.now() - clock < 1200); i++) {
+      for (const size of sizes) {
+        const run = simulate(ctx, variants[i].prio, size, variants[i].delays);
+        if (!run) continue;
+        const spread = Math.max(...run.busy) - Math.min(...run.busy);
+        const score = run.last * 1e4 + (size === opts.people ? 0 : 1) + spread / 1e3;
+        if (!best || score < best.score) best = Object.assign(run, { score });
       }
     }
-    if (pending.size) {
+    if (!best) {
       result.ok = false;
       result.warnings.push("No se pudo colocar todo el trabajo en el horizonte de planificación.");
+      return result;
     }
-    spans.forEach((sp) => {
-      if (sp.start !== null && sp.end === null) sp.end = tasks[sp.last].end;
+    tasks.forEach((task) => {
+      task.start = best.start[task.id];
+      task.end = best.end[task.id];
+      task.person = best.person[task.id];
     });
+    spans.forEach((sp, i) => {
+      sp.unit = best.spans[i].unit;
+      sp.start = best.spans[i].start;
+      sp.end = best.spans[i].end === null ? tasks[sp.last].end : best.spans[i].end;
+    });
+    const busy = best.busy.concat(new Array(Math.max(0, opts.people - best.busy.length)).fill(0));
+    const blocked = best.blocked;
 
     // ---- resultado
     const done = tasks.filter((t) => t.start !== null);

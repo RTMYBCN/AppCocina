@@ -150,3 +150,27 @@ test("el formato de horas y duraciones es legible", () => {
   assert.equal(planner.fmtDuration(125), "2 h 5 min");
   assert.equal(planner.fmtDuration(1440), "1 día");
 });
+
+const withB03 = JSON.parse(fs.readFileSync(path.join(__dirname, "fixtures", "plan-recipes.json"), "utf8")).recipes;
+const b03 = withB03.find((r) => r.code === "B03");
+
+test("B03 (salmorreta) forma parte de los datos de prueba con su plan", () => {
+  assert.ok(b03 && planner.hasPlan(b03));
+});
+
+test("añadir personas nunca retrasa el final del plan", () => {
+  const all = withB03.map((r) => r.id);
+  let prev = Infinity;
+  for (let people = 1; people <= 6; people++) {
+    const plan = planner.buildPlan(withB03, all, { people });
+    assert.equal(plan.ok, true);
+    assert.ok(plan.end <= prev, `con ${people} personas termina más tarde (${plan.end}) que con ${people - 1} (${prev})`);
+    prev = plan.end;
+  }
+});
+
+test("si B01 y B03 compiten por la Thermomix grande, gana la que más tarda en total", () => {
+  const plan = planner.buildPlan(withB03, [b01.id, b03.id], { people: 3 });
+  // Óptimo con una sola Thermomix grande: B03 primero y B01 después (10:44).
+  assert.ok(plan.end <= 8 * 60 + 164, `el plan termina a las ${planner.fmtClock(plan.end)}, se esperaba 10:44 o antes`);
+});
