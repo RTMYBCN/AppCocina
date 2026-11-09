@@ -1237,3 +1237,9 @@ input[type=range].rtmy-slider::-moz-range-track{
 @media (min-width:640px){
   .rtmy-plan-endtime{font-size:60px;}
 }
+
+.rtmy-plan-note details{margin-top:6px;}
+.rtmy-plan-note summary{cursor:pointer; font-weight:600;}
+.rtmy-plan-note ul{margin:6px 0 0; padding-left:18px;}
+.rtmy-plan-note ul.bare{list-style:none; padding-left:0; margin:0;}
+.rtmy-plan-note li{padding:1px 0;}

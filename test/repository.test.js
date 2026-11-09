@@ -43,9 +43,9 @@ test("recipes.json has valid unique recipes and executable stages", () => {
 
 test("HTML references the current cache-busted assets and accessibility regions", () => {
   const html = fs.readFileSync(path.join(root, "index.html"), "utf8");
-  assert.match(html, /styles\.css\?v=9/);
-  assert.match(html, /planner\.js\?v=9/);
-  assert.match(html, /app\.js\?v=9/);
+  assert.match(html, /styles\.css\?v=10/);
+  assert.match(html, /planner\.js\?v=10/);
+  assert.match(html, /app\.js\?v=10/);
   assert.match(html, /id="timer-bar"[^>]+aria-live="assertive"/);
 });
 

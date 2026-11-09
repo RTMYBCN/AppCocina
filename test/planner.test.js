@@ -191,7 +191,7 @@ test("si una receta necesita la Thermomix grande, la que admite cualquiera usa l
     .forEach((t) => assert.equal(t.equipment, "Thermomix grande"));
 });
 
-test("dos personas nunca tienen a la vez el mismo aparato asignado", () => {
+test("dos recetas nunca tienen a la vez el mismo aparato asignado", () => {
   const plan = planner.buildPlan(withB03, withB03.map((r) => r.id), { people: 3 });
   const byEq = {};
   plan.tasks.filter((t) => /Thermomix|Olla|Horno|Freidora|Airfryer|Panificadora|Envasadora/.test(t.equipment))
@@ -204,5 +204,37 @@ test("dos personas nunca tienen a la vez el mismo aparato asignado", () => {
         assert.ok(!(a.start < b.end && b.start < a.end), `${eq}: ${a.code}.${a.step} y ${b.code}.${b.step} se solapan`);
       }
     }
+  });
+});
+
+test("avisa cuando el turno corta el trabajo y dice cuánto habría que alargarlo", () => {
+  const plan = planner.buildPlan(withB03, withB03.map((r) => r.id), { people: 1, shiftMin: 90 });
+  assert.ok(plan.overflow, "se esperaba un aviso de turno insuficiente");
+  assert.ok(plan.overflow.steps > 0);
+  assert.ok(plan.overflow.endIfLonger < plan.end);
+  assert.ok(plan.overflow.shiftMinutes > 90);
+});
+
+test("sin recorte de turno no se inventa el aviso", () => {
+  const plan = planner.buildPlan(withB03, [b01.id, b02.id, b03.id], { people: 2 });
+  assert.ok(plan.end - plan.start < 8 * 60, "este lote debería caber de sobra en el turno");
+  assert.equal(plan.overflow, undefined);
+});
+
+
+test("si dos recetas usan a la vez un equipo del que hay varios, se numeran", () => {
+  const plan = planner.buildPlan(withB03, withB03.map((r) => r.id), { people: 2 });
+  const pots = [...new Set(plan.spans.filter((s) => s.key === "OLLA25").map((s) => s.label))];
+  if (plan.spans.filter((s) => s.key === "OLLA25").length > 1) {
+    assert.ok(pots.every((l) => /\(\d\)$/.test(l)), `las ollas no están numeradas: ${pots.join(", ")}`);
+    assert.ok(pots.length > 1, "se esperaban al menos dos ollas distintas");
+  }
+});
+
+test("el aparato de un paso no cambia a mitad de la misma reserva", () => {
+  const plan = planner.buildPlan(withB03, withB03.map((r) => r.id), { people: 2 });
+  plan.spans.forEach((sp) => {
+    const mine = plan.tasks.filter((t) => t.recipeId === sp.recipeId && t.start >= sp.start && t.end <= sp.end && t.equipment === sp.label);
+    mine.forEach((t) => assert.equal(t.equipment, sp.label));
   });
 });

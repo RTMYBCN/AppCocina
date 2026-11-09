@@ -154,7 +154,7 @@
             }
           ],
           "steps": [
-            "Pelar las cebollas, cortarlas en trozos medianos y colocarlas en el vaso de la Thermomix (grande o pequeña, la que esté libre).",
+            "Pelar las cebollas, cortarlas en trozos medianos y colocarlas en el vaso de la Thermomix.",
             "Picar 20 segundos, velocidad 4. Bajar con una espátula la cebolla de las paredes del vaso y picar otros 20 segundos, velocidad 4. La cebolla debe quedar en trozos muy pequeños.",
             "Agregar los 40 gramos de aceite y los 5 gramos de sal.",
             "Programar 30 minutos, 105 °C, velocidad 1, con el cubilete puesto del revés para que salga el vapor.",
@@ -437,6 +437,801 @@
         ]
       },
       "sourceSheet": "B03 SALMORRETA"
+    },
+    {
+      "id": "fumet-de-pescado",
+      "name": "FUMET DE PESCADO",
+      "code": "B04",
+      "section": "Preparaciones base",
+      "sectionOrder": 1,
+      "yieldAmount": 5160,
+      "yieldUnit": "g",
+      "stages": [
+        {
+          "title": "PROCEDIMIENTO",
+          "procedureTitle": null,
+          "description": "Fumet de pescado de roca que se utiliza para la preparación de las paellas de marisco.",
+          "ingredients": [
+            {
+              "qty": 700,
+              "unit": "g",
+              "name": "Cabeza de rape"
+            },
+            {
+              "qty": 700,
+              "unit": "g",
+              "name": "Pescado de roca"
+            },
+            {
+              "qty": 30,
+              "unit": "g",
+              "name": "Ajo pelado"
+            },
+            {
+              "qty": 400,
+              "unit": "g",
+              "name": "Cebolla blanca"
+            },
+            {
+              "qty": 200,
+              "unit": "g",
+              "name": "Puerro"
+            },
+            {
+              "qty": 150,
+              "unit": "g",
+              "name": "Zanahoria en cubos"
+            },
+            {
+              "qty": 150,
+              "unit": "g",
+              "name": "Tomate"
+            },
+            {
+              "qty": 160,
+              "unit": "ml",
+              "name": "Vino blanco de cocina"
+            },
+            {
+              "qty": 30,
+              "unit": "g",
+              "name": "Sal"
+            },
+            {
+              "qty": 3,
+              "unit": "g",
+              "name": "Laurel"
+            },
+            {
+              "qty": 5000,
+              "unit": "ml",
+              "name": "Agua"
+            }
+          ],
+          "steps": [
+            "Lavar bien el pescado.",
+            "En una olla grande, en el fuego de gas a fuego bajo, poner el pescado con la sal, el laurel y el agua.",
+            "Mientras se calienta el agua, pelar los ajos y cortar las verduras en trozos medianos.",
+            "Incorporar los ajos y las verduras a la olla.",
+            "Agregar el vino.",
+            "Una vez que comience a hervir, contabilizar 25 minutos y apagar el fuego.",
+            "Dejar reposar durante 10 minutos.",
+            "Colar el fumet con el chino."
+          ]
+        },
+        {
+          "title": "ENVASADO",
+          "procedureTitle": null,
+          "description": null,
+          "ingredients": [],
+          "steps": [
+            "Colocar la olla a presión de 25 litros con suficiente agua en su interior y la bandeja de metal a hervir.",
+            "En la misma olla a presión, sin tapar, sumergir en el agua hirviendo los botes de cristal, previamente lavados, donde se envasará el fumet.",
+            "Colocar también las tapas.",
+            "Dejar hervir los botes completamente sumergidos en el agua durante 10 minutos.",
+            "Mientras tanto, mantener el fumet a punto de hervor.",
+            "Una vez que hayan hervido los botes, sacarlos con cuidado del agua y rellenarlos con 420 gramos de fumet hirviendo.",
+            "Tapar con cuidado e introducirlos en la olla a presión, que tendrá el agua bien caliente en el interior.",
+            "Una vez colocados todos los botes dentro de la olla a presión, taparla con cuidado SIN LA VÁLVULA DE PRESIÓN COLOCADA.",
+            "Cuando el vapor salga de forma constante, contabilizar 3 minutos para asegurar que se expulsa todo el aire del interior.",
+            "Pasados los 3 minutos, colocar con cuidado la válvula y esperar a que llegue a 1 bar de presión.",
+            "Una vez que la presión se mantenga en 1 bar, contabilizar 70 minutos.",
+            "Pasado el tiempo, apagar el fuego. NO TOCAR NADA: no quitar la válvula ni enfriar la olla. Dejar que la presión baje de forma natural.",
+            "Una vez atemperada la olla, retirar la tapa y dejar los botes dentro del agua durante 20 minutos más.",
+            "Pasado ese tiempo, los botes habrán estabilizado la presión y podrán sacarse del agua. Etiquetar, fechar y guardar en el almacén, a temperatura ambiente, un máximo de 3 meses."
+          ]
+        }
+      ],
+      "plan": {
+        "phase": "Producción",
+        "shelfLifeDays": 90,
+        "storage": "Ambiente",
+        "requires": [],
+        "steps": [
+          {
+            "b": 1,
+            "s": 1,
+            "d": 1,
+            "eq": "Manual",
+            "t": "Activo",
+            "pm": 5,
+            "mm": null,
+            "sc": true
+          },
+          {
+            "b": 1,
+            "s": 2,
+            "d": 1,
+            "eq": "Olla grande (sin presión)",
+            "t": "Activo",
+            "pm": 5,
+            "mm": null,
+            "sc": false
+          },
+          {
+            "b": 1,
+            "s": 3,
+            "d": 1,
+            "eq": "Manual",
+            "t": "Activo",
+            "pm": 15,
+            "mm": null,
+            "sc": true
+          },
+          {
+            "b": 1,
+            "s": 4,
+            "d": 1,
+            "eq": "Olla grande (sin presión)",
+            "t": "Activo",
+            "pm": 1,
+            "mm": null,
+            "sc": false
+          },
+          {
+            "b": 1,
+            "s": 5,
+            "d": 1,
+            "eq": "Olla grande (sin presión)",
+            "t": "Activo",
+            "pm": 1,
+            "mm": null,
+            "sc": false
+          },
+          {
+            "b": 1,
+            "s": 6,
+            "d": 1,
+            "eq": "Olla grande (sin presión)",
+            "t": "Máquina",
+            "pm": null,
+            "mm": 25,
+            "sc": false,
+            "n": "PENDIENTE: el tiempo hasta el hervor depende de la cantidad; medirlo con dos tamaños de lote",
+            "pend": true
+          },
+          {
+            "b": 1,
+            "s": 7,
+            "d": 1,
+            "eq": "Olla grande (sin presión)",
+            "t": "Espera",
+            "pm": null,
+            "mm": 10,
+            "sc": false
+          },
+          {
+            "b": 1,
+            "s": 8,
+            "d": 1,
+            "eq": "Manual",
+            "t": "Activo",
+            "pm": 10,
+            "mm": null,
+            "sc": false
+          },
+          {
+            "b": 2,
+            "s": 1,
+            "d": 1,
+            "eq": "Olla 25 L",
+            "t": "Activo + espera",
+            "pm": 5,
+            "mm": null,
+            "sc": false,
+            "n": "PENDIENTE: medir el tiempo hasta que hierve el agua",
+            "pend": true
+          },
+          {
+            "b": 2,
+            "s": 2,
+            "d": 1,
+            "eq": "Olla 25 L",
+            "t": "Activo",
+            "pm": 5,
+            "mm": null,
+            "sc": true
+          },
+          {
+            "b": 2,
+            "s": 3,
+            "d": 1,
+            "eq": "Olla 25 L",
+            "t": "Activo",
+            "pm": 1,
+            "mm": null,
+            "sc": false
+          },
+          {
+            "b": 2,
+            "s": 4,
+            "d": 1,
+            "eq": "Olla 25 L",
+            "t": "Máquina",
+            "pm": null,
+            "mm": 10,
+            "sc": false
+          },
+          {
+            "b": 2,
+            "s": 5,
+            "d": 1,
+            "eq": "Olla grande (sin presión)",
+            "t": "Espera",
+            "pm": null,
+            "mm": 10,
+            "sc": false
+          },
+          {
+            "b": 2,
+            "s": 6,
+            "d": 1,
+            "eq": "Olla 25 L",
+            "t": "Activo",
+            "pm": 30,
+            "mm": null,
+            "sc": true,
+            "n": "30 min para unos 15 botes"
+          },
+          {
+            "b": 2,
+            "s": 7,
+            "d": 1,
+            "eq": "Olla 25 L",
+            "t": "Activo",
+            "pm": 5,
+            "mm": null,
+            "sc": true,
+            "n": "Caben 15 botes por olla de 25 L; un lote (unos 12 botes) entra de una vez"
+          },
+          {
+            "b": 2,
+            "s": 8,
+            "d": 1,
+            "eq": "Olla 25 L",
+            "t": "Activo",
+            "pm": 1,
+            "mm": null,
+            "sc": false
+          },
+          {
+            "b": 2,
+            "s": 9,
+            "d": 1,
+            "eq": "Olla 25 L",
+            "t": "Máquina",
+            "pm": null,
+            "mm": 3,
+            "sc": false,
+            "n": "PENDIENTE: más el tiempo hasta que sale vapor constante",
+            "pend": true
+          },
+          {
+            "b": 2,
+            "s": 10,
+            "d": 1,
+            "eq": "Olla 25 L",
+            "t": "Activo + espera",
+            "pm": 1,
+            "mm": null,
+            "sc": false,
+            "n": "PENDIENTE: medir el tiempo hasta llegar a 1 bar",
+            "pend": true
+          },
+          {
+            "b": 2,
+            "s": 11,
+            "d": 1,
+            "eq": "Olla 25 L",
+            "t": "Máquina",
+            "pm": null,
+            "mm": 70,
+            "sc": false
+          },
+          {
+            "b": 2,
+            "s": 12,
+            "d": 1,
+            "eq": "Olla 25 L",
+            "t": "Espera",
+            "pm": null,
+            "mm": null,
+            "sc": false,
+            "n": "PENDIENTE: medir el tiempo de bajada natural de la presión",
+            "pend": true
+          },
+          {
+            "b": 2,
+            "s": 13,
+            "d": 1,
+            "eq": "Olla 25 L",
+            "t": "Activo + espera",
+            "pm": 1,
+            "mm": 20,
+            "sc": false
+          },
+          {
+            "b": 2,
+            "s": 14,
+            "d": 1,
+            "eq": "Manual",
+            "t": "Activo",
+            "pm": 10,
+            "mm": null,
+            "sc": true
+          }
+        ],
+        "warnings": [
+          "fila 16 (2.1): falta tiempo para el tipo \"Activo + espera\".",
+          "fila 25 (2.10): falta tiempo para el tipo \"Activo + espera\".",
+          "fila 27 (2.12): falta tiempo para el tipo \"Espera\"."
+        ]
+      },
+      "sourceSheet": "B04 FUMET DE PESCADO"
+    },
+    {
+      "id": "caldo-de-pollo",
+      "name": "CALDO DE POLLO",
+      "code": "B05",
+      "section": "Preparaciones base",
+      "sectionOrder": 1,
+      "yieldAmount": 5160,
+      "yieldUnit": "g",
+      "stages": [
+        {
+          "title": "PROCEDIMIENTO",
+          "procedureTitle": null,
+          "description": "Caldo de pollo para la paella de pato (C25) y la paella de carrillera.",
+          "ingredients": [
+            {
+              "qty": 2500,
+              "unit": "g",
+              "name": "Carcasa de pollo"
+            },
+            {
+              "qty": 5000,
+              "unit": "ml",
+              "name": "Agua"
+            },
+            {
+              "qty": 300,
+              "unit": "g",
+              "name": "Cebolla blanca"
+            },
+            {
+              "qty": 150,
+              "unit": "g",
+              "name": "Puerro"
+            },
+            {
+              "qty": 150,
+              "unit": "g",
+              "name": "Zanahoria en cubos"
+            },
+            {
+              "qty": 20,
+              "unit": "g",
+              "name": "Ajo pelado"
+            },
+            {
+              "qty": 160,
+              "unit": "ml",
+              "name": "Vino blanco de cocina"
+            },
+            {
+              "qty": 30,
+              "unit": "g",
+              "name": "Sal"
+            },
+            {
+              "qty": 3,
+              "unit": "g",
+              "name": "Laurel"
+            }
+          ],
+          "steps": [
+            "Preparar la cesta de la airfryer: colocar aluminio en el fondo y las rejillas encima para facilitar la limpieza posterior.",
+            "Tostar las carcasas de pollo en la airfryer, 205 °C durante 20 minutos, sin aceite. Si es necesario, hacerlo en dos tandas.",
+            "Mientras se asan, pelar los ajos y cortar las verduras en trozos grandes.",
+            "Mientras tanto, poner en la olla a presión de 25 litros (la pequeña para tandas de hasta 2 litros de agua) el agua fría, las verduras, el ajo, la sal y el laurel.",
+            "Cuando estén tostadas, pasar las carcasas a la olla dejando escurrir la grasa en la cesta.",
+            "Retirar y DESECHAR toda la grasa que haya soltado el pollo en el aluminio y en la cesta. No se añade a la olla.",
+            "Agregar el vino directamente a la olla.",
+            "Comprobar que el contenido no supera los dos tercios de la olla.",
+            "Calentar la olla a fuego fuerte hasta que expulse el aire y salga vapor constante.",
+            "Colocar la válvula y, cuando suba la presión, bajar el nivel para que mantenga un seseo suave.",
+            "Cocinar 50 minutos desde que la olla alcanza la presión. Si es vitro, nivel 5.",
+            "Apagar y dejar que la presión baje sola.",
+            "Colar con el chino.",
+            "Pasar el caldo a recipientes y dejar atemperar 1 hora.",
+            "DESGRASAR: retirar la capa de grasa de la superficie con una espumadera y desecharla.",
+            "Antes de envasar, volver a llevar el caldo a hervor en la misma olla en que se cocinó."
+          ]
+        },
+        {
+          "title": "ENVASADO",
+          "procedureTitle": null,
+          "description": null,
+          "ingredients": [],
+          "steps": [
+            "Colocar la olla a presión de 25 litros con suficiente agua en su interior y la bandeja de metal a hervir.",
+            "En la misma olla a presión, sin tapar, sumergir en el agua hirviendo los botes de cristal, previamente lavados, donde se envasará el caldo.",
+            "Colocar también las tapas.",
+            "Dejar hervir los botes completamente sumergidos en el agua durante 10 minutos.",
+            "Mientras tanto, mantener el caldo a punto de hervor.",
+            "Una vez que hayan hervido los botes, sacarlos con cuidado del agua y rellenarlos con 420 gramos de caldo hirviendo.",
+            "Tapar con cuidado e introducirlos en la olla a presión, que tendrá el agua bien caliente en el interior.",
+            "Una vez colocados todos los botes dentro de la olla a presión, taparla con cuidado SIN LA VÁLVULA DE PRESIÓN COLOCADA.",
+            "Cuando el vapor salga de forma constante, contabilizar 3 minutos para asegurar que se expulsa todo el aire del interior.",
+            "Pasados los 3 minutos, colocar con cuidado la válvula y esperar a que llegue a 1 bar de presión.",
+            "Una vez que la presión se mantenga en 1 bar, contabilizar 25 minutos.",
+            "Pasado el tiempo, apagar el fuego. NO TOCAR NADA: no quitar la válvula ni enfriar la olla. Dejar que la presión baje de forma natural.",
+            "Una vez atemperada la olla, retirar la tapa y dejar los botes dentro del agua durante 20 minutos más.",
+            "Pasado ese tiempo, los botes habrán estabilizado la presión y podrán sacarse del agua. Etiquetar, fechar y guardar en el almacén, a temperatura ambiente, un máximo de 3 meses."
+          ]
+        }
+      ],
+      "plan": {
+        "phase": "Producción",
+        "shelfLifeDays": 90,
+        "storage": "Ambiente",
+        "requires": [],
+        "steps": [
+          {
+            "b": 1,
+            "s": 1,
+            "d": 1,
+            "eq": "Airfryer",
+            "t": "Activo",
+            "pm": 5,
+            "mm": null,
+            "sc": false
+          },
+          {
+            "b": 1,
+            "s": 2,
+            "d": 1,
+            "eq": "Airfryer",
+            "t": "Máquina",
+            "pm": null,
+            "mm": 20,
+            "sc": false,
+            "rp": "POR TANDA",
+            "ub": 2000,
+            "n": "2.500 g de carcasa = 2 tandas"
+          },
+          {
+            "b": 1,
+            "s": 3,
+            "d": 1,
+            "eq": "Manual",
+            "t": "Activo",
+            "pm": 10,
+            "mm": null,
+            "sc": true
+          },
+          {
+            "b": 1,
+            "s": 4,
+            "d": 1,
+            "eq": "Olla 25 L",
+            "t": "Activo",
+            "pm": 5,
+            "mm": null,
+            "sc": false
+          },
+          {
+            "b": 1,
+            "s": 5,
+            "d": 1,
+            "eq": "Olla 25 L",
+            "t": "Activo",
+            "pm": 5,
+            "mm": null,
+            "sc": false
+          },
+          {
+            "b": 1,
+            "s": 6,
+            "d": 1,
+            "eq": "Airfryer",
+            "t": "Activo",
+            "pm": 5,
+            "mm": null,
+            "sc": false
+          },
+          {
+            "b": 1,
+            "s": 7,
+            "d": 1,
+            "eq": "Olla 25 L",
+            "t": "Activo",
+            "pm": 1,
+            "mm": null,
+            "sc": false
+          },
+          {
+            "b": 1,
+            "s": 8,
+            "d": 1,
+            "eq": "Olla 25 L",
+            "t": "Activo",
+            "pm": 1,
+            "mm": null,
+            "sc": false
+          },
+          {
+            "b": 1,
+            "s": 9,
+            "d": 1,
+            "eq": "Olla 25 L",
+            "t": "Máquina",
+            "pm": null,
+            "mm": null,
+            "sc": false,
+            "n": "PENDIENTE: medir el tiempo hasta que sale vapor constante",
+            "pend": true
+          },
+          {
+            "b": 1,
+            "s": 10,
+            "d": 1,
+            "eq": "Olla 25 L",
+            "t": "Activo + espera",
+            "pm": 1,
+            "mm": null,
+            "sc": false,
+            "n": "PENDIENTE: medir el tiempo hasta alcanzar la presión",
+            "pend": true
+          },
+          {
+            "b": 1,
+            "s": 11,
+            "d": 1,
+            "eq": "Olla 25 L",
+            "t": "Máquina",
+            "pm": null,
+            "mm": 50,
+            "sc": false
+          },
+          {
+            "b": 1,
+            "s": 12,
+            "d": 1,
+            "eq": "Olla 25 L",
+            "t": "Espera",
+            "pm": null,
+            "mm": null,
+            "sc": false,
+            "n": "PENDIENTE: medir el tiempo de bajada natural de la presión",
+            "pend": true
+          },
+          {
+            "b": 1,
+            "s": 13,
+            "d": 1,
+            "eq": "Manual",
+            "t": "Activo",
+            "pm": 10,
+            "mm": null,
+            "sc": false
+          },
+          {
+            "b": 1,
+            "s": 14,
+            "d": 1,
+            "eq": "Manual",
+            "t": "Activo + espera",
+            "pm": 5,
+            "mm": 60,
+            "sc": true,
+            "n": "Atemperado desatendido; se desgrasa después de 1 hora"
+          },
+          {
+            "b": 1,
+            "s": 15,
+            "d": 1,
+            "eq": "Manual",
+            "t": "Activo",
+            "pm": 5,
+            "mm": null,
+            "sc": false
+          },
+          {
+            "b": 1,
+            "s": 16,
+            "d": 1,
+            "eq": "Olla 25 L",
+            "t": "Máquina",
+            "pm": null,
+            "mm": null,
+            "sc": false,
+            "n": "PENDIENTE: el tiempo hasta el hervor depende de la cantidad",
+            "pend": true
+          },
+          {
+            "b": 2,
+            "s": 1,
+            "d": 1,
+            "eq": "Olla 25 L",
+            "t": "Activo + espera",
+            "pm": 5,
+            "mm": null,
+            "sc": false,
+            "n": "PENDIENTE: medir el tiempo hasta que hierve el agua",
+            "pend": true
+          },
+          {
+            "b": 2,
+            "s": 2,
+            "d": 1,
+            "eq": "Olla 25 L",
+            "t": "Activo",
+            "pm": 5,
+            "mm": null,
+            "sc": true
+          },
+          {
+            "b": 2,
+            "s": 3,
+            "d": 1,
+            "eq": "Olla 25 L",
+            "t": "Activo",
+            "pm": 1,
+            "mm": null,
+            "sc": false
+          },
+          {
+            "b": 2,
+            "s": 4,
+            "d": 1,
+            "eq": "Olla 25 L",
+            "t": "Máquina",
+            "pm": null,
+            "mm": 10,
+            "sc": false
+          },
+          {
+            "b": 2,
+            "s": 5,
+            "d": 1,
+            "eq": "Olla 25 L",
+            "t": "Espera",
+            "pm": null,
+            "mm": 10,
+            "sc": false,
+            "n": "El caldo se mantiene caliente en la olla donde se cocinó"
+          },
+          {
+            "b": 2,
+            "s": 6,
+            "d": 1,
+            "eq": "Olla 25 L",
+            "t": "Activo",
+            "pm": 30,
+            "mm": null,
+            "sc": true,
+            "n": "30 min para unos 15 botes"
+          },
+          {
+            "b": 2,
+            "s": 7,
+            "d": 1,
+            "eq": "Olla 25 L",
+            "t": "Activo",
+            "pm": 5,
+            "mm": null,
+            "sc": true,
+            "n": "Caben 15 botes por olla de 25 L; un lote (unos 12 botes) entra de una vez"
+          },
+          {
+            "b": 2,
+            "s": 8,
+            "d": 1,
+            "eq": "Olla 25 L",
+            "t": "Activo",
+            "pm": 1,
+            "mm": null,
+            "sc": false
+          },
+          {
+            "b": 2,
+            "s": 9,
+            "d": 1,
+            "eq": "Olla 25 L",
+            "t": "Máquina",
+            "pm": null,
+            "mm": 3,
+            "sc": false,
+            "n": "PENDIENTE: más el tiempo hasta que sale vapor constante",
+            "pend": true
+          },
+          {
+            "b": 2,
+            "s": 10,
+            "d": 1,
+            "eq": "Olla 25 L",
+            "t": "Activo + espera",
+            "pm": 1,
+            "mm": null,
+            "sc": false,
+            "n": "PENDIENTE: medir el tiempo hasta llegar a 1 bar",
+            "pend": true
+          },
+          {
+            "b": 2,
+            "s": 11,
+            "d": 1,
+            "eq": "Olla 25 L",
+            "t": "Máquina",
+            "pm": null,
+            "mm": 25,
+            "sc": false
+          },
+          {
+            "b": 2,
+            "s": 12,
+            "d": 1,
+            "eq": "Olla 25 L",
+            "t": "Espera",
+            "pm": null,
+            "mm": null,
+            "sc": false,
+            "n": "PENDIENTE: medir el tiempo de bajada natural de la presión",
+            "pend": true
+          },
+          {
+            "b": 2,
+            "s": 13,
+            "d": 1,
+            "eq": "Olla 25 L",
+            "t": "Activo + espera",
+            "pm": 1,
+            "mm": 20,
+            "sc": false
+          },
+          {
+            "b": 2,
+            "s": 14,
+            "d": 1,
+            "eq": "Manual",
+            "t": "Activo",
+            "pm": 10,
+            "mm": null,
+            "sc": true
+          }
+        ],
+        "warnings": [
+          "fila 16 (1.9): falta tiempo para el tipo \"Máquina\".",
+          "fila 17 (1.10): falta tiempo para el tipo \"Activo + espera\".",
+          "fila 19 (1.12): falta tiempo para el tipo \"Espera\".",
+          "fila 23 (1.16): falta tiempo para el tipo \"Máquina\".",
+          "fila 24 (2.1): falta tiempo para el tipo \"Activo + espera\".",
+          "fila 33 (2.10): falta tiempo para el tipo \"Activo + espera\".",
+          "fila 35 (2.12): falta tiempo para el tipo \"Espera\"."
+        ]
+      },
+      "sourceSheet": "B05 CALDO DE POLLO"
     }
   ]
 }

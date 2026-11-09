@@ -1802,10 +1802,7 @@ function planTimelineHtml(plan, colors) {
       .join("");
     lanes.push({ label: "Persona " + (p + 1), bars });
   }
-  const eqLabels = [];
-  plan.spans.forEach((sp) => {
-    if (!eqLabels.includes(sp.label)) eqLabels.push(sp.label);
-  });
+  const eqLabels = [...new Set(plan.spans.map((sp) => sp.label))].sort((a, b) => a.localeCompare(b, "es"));
   eqLabels.forEach((label) => {
     const bars = plan.spans
       .filter((sp) => sp.label === label)
@@ -1849,23 +1846,48 @@ function planTimelineHtml(plan, colors) {
 function planNotesHtml(plan) {
   const notes = [];
   if (plan.assumptions.length) {
+    const codes = [...new Set(plan.assumptions.map((x) => x.code))];
+    const list = plan.assumptions
+      .map((x) => `<li>${escapeHtml(x.code)} · bloque ${x.block}, paso ${x.step} (${escapeHtml(x.type)})</li>`)
+      .join("");
     notes.push(
-      `<div class="rtmy-plan-note warn"><b>${plan.assumptions.length} paso${plan.assumptions.length === 1 ? "" : "s"} sin tiempo en la ficha.</b> Se han supuesto ${plan.options.assumedPersonMin} min de trabajo, ${plan.options.assumedMachineMin} min de máquina o ${plan.options.assumedWaitMin} min de espera (se marcan con ~).</div>`
+      `<div class="rtmy-plan-note warn">
+        <b>${plan.assumptions.length} paso${plan.assumptions.length === 1 ? "" : "s"} sin tiempo en la ficha</b> (${codes.map(escapeHtml).join(", ")}).
+        Se han supuesto ${plan.options.assumedWaitMin} min de espera o ${plan.options.assumedMachineMin} min de máquina, así que las horas de esas recetas son orientativas (se marcan con ~).
+        <details><summary>Ver cuáles</summary><ul>${list}</ul></details>
+      </div>`
+    );
+  }
+  if (plan.overflow) {
+    const h = Math.floor(plan.overflow.shiftMinutes / 60);
+    const m = plan.overflow.shiftMinutes % 60;
+    notes.push(
+      `<div class="rtmy-plan-note info"><b>${plan.overflow.steps} paso${plan.overflow.steps === 1 ? "" : "s"} no cabe${plan.overflow.steps === 1 ? "" : "n"} en el turno</b> y pasa${plan.overflow.steps === 1 ? "" : "n"} al día siguiente. Alargando el turno a ${h} h${m ? " " + m + " min" : ""} todo terminaría a las ${RTMYPlanner.fmtClock(plan.overflow.endIfLonger)} del mismo día.</div>`
     );
   }
   if (plan.stock.length) {
-    const names = [...new Set(plan.stock.map((s) => titleCase(s.name)))];
+    const names = [...new Set(plan.stock.map((x) => titleCase(x.name)))];
     notes.push(`<div class="rtmy-plan-note stock"><b>En stock (no se prepara hoy):</b> ${names.map(escapeHtml).join(", ")}.</div>`);
   }
   const queues = Object.entries(plan.blocked).filter(([, v]) => v > 0);
   if (queues.some(([k]) => k === "Personas")) {
     notes.push(`<div class="rtmy-plan-note info">Hay pasos esperando a que quede una persona libre. Con una persona más se adelantaría el final.</div>`);
   }
-  const eq = queues.filter(([k]) => k !== "Personas").sort((a, b) => b[1] - a[1]);
+  const eq = queues.filter(([k]) => k !== "Personas").sort((x, y) => y[1] - x[1]);
   if (eq.length) {
     notes.push(`<div class="rtmy-plan-note info"><b>Cola por equipo:</b> ${eq.slice(0, 3).map(([k]) => escapeHtml(k)).join(", ")}. Dos pasos necesitaban la misma máquina a la vez, así que uno espera.</div>`);
   }
-  plan.warnings.forEach((w) => notes.push(`<div class="rtmy-plan-note warn">${escapeHtml(w)}</div>`));
+  // Avisos del Excel. Los de "falta tiempo" ya están resumidos arriba, así que
+  // no se repiten; el resto se pliega si son muchos.
+  const warns = plan.warnings.filter((w) => !/falta tiempo para el tipo/i.test(w));
+  if (warns.length) {
+    const body = warns.map((w) => `<li>${escapeHtml(w)}</li>`).join("");
+    notes.push(
+      warns.length > 2
+        ? `<div class="rtmy-plan-note warn"><b>${warns.length} avisos en los datos del Excel.</b><details><summary>Ver detalle</summary><ul>${body}</ul></details></div>`
+        : `<div class="rtmy-plan-note warn"><ul class="bare">${body}</ul></div>`
+    );
+  }
   return notes.join("");
 }
 
@@ -1909,7 +1931,12 @@ function renderPlan() {
     <div class="rtmy-panel rtmy-plan-summary">
       <div class="rtmy-plan-kicker">${endDay > 1 ? "Termina el día " + endDay + " a las" : "Todo listo a las"}</div>
       <div class="rtmy-plan-endtime">${RTMYPlanner.fmtClock(plan.end)}</div>
-      <div class="rtmy-plan-meta">${RTMYPlanner.fmtDuration(plan.end - plan.start)} desde las ${RTMYPlanner.fmtClock(plan.start)} · ${plan.persons} persona${plan.persons === 1 ? "" : "s"} · ${plan.tasks.length} pasos</div>
+      <div class="rtmy-plan-meta">${
+        // Con varios días, la duración total incluiría la noche: engaña más que informa.
+        endDay > 1
+          ? `Empieza a las ${RTMYPlanner.fmtClock(plan.start)}`
+          : `${RTMYPlanner.fmtDuration(plan.end - plan.start)} desde las ${RTMYPlanner.fmtClock(plan.start)}`
+      } · ${plan.persons} persona${plan.persons === 1 ? "" : "s"} · ${plan.tasks.length} pasos</div>
       <ul class="rtmy-plan-recipes">${recipesHtml}</ul>
       <div class="rtmy-plan-progress" role="progressbar" aria-valuemin="0" aria-valuemax="${plan.tasks.length}" aria-valuenow="${doneCount}"><span style="width:${Math.round((doneCount / plan.tasks.length) * 100)}%"></span></div>
       <div class="rtmy-plan-progress-text">${doneCount} de ${plan.tasks.length} pasos hechos</div>

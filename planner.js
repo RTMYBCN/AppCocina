@@ -175,9 +175,10 @@
     const start = new Array(n).fill(null);
     const end = new Array(n).fill(null);
     const person = new Array(n).fill(null);
-    const sp = spans.map(() => ({ unit: null, start: null, end: null, active: false }));
+    const sp = spans.map(() => ({ unit: null, slot: 0, start: null, end: null, active: false }));
     const held = {};
-    Object.keys(POOLS).forEach((k) => (held[k] = 0));
+    Object.keys(POOLS).forEach((k) => (held[k] = new Array(POOLS[k]).fill(false)));
+    const freeSlot = (k) => held[k].indexOf(false);
     const busy = new Array(people).fill(0);
     const freeAt = new Array(people).fill(0);
     const lastPerson = new Map();
@@ -191,7 +192,7 @@
       spans.forEach((s, i) => {
         const st = sp[i];
         if (st.active && end[s.last] !== null && end[s.last] <= t + EPS) {
-          held[st.unit] -= 1;
+          held[st.unit][st.slot] = false;
           st.active = false;
           st.end = end[s.last];
         }
@@ -222,15 +223,17 @@
           const idx = ctx.spans.indexOf(s);
           let unit = s.key;
           if (s.key === "TMX_ANY") {
-            unit = held.TMX_P < POOLS.TMX_P ? "TMX_P" : anyStrict || held.TMX_G >= POOLS.TMX_G ? null : "TMX_G";
+            unit = freeSlot("TMX_P") >= 0 ? "TMX_P" : anyStrict || freeSlot("TMX_G") < 0 ? null : "TMX_G";
           }
-          if (unit === null || held[unit] >= POOLS[unit]) {
+          const slot = unit === null ? -1 : freeSlot(unit);
+          if (slot < 0) {
             const label = LABELS[s.key] || (s.key === "TMX_ANY" ? "Thermomix" : s.key);
             blocked[label] = (blocked[label] || 0) + 1;
             continue;
           }
-          held[unit] += 1;
+          held[unit][slot] = true;
           sp[idx].unit = unit;
+          sp[idx].slot = slot;
           sp[idx].active = true;
           sp[idx].start = t;
         }
@@ -411,24 +414,54 @@
     });
     spans.forEach((sp, i) => {
       sp.unit = best.spans[i].unit;
+      sp.slot = best.spans[i].slot;
       sp.start = best.spans[i].start;
       sp.end = best.spans[i].end === null ? tasks[sp.last].end : best.spans[i].end;
-      // "Thermomix (cualquiera)" en la ficha -> el aparato concreto que le toca,
-      // para que dos personas no crean que pueden usar el mismo.
-      if (sp.unit && AMBIGUOUS[sp.key]) {
-        const label = LABELS[sp.unit];
-        if (label) sp.ids.forEach((id) => (tasks[id].equipment = label));
-      }
+    });
+    // Nombre del aparato que de verdad le toca a cada paso. Si de un mismo
+    // equipo hay varios y dos recetas lo usan a la vez, se numeran ("Olla 25 L
+    // (1)" y "(2)"), para que nadie vaya a por el que ya está ocupado.
+    const numbered = {};
+    spans.forEach((a) => {
+      if (!a.unit || POOLS[a.unit] < 2) return;
+      spans.forEach((b) => {
+        if (a === b || b.unit !== a.unit) return;
+        if (a.start < b.end && b.start < a.end) numbered[a.unit] = true;
+      });
+    });
+    spans.forEach((sp) => {
+      if (!sp.unit) return;
+      const base = LABELS[sp.unit];
+      if (!base) return;
+      sp.label = numbered[sp.unit] ? `${base} (${sp.slot + 1})` : base;
+      if (AMBIGUOUS[sp.key] || numbered[sp.unit]) sp.ids.forEach((id) => (tasks[id].equipment = sp.label));
     });
     const busy = best.busy.concat(new Array(Math.max(0, opts.people - best.busy.length)).fill(0));
     const blocked = best.blocked;
+
+    // ¿Se va trabajo al día siguiente solo porque no cabe en el turno? Si es así,
+    // se calcula cuánto habría que alargarlo para terminarlo el mismo día.
+    const pushed = tasks.filter((t) => Math.floor(best.start[t.id] / DAY) + 1 > t.day).length;
+    if (pushed) {
+      const wide = simulate(
+        Object.assign({}, ctx, { opts: Object.assign({}, opts, { shiftMin: DAY - opts.startMin }) }),
+        cp, opts.people, null, false
+      );
+      if (wide && wide.last < best.last) {
+        result.overflow = {
+          steps: pushed,
+          endIfLonger: wide.last,
+          shiftMinutes: Math.ceil((wide.last - opts.startMin) % DAY === 0 ? opts.shiftMin : wide.last - opts.startMin),
+        };
+      }
+    }
 
     // ---- resultado
     const done = tasks.filter((t) => t.start !== null);
     result.tasks = done.sort((a, b) => a.start - b.start || a.id - b.id);
     result.spans = spans
       .filter((s) => s.start !== null)
-      .map((s) => ({ key: s.unit || s.key, label: LABELS[s.unit || s.key] || s.key, recipeId: s.recipeId, code: s.code, start: s.start, end: s.end }));
+      .map((s) => ({ key: s.unit || s.key, label: s.label || LABELS[s.unit || s.key] || s.key, recipeId: s.recipeId, code: s.code, start: s.start, end: s.end }));
     result.blocked = blocked;
     result.busy = busy;
     result.start = Math.min(...done.map((t) => t.start));
