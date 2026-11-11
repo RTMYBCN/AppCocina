@@ -192,6 +192,58 @@ function applyRecipes(data, source, fetchedAt) {
   state.fetchedAt = fetchedAt || Date.now();
   state.dataSource = source;
   state.refreshError = null;
+  relinkRecipeRefs();
+}
+
+/* Cada preparación abierta guarda SU PROPIA copia de la ficha, para que al
+   cocinero no se le quede el paso en blanco si se cae la red. El problema:
+   esa copia se guarda en localStorage y sobrevive a cerrar la app, así que
+   una preparación empezada en octubre seguía mostrando la ficha de octubre
+   para siempre, aunque el Sheet ya tuviera otra y se pulsara "Actualizar".
+   Al llegar datos nuevos se vuelven a enganchar a la ficha de verdad. */
+function relinkRecipeRefs() {
+  let changed = false;
+  state.sessions.forEach((session) => {
+    const fresh = findRecipe(session.id);
+    // Si la ficha ha desaparecido del Sheet se conserva la copia: mejor eso
+    // que dejar al cocinero a medias sin pasos.
+    if (!fresh || !fresh.stages || !fresh.stages.length) return;
+    const same = JSON.stringify(fresh.stages) === JSON.stringify((session.recipe || {}).stages);
+    session.recipe = fresh;
+    if (same) return;
+    changed = true;
+    // La ficha ha cambiado: se reconstruye el recorrido y se intenta dejarle
+    // en el mismo paso. Si ese paso ya no existe, en el más cercano que sí.
+    const at = (session.flow || [])[session.flowPos] || null;
+    const from = Math.min(session.startStageIndex || 0, fresh.stages.length - 1);
+    session.startStageIndex = from;
+    session.flow = buildFlow(fresh, from);
+    let idx = -1;
+    if (at) {
+      idx = session.flow.findIndex(
+        (x) => x.stageIndex === at.stageIndex && x.stepIndexInStage === at.stepIndexInStage
+      );
+      if (idx < 0) idx = session.flow.findIndex((x) => x.stageIndex === at.stageIndex);
+    }
+    if (idx < 0) idx = session.flowPos || 0;
+    session.flowPos = Math.max(0, Math.min(idx, session.flow.length - 1));
+    // Se avisa en pantalla: el cocinero tiene que saber que le han cambiado
+    // la ficha debajo, no descubrirlo a medio paso.
+    session.recipeChanged = true;
+  });
+  // La ficha abierta es OTRA referencia al objeto viejo: si no se reengancha,
+  // el botón "Actualizar" trae los datos nuevos pero la pantalla sigue
+  // pintando los de antes.
+  if (state.currentRecipe) {
+    const fresh = findRecipe(state.currentRecipe.id);
+    if (fresh) state.currentRecipe = fresh;
+  }
+  if (state.finishedSession) {
+    const fresh = findRecipe(state.finishedSession.recipe && state.finishedSession.recipe.id);
+    if (fresh) state.finishedSession.recipe = fresh;
+  }
+  if (state.sessions.length) saveRuntimeState();
+  return changed;
 }
 
 /* ---------------- Data loading ----------------
@@ -297,7 +349,10 @@ async function loadRecipes(opts) {
     // Detail/steps/final keep whatever was already on screen so an
     // in-progress recipe never changes under the cook's hands; the fresh
     // data is already in state.recipes for the next time they navigate.
-    if (state.view === "list" || root.dataset.rendered !== "1") render();
+    // Con "Actualizar" el cocinero ha pedido ver los datos nuevos: se repinta
+    // también la ficha o el paso que tenga abierto (antes solo el listado, y
+    // parecía que el botón no hacía nada).
+    if (state.view === "list" || manual || root.dataset.rendered !== "1") render();
   } catch (err) {
     if (!finish()) return;
     if (!state.recipes.length) {
@@ -1149,6 +1204,14 @@ window.onScaleInput = function (val) {
   renderDetail();
 };
 
+window.dismissRecipeChanged = function () {
+  const session = activeSession();
+  if (!session) return;
+  session.recipeChanged = false;
+  saveRuntimeState();
+  renderSteps();
+};
+
 function renderSteps() {
   const session = activeSession();
   if (!session) {
@@ -1204,6 +1267,14 @@ function renderSteps() {
     <div class="rtmy-progress">${dots}</div>
     <div class="rtmy-stage-heading">${escapeHtml(titleCase(stage.title))}</div>
     <div class="rtmy-step-count">Paso ${item.stepIndexInStage + 1} de ${item.totalInStage}</div>
+    ${
+      session.recipeChanged
+        ? `<div class="rtmy-warning" style="display:flex;width:100%;box-sizing:border-box;justify-content:space-between;">
+      <span>La ficha se ha actualizado. Revisa el paso antes de seguir.</span>
+      <button class="chip-close" onclick="dismissRecipeChanged()" aria-label="Entendido">✕</button>
+    </div>`
+        : ""
+    }
     ${
       item.stepIndexInStage === 0 && item.stageIndex !== 0 && stage.ingredients.length
         ? `
@@ -2044,6 +2115,9 @@ window.addEventListener("hashchange", onHashChange);
 
 loadRecipes().then(() => {
   restoreRuntimeState();
+  // Las preparaciones abiertas se restauran DESPUÉS de cargar las recetas,
+  // así que aquí es donde hay que engancharlas a la ficha de verdad.
+  relinkRecipeRefs();
   restorePlanState();
   if (state.timers.some((timer) => timer.running && !timer.done)) ensureTimerTick();
   renderTimerBar();

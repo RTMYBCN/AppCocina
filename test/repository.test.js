@@ -43,10 +43,10 @@ test("recipes.json has valid unique recipes and executable stages", () => {
 
 test("HTML references the current cache-busted assets and accessibility regions", () => {
   const html = fs.readFileSync(path.join(root, "index.html"), "utf8");
-  assert.match(html, /styles\.css\?v=16/);
-  assert.match(html, /planner\.js\?v=16/);
-  assert.match(html, /app\.js\?v=16/);
-  assert.match(html, /text\.js\?v=16/);
+  assert.match(html, /styles\.css\?v=17/);
+  assert.match(html, /planner\.js\?v=17/);
+  assert.match(html, /app\.js\?v=17/);
+  assert.match(html, /text\.js\?v=17/);
   assert.match(html, /id="timer-bar"[^>]+aria-live="assertive"/);
 });
 
@@ -101,6 +101,21 @@ test("each timer belongs to the cook who started it", () => {
   assert.match(source, /rtmy-plan-timers\[data-person\]/);
   assert.match(source, /rtmy-timer-who/); // la barra de abajo marca P1 / P2
   assert.match(css, /\.rtmy-plan-timer-chip/);
+});
+
+test("an open preparation follows the recipe when the sheet changes", () => {
+  const source = fs.readFileSync(path.join(root, "app.js"), "utf8");
+  // la copia congelada de la ficha que guarda cada sesión se vuelve a enganchar
+  assert.match(source, /function relinkRecipeRefs\(\)/);
+  assert.match(source, /session\.recipe = fresh;/);
+  assert.match(source, /session\.recipeChanged = true;/);
+  // también la ficha que está en pantalla y la sesión terminada
+  assert.match(source, /state\.currentRecipe = fresh;/);
+  // y se reengancha al restaurar, que ocurre DESPUÉS de cargar las recetas
+  assert.match(source, /restoreRuntimeState\(\);[\s\S]{0,240}relinkRecipeRefs\(\);/);
+  // "Actualizar" repinta también la ficha abierta
+  assert.match(source, /state\.view === "list" \|\| manual \|\|/);
+  assert.match(source, /La ficha se ha actualizado/);
 });
 
 test("the bottom bar splits into one lane per cook while the plan is open", () => {
