@@ -330,11 +330,7 @@ function findRecipe(id) {
   return state.recipes.find((r) => r.id === id) || null;
 }
 
-function fmtQty(n) {
-  if (n === null || n === undefined) return "";
-  const rounded = n >= 10 ? Math.round(n) : Math.round(n * 10) / 10;
-  return rounded.toString().replace(".", ",");
-}
+const fmtQty = RTMYText.fmtQty;
 
 // "SALMORRETA RTMY" -> "Salmorreta RTMY". Las siglas van en una lista cerrada:
 // una regla por longitud confundiría "DE" o "PAN" con siglas.
@@ -617,94 +613,12 @@ function renderTimerBar() {
   timerBarEl.innerHTML = `<div class="rtmy-timer-grid">${lanes}</div>${loose.map((t) => timerRowHtml(t, false)).join("")}`;
 }
 
-/* ---------------- Ingredient quantities in step text ----------------
-   "saltear la cebolla" -> "saltear los 210 g de cebolla", pulling the
-   number straight from the (already scaled) ingredient list — never a
-   guess, always the real figure for that batch.
-
-   Matching strategy: use each ingredient's first word as its "key" (the
-   table often reads "Cebolla blanca" while the step just says "la
-   cebolla"). If two ingredients in the same list share a first word
-   (e.g. two "Aceite ..."), that key is skipped entirely rather than
-   guessing which one a step means. Only the first mention of each
-   ingredient in a step gets annotated.
-------------------------------------------------- */
-
-const UNIT_GENDER = {
-  g: "m", gramo: "m", gramos: "m",
-  kg: "m", kilo: "m", kilos: "m",
-  ml: "m", mililitro: "m", mililitros: "m",
-  cl: "m", l: "m", litro: "m", litros: "m",
-  ud: "f", "u.": "f", unidad: "f", unidades: "f",
-  loncha: "f", lonchas: "f",
-};
-
-function articleFor(unit, plural) {
-  const gender = UNIT_GENDER[(unit || "").toLowerCase()] || "m";
-  if (gender === "f") return plural ? "las" : "la";
-  return plural ? "los" : "el";
-}
-
-function escapeRegex(s) {
-  return s.replace(/[.*+?^${}()|[\]\\]/g, "\\$&");
-}
-
-function ingredientKeyTerm(name) {
-  const word = name.trim().split(/\s+/)[0];
-  return word.toLowerCase();
-}
-
-// Generic culinary nouns that regularly show up in prose meaning "the
-// mix/prep I already made" rather than the specific named ingredient
-// (e.g. "Base de tortilla RTMY" the ingredient vs. "la base de patata"
-// meaning the potato mixture). Too ambiguous to auto-annotate safely.
-const GENERIC_KEY_BLOCKLIST = new Set([
-  "base", "salsa", "mezcla", "masa", "relleno", "caldo", "fondo", "reduccion", "reducción",
-]);
-
-function injectIngredientQuantities(text, ingredients) {
-  if (!ingredients || !ingredients.length) return text;
-
-  const byKey = new Map();
-  ingredients.forEach((ing) => {
-    const key = ingredientKeyTerm(ing.name);
-    if (key.length < 3 || GENERIC_KEY_BLOCKLIST.has(key)) return;
-    if (!byKey.has(key)) byKey.set(key, []);
-    byKey.get(key).push(ing);
-  });
-
-  let result = text;
-  byKey.forEach((list, key) => {
-    if (list.length > 1) return; // ambiguous shared first word — don't guess
-    const ing = list[0];
-    // \b on both ends: without the trailing boundary, a short key like
-    // "sal" would also match inside an unrelated word like "saltear".
-    // The optional (es|s) only covers simple Spanish pluralization. The
-    // lookbehind skips mentions that already carry their own explicit
-    // quantity (e.g. "embolsar en raciones de 150 gramos de carrilleras")
-    // so we don't tack the full batch weight onto a portion size.
-    // Trailing \s* (not \s+) on the lookbehind: the regex engine tries a
-    // match starting right at the space before the key as well as right
-    // after it, so the exclusion has to fire at either boundary or the
-    // "at the space" attempt slips through as the leftmost match.
-    const re = new RegExp(
-      `(?<!\\d+\\s*(?:g|gramos?|kg|kilos?|ml|mililitros?|ud|unidades?)\\s+de\\s*)(el|la|los|las)?(\\s*)\\b(${escapeRegex(key)}(?:es|s)?)\\b`,
-      "i"
-    );
-    const m = result.match(re);
-    if (!m) return;
-    const qtyLabel = `${fmtQty(ing.qty)} ${ing.unit}`;
-    const plural = Math.abs(ing.qty - 1) > 0.001;
-    const matchedWord = m[3];
-    // No article to swap out (e.g. "con sal", "por harina"): the leading
-    // whitespace (m[2]) was consumed by the match too, so it must be put
-    // back or the words on either side run together ("consal").
-    const replacement = m[1]
-      ? `${articleFor(ing.unit, plural)} ${qtyLabel} de ${matchedWord}`
-      : `${m[2]}${matchedWord} (${qtyLabel})`;
-    result = result.replace(m[0], replacement);
-  });
-  return result;
+/* Las cantidades dentro del texto de los pasos (actualizar las que ya
+   vienen escritas en la ficha al escalar, y añadir las que faltan) viven
+   en text.js, que se puede probar con node porque no toca el DOM. */
+// Los pasos de una etapa, o su descripción si no los tiene desglosados.
+function stageStepsOf(stage) {
+  return stage.steps && stage.steps.length ? stage.steps : [stage.description];
 }
 
 /* ---------------- Router ----------------
@@ -859,7 +773,8 @@ window.onSelectMainIngredient = function (idx) {
 };
 
 function applyScale(ingredients, ratio) {
-  return ingredients.map((ing) => ({ ...ing, qty: ing.qty * ratio }));
+  // Las unidades contables se redondean hacia arriba: 2,8 huevos son 3.
+  return ingredients.map((ing) => ({ ...ing, qty: RTMYText.scaleQty(ing.qty, ing.unit, ratio) }));
 }
 
 function scaledIngredients(recipe) {
@@ -1251,22 +1166,23 @@ function renderSteps() {
     return;
   }
   const stage = r.stages[item.stageIndex];
-  const rawStepText =
-    (stage.steps && stage.steps.length ? stage.steps : [stage.description])[
-      item.stepIndexInStage
-    ];
+  const rawStepText = stageStepsOf(stage)[item.stepIndexInStage];
   const warnings = extractWarnings(rawStepText);
   const durations = extractDurations(rawStepText);
   state.currentStepDurations = durations;
 
-  // Ingredients available to name-check quantities against: the scaled
-  // base batch for stage 0, or that stage's own (unscaled) table for
-  // composite recipes with sub-recipes further down.
-  const stageIngredients =
-    item.stageIndex === 0
-      ? applyScale(r.stages[0].ingredients, session.scaleFactor)
-      : stage.ingredients;
-  const stepText = injectIngredientQuantities(rawStepText, stageIngredients);
+  // Las cantidades se miden contra la tabla de la etapa 0 (la que el
+  // cocinero escala) o, en recetas compuestas, contra la tabla propia de esa
+  // etapa, que no se escala. Se pasa la tabla SIN escalar más la proporción:
+  // así se reescriben también las cantidades que la ficha ya trae escritas.
+  // Se procesa la etapa entera, no solo este paso, porque la cantidad de
+  // cada ingrediente se dice una sola vez: la primera que aparece.
+  const isMainStage = item.stageIndex === 0;
+  const stageIngredients = isMainStage ? r.stages[0].ingredients : stage.ingredients;
+  const stageRatio = isMainStage ? session.scaleFactor : 1;
+  const stepText = RTMYText.stepTexts(stageStepsOf(stage), stageIngredients, stageRatio)[
+    item.stepIndexInStage
+  ];
 
   // progress dots: one per stage in active range
   const activeStages = r.stages.slice(session.startStageIndex);
@@ -1367,7 +1283,7 @@ window.stepBack = function () {
 window.finishFlow = function () {
   const s = activeSession();
   if (!s) return;
-  state.finishedSession = { recipe: s.recipe };
+  state.finishedSession = { recipe: s.recipe, scaleFactor: s.scaleFactor || 1 };
   state.sessions = state.sessions.filter((x) => x.id !== s.id);
   if (state.activeSessionId === s.id) state.activeSessionId = null;
   saveRuntimeState();
@@ -1377,7 +1293,12 @@ window.finishFlow = function () {
 function renderFinal() {
   const r = state.finishedSession.recipe;
   const lastStage = r.stages[r.stages.length - 1];
-  const steps = lastStage.steps && lastStage.steps.length ? lastStage.steps : [];
+  // Las últimas indicaciones también llevan cantidades: se escalan igual
+  // que en la pantalla de pasos (solo si esa etapa es la que se escala).
+  const ratio = r.stages.length === 1 ? state.finishedSession.scaleFactor || 1 : 1;
+  const steps = lastStage.steps && lastStage.steps.length
+    ? RTMYText.stepTexts(lastStage.steps, lastStage.ingredients, ratio)
+    : [];
 
   root.innerHTML = `
     ${header(true, "#/receta/" + encodeURIComponent(r.id), escapeHtml(titleCase(r.name)))}

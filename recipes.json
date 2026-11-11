@@ -1,6 +1,6 @@
 {
-  "fetchedAt": "2026-10-13T21:07:14.527Z",
-  "sourceUpdatedAt": "2026-10-13T20:44:54.357Z",
+  "fetchedAt": "2026-11-11T11:22:11.517Z",
+  "sourceUpdatedAt": "2026-11-11T10:42:16.734Z",
   "recipes": [
     {
       "id": "sofrito-base",
@@ -8,7 +8,7 @@
       "code": "B01",
       "section": "Preparaciones base",
       "sectionOrder": 1,
-      "yieldAmount": 700,
+      "yieldAmount": 450,
       "yieldUnit": "g",
       "stages": [
         {
@@ -27,21 +27,102 @@
               "name": "Pimiento"
             },
             {
-              "qty": 200,
+              "qty": 100,
               "unit": "g",
               "name": "Aceite de Oliva"
             }
           ],
           "steps": [
-            "En el vaso de la Thermomix grande colocar los 800 gramos de cebolla cortada.",
-            "Agregar los 300 gramos de pimiento cortado y los 200 gramos de aceite.",
-            "Sofreir 45 minutos a velocidad 1 (marcha atrás) a 130 grados.",
-            "Cada tanto, bajar el sofrito de las paredes del vaso con ayuda de una espátula.",
-            "Una vez terminado, dejar atemperar. Envasar en tuper y fechar.",
-            "Se usan 3 cucharadas (70 gramos) por ración de paella."
+            "Cortar la cebolla y el pimiento en trozos de tamaño mediano.",
+            "Colocar los trozos de verdura en el vaso de la Thermomix grande.",
+            "Picar las verduras: 30 segundos, velocidad 4, sin temperatura.",
+            "Agregar los 100 gramos de aceite.",
+            "Sofreír 45 minutos a 130 °C, velocidad 1, marcha atrás, con el cubilete puesto del revés para que salga el vapor.",
+            "Pasar el sofrito a un túper y dejar atemperar.",
+            "Tapar el túper, etiquetar, fechar y guardar en nevera un máximo de 5 días."
           ]
         }
       ],
+      "plan": {
+        "phase": "Producción",
+        "shelfLifeDays": 5,
+        "storage": "Nevera",
+        "requires": [],
+        "steps": [
+          {
+            "b": 1,
+            "s": 1,
+            "d": 1,
+            "eq": "Manual",
+            "t": "Activo",
+            "pm": 10,
+            "mm": null,
+            "sc": true,
+            "n": "Incluye limpiar, lavar y cortar toda la verdura"
+          },
+          {
+            "b": 1,
+            "s": 2,
+            "d": 1,
+            "eq": "Thermomix grande",
+            "t": "Activo",
+            "pm": 5,
+            "mm": null,
+            "sc": false
+          },
+          {
+            "b": 1,
+            "s": 3,
+            "d": 1,
+            "eq": "Thermomix grande",
+            "t": "Máquina",
+            "pm": null,
+            "mm": 0.5,
+            "sc": false
+          },
+          {
+            "b": 1,
+            "s": 4,
+            "d": 1,
+            "eq": "Thermomix grande",
+            "t": "Activo",
+            "pm": 1,
+            "mm": null,
+            "sc": false
+          },
+          {
+            "b": 1,
+            "s": 5,
+            "d": 1,
+            "eq": "Thermomix grande",
+            "t": "Máquina",
+            "pm": null,
+            "mm": 45,
+            "sc": false
+          },
+          {
+            "b": 1,
+            "s": 6,
+            "d": 1,
+            "eq": "Manual",
+            "t": "Activo + espera",
+            "pm": 5,
+            "mm": 30,
+            "sc": true,
+            "n": "Atemperado desatendido; cada lote se atempera y se guarda por separado. Valor inicial, ajustar cuando se mida"
+          },
+          {
+            "b": 1,
+            "s": 7,
+            "d": 1,
+            "eq": "Manual",
+            "t": "Activo",
+            "pm": 5,
+            "mm": null,
+            "sc": false
+          }
+        ]
+      },
       "sourceSheet": "B01 SOFRITO BASE"
     },
     {
@@ -56,7 +137,7 @@
         {
           "title": "PROCEDIMIENTO",
           "procedureTitle": null,
-          "description": "Cebolla pochada que se utiliza para la preparación de las paellas.",
+          "description": "Cebolla pochada para la base de tortilla y la salsa brava. Alternativa en la paella si se acaba el sofrito B01 durante el servicio: sustituye solo a la cebolla cruda y ahorra unos 6 minutos de pochado.",
           "ingredients": [
             {
               "qty": 1000,
@@ -76,14 +157,106 @@
           ],
           "steps": [
             "Pelar las cebollas, cortarlas en trozos medianos y colocarlas en el vaso de la Thermomix.",
-            "Programar 20 segundos / Velocidad 10. Con una espátula bajar la cebolla y repetir el proceso. El objetivo es cortar la cebolla en trozos muy pequeños.",
-            "Programar 30 minutos / Velocidad 1 / 105 grados SIN TAPAR para que evapore líquido.",
-            "Destapar. Bajar la cebolla que quede en las paredes del vaso. Volver a tapar.",
-            "Programar otros 20 minutos / Velocidad 1 / 105 grados. La cebolla debe reducir y quedar bien transparente.",
-            "Dejar atemperar. Envasar y guardar refrigerada hasta su uso."
+            "Picar 20 segundos, velocidad 4. Bajar con una espátula la cebolla de las paredes del vaso y picar otros 20 segundos, velocidad 4. La cebolla debe quedar en trozos muy pequeños.",
+            "Agregar los 40 gramos de aceite y los 5 gramos de sal.",
+            "Programar 30 minutos, 105 °C, velocidad 1, con el cubilete puesto del revés para que salga el vapor.",
+            "Abrir la tapa, bajar la cebolla que quede en las paredes del vaso y volver a cerrar.",
+            "Programar otros 20 minutos, 105 °C, velocidad 1, con el cubilete del revés. La cebolla debe reducir y quedar bien transparente.",
+            "Pasar la cebolla a un túper y dejar atemperar.",
+            "Envasar al vacío, etiquetar, fechar y guardar en nevera un máximo de 7 días."
           ]
         }
       ],
+      "plan": {
+        "phase": "Producción",
+        "shelfLifeDays": 7,
+        "storage": "Vacío en nevera",
+        "requires": [],
+        "steps": [
+          {
+            "b": 1,
+            "s": 1,
+            "d": 1,
+            "eq": "Manual",
+            "t": "Activo",
+            "pm": 10,
+            "mm": null,
+            "sc": true
+          },
+          {
+            "b": 1,
+            "s": 2,
+            "d": 1,
+            "eq": "Thermomix (cualquiera)",
+            "t": "Activo",
+            "pm": 2,
+            "mm": null,
+            "sc": false
+          },
+          {
+            "b": 1,
+            "s": 3,
+            "d": 1,
+            "eq": "Thermomix (cualquiera)",
+            "t": "Activo",
+            "pm": 1,
+            "mm": null,
+            "sc": false
+          },
+          {
+            "b": 1,
+            "s": 4,
+            "d": 1,
+            "eq": "Thermomix (cualquiera)",
+            "t": "Máquina",
+            "pm": null,
+            "mm": 30,
+            "sc": false
+          },
+          {
+            "b": 1,
+            "s": 5,
+            "d": 1,
+            "eq": "Thermomix (cualquiera)",
+            "t": "Activo",
+            "pm": 1,
+            "mm": null,
+            "sc": false
+          },
+          {
+            "b": 1,
+            "s": 6,
+            "d": 1,
+            "eq": "Thermomix (cualquiera)",
+            "t": "Máquina",
+            "pm": null,
+            "mm": 20,
+            "sc": false
+          },
+          {
+            "b": 1,
+            "s": 7,
+            "d": 1,
+            "eq": "Manual",
+            "t": "Activo + espera",
+            "pm": 5,
+            "mm": 30,
+            "sc": true,
+            "n": "Atemperado desatendido. Valor inicial, ajustar cuando se mida"
+          },
+          {
+            "b": 1,
+            "s": 8,
+            "d": 1,
+            "eq": "Envasadora",
+            "t": "Activo",
+            "pm": 10,
+            "mm": null,
+            "sc": true,
+            "n": "Se envasa en varias bolsas"
+          }
+        ]
+      },
       "sourceSheet": "B02 CEBOLLA POCHADA"
     },
     {
@@ -92,13 +265,13 @@
       "code": "B03",
       "section": "Preparaciones base",
       "sectionOrder": 1,
-      "yieldAmount": 2300,
+      "yieldAmount": 1500,
       "yieldUnit": "g",
       "stages": [
         {
           "title": "PROCEDIMIENTO EN THERMOMIX GRANDE",
           "procedureTitle": null,
-          "description": "Preparación tradicional alicantina base para los arroces.",
+          "description": "Salmorreta RTMY. Base para las paellas (C23–C25), el tomate confitado (B08), las alcachofas (C11) y la burrata (C12).",
           "ingredients": [
             {
               "qty": 1875,
@@ -132,18 +305,139 @@
             }
           ],
           "steps": [
-            "Cortar los tomates en cuartos y repartirlo en dos recipientes",
-            "Colocar en el vaso de la thermomix el aceite y el ajo. Programar 6 minutos / Velocidad 1 / 120 grados.",
-            "Agregar el pimentón. Programar 30 segundos / Velocidad 1 / 120 grados.",
-            "Agregar el bote de ñoras. Programar 3 minutos / Velocidad 1 / 110 grados.",
-            "Añadir la mitad del tomate. Programar 15 minutos / Velocidad 1 / 100 grados. SIN CUBILETE.",
-            "Añadir el resto del tomate y la sal. Programar 20 minutos / Velocidad 1 / 100 grados. SIN CUBILETE.",
+            "Lavar los tomates, cortarlos en cuartos y repartirlos en dos recipientes.",
+            "Pelar los ajos.",
+            "Colocar en el vaso de la Thermomix grande el aceite y el ajo. Programar 6 minutos, 120 °C, velocidad 1.",
+            "Agregar el pimentón. Programar 30 segundos, 120 °C, velocidad 1.",
+            "Agregar el bote de ñoras. Programar 3 minutos, 110 °C, velocidad 1.",
+            "Añadir la mitad del tomate. Programar 15 minutos, 100 °C, velocidad 1, sin cubilete.",
+            "Añadir el resto del tomate y la sal. Programar 20 minutos, 100 °C, velocidad 1, sin cubilete.",
             "Dejar reposar completamente destapado 5 minutos para que baje la temperatura.",
-            "Tapar y triturar la salmorreta subiendo la velocidad lentamente hasta llegar al nivel 10 durante 1 minuto.",
-            "Dejar reposar y conservar refrigerada hasta su uso."
+            "Tapar y triturar: 2 minutos a velocidad 5, 3 minutos a velocidad 8 y 5 minutos a velocidad 10.",
+            "Pasar la salmorreta a un túper y dejar atemperar.",
+            "Tapar el túper, etiquetar, fechar y guardar en nevera un máximo de 7 días."
           ]
         }
       ],
+      "plan": {
+        "phase": "Producción",
+        "shelfLifeDays": 7,
+        "storage": "Nevera",
+        "requires": [],
+        "steps": [
+          {
+            "b": 1,
+            "s": 1,
+            "d": 1,
+            "eq": "Manual",
+            "t": "Activo",
+            "pm": 5,
+            "mm": null,
+            "sc": true
+          },
+          {
+            "b": 1,
+            "s": 2,
+            "d": 1,
+            "eq": "Manual",
+            "t": "Activo",
+            "pm": 7,
+            "mm": null,
+            "sc": true
+          },
+          {
+            "b": 1,
+            "s": 3,
+            "d": 1,
+            "eq": "Thermomix grande",
+            "t": "Máquina",
+            "pm": null,
+            "mm": 6,
+            "sc": false
+          },
+          {
+            "b": 1,
+            "s": 4,
+            "d": 1,
+            "eq": "Thermomix grande",
+            "t": "Máquina",
+            "pm": null,
+            "mm": 0.5,
+            "sc": false
+          },
+          {
+            "b": 1,
+            "s": 5,
+            "d": 1,
+            "eq": "Thermomix grande",
+            "t": "Máquina",
+            "pm": null,
+            "mm": 3,
+            "sc": false
+          },
+          {
+            "b": 1,
+            "s": 6,
+            "d": 1,
+            "eq": "Thermomix grande",
+            "t": "Máquina",
+            "pm": null,
+            "mm": 15,
+            "sc": false
+          },
+          {
+            "b": 1,
+            "s": 7,
+            "d": 1,
+            "eq": "Thermomix grande",
+            "t": "Máquina",
+            "pm": null,
+            "mm": 20,
+            "sc": false
+          },
+          {
+            "b": 1,
+            "s": 8,
+            "d": 1,
+            "eq": "Thermomix grande",
+            "t": "Espera",
+            "pm": null,
+            "mm": 5,
+            "sc": false
+          },
+          {
+            "b": 1,
+            "s": 9,
+            "d": 1,
+            "eq": "Thermomix grande",
+            "t": "Máquina",
+            "pm": null,
+            "mm": 10,
+            "sc": false
+          },
+          {
+            "b": 1,
+            "s": 10,
+            "d": 1,
+            "eq": "Manual",
+            "t": "Activo + espera",
+            "pm": 5,
+            "mm": 45,
+            "sc": true,
+            "n": "Atemperado desatendido. Mínimo 45 minutos para unos 1.500 g"
+          },
+          {
+            "b": 1,
+            "s": 11,
+            "d": 1,
+            "eq": "Manual",
+            "t": "Activo",
+            "pm": 5,
+            "mm": null,
+            "sc": false
+          }
+        ]
+      },
       "sourceSheet": "B03 SALMORRETA"
     },
     {
@@ -196,11 +490,6 @@
               "name": "Tomate"
             },
             {
-              "qty": 80,
-              "unit": "g",
-              "name": "Aceite de Oliva"
-            },
-            {
               "qty": 160,
               "unit": "ml",
               "name": "Vino blanco de cocina"
@@ -222,11 +511,14 @@
             }
           ],
           "steps": [
-            "Lavar bien el pescado.\n2 En una olla grande, poner el pescado a hervir junto con la sal, el laurel y el agua.",
-            "Cortar las verduras en trozos medianos e incorporarlas al agua de cocción.",
-            "Agregar el aceite y el vino.",
+            "Lavar bien el pescado.",
+            "En una olla grande, en el fuego de gas a fuego bajo, poner el pescado con la sal, el laurel y el agua.",
+            "Mientras se calienta el agua, pelar los ajos y cortar las verduras en trozos medianos.",
+            "Incorporar los ajos y las verduras a la olla.",
+            "Agregar el vino.",
             "Una vez que comience a hervir, contabilizar 25 minutos y apagar el fuego.",
-            "Dejar reposar durante 10 minutos y colar el fumet con el chino."
+            "Dejar reposar durante 10 minutos.",
+            "Colar el fumet con el chino."
           ]
         },
         {
@@ -235,23 +527,231 @@
           "description": null,
           "ingredients": [],
           "steps": [
-            "Colocar la olla a presión de 25 litros con suficiente agua en su interior y la bandeja de metal a hervir.",
-            "En una olla grande, poner suficiente agua a hervir y sumergir los botes de cristal donde se envasará el caldo previamente lavados.",
-            "Colocar también las tapas.",
-            "Dejar hervir los botes completamente sumergidos en el agua durante 15 minutos.",
-            "Mantener el caldo a punto de hervor.",
-            "Una vez que hayan hervido los botes, sacarlos con cuidado del agua y rellenarlos con 430 gramos de fumet hirviendo.",
-            "Tapar con cuidado e introducirlos en la olla a presión que tendrá el agua interior hirviendo.",
-            "Una vez se hayan colocado todos los botes dentro de la olla a presión, taparla con cuidado SIN LA VALVULA DE PRESION COLOCADA.",
-            "Dejar que la olla a presión hierva sin válvula durante 10 minutos para asegurar que expulse todo el aire del interior.",
-            "Pasados los 10 minutos, colocar con cuidado la válvula y esperar a que llegue a 1 bar de presión.",
-            "Una vez alcanzada la presión necesaria, contabilizar 25 minutos.",
-            "Pasado el tiempo, apagar el fuego. NO TOCAR NADA. Dejar atemperar naturalmente.",
+            "Colocar la olla a presión de 25 litros en el fuego con agua fría. Colocar una primera fila de 8 botes de cristal de 450 ml, previamente lavados. Encima, colocar la bandeja de metal y sobre ella otros 7 botes. El agua fría debe cubrir todos los botes.",
+            "Sin tapar la olla, llevar el agua a ebullición. Los botes no se meten fríos en agua hirviendo para evitar el choque térmico, que podría romper el cristal.",
+            "Una vez que el agua hierve, contabilizar 10 minutos para esterilizar los botes.",
+            "Mientras tanto, hervir las tapas aparte, en otro recipiente, solo 5 minutos para no dañar las gomas que sellan el cierre.",
+            "Mientras tanto, mantener el fumet a punto de hervor.",
+            "Pasados los 10 minutos, sacar los botes con cuidado del agua y rellenarlos con 420 gramos de fumet hirviendo.",
+            "Tapar con cuidado e introducirlos en la olla a presión de 25 litros, que tendrá el agua bien caliente, con la misma disposición: 8 botes abajo, la bandeja y 7 botes arriba.",
+            "Una vez colocados todos los botes dentro de la olla a presión, taparla con cuidado SIN LA VÁLVULA DE PRESIÓN COLOCADA.",
+            "Cuando el vapor salga de forma constante, contabilizar 3 minutos para asegurar que se expulsa todo el aire del interior.",
+            "Pasados los 3 minutos, colocar con cuidado la válvula y esperar a que llegue a 1 bar de presión.",
+            "Una vez que la presión se mantenga en 1 bar, contabilizar 70 minutos.",
+            "Pasado el tiempo, apagar el fuego. NO TOCAR NADA: no quitar la válvula ni enfriar la olla. Dejar que la presión baje de forma natural.",
             "Una vez atemperada la olla, retirar la tapa y dejar los botes dentro del agua durante 20 minutos más.",
-            "Pasado ese tiempo, los botes habrán estabilizado la presión y podrán sacarse del agua."
+            "Pasado ese tiempo, los botes habrán estabilizado la presión y podrán sacarse del agua. Etiquetar, fechar y guardar en el almacén, a temperatura ambiente, un máximo de 3 meses."
           ]
         }
       ],
+      "plan": {
+        "phase": "Producción",
+        "shelfLifeDays": 90,
+        "storage": "Ambiente",
+        "requires": [],
+        "steps": [
+          {
+            "b": 1,
+            "s": 1,
+            "d": 1,
+            "eq": "Manual",
+            "t": "Activo",
+            "pm": 5,
+            "mm": null,
+            "sc": true
+          },
+          {
+            "b": 1,
+            "s": 2,
+            "d": 1,
+            "eq": "Olla grande (sin presión)",
+            "t": "Activo",
+            "pm": 5,
+            "mm": null,
+            "sc": false
+          },
+          {
+            "b": 1,
+            "s": 3,
+            "d": 1,
+            "eq": "Manual",
+            "t": "Activo",
+            "pm": 15,
+            "mm": null,
+            "sc": true
+          },
+          {
+            "b": 1,
+            "s": 4,
+            "d": 1,
+            "eq": "Olla grande (sin presión)",
+            "t": "Activo",
+            "pm": 1,
+            "mm": null,
+            "sc": false
+          },
+          {
+            "b": 1,
+            "s": 5,
+            "d": 1,
+            "eq": "Olla grande (sin presión)",
+            "t": "Activo",
+            "pm": 1,
+            "mm": null,
+            "sc": false
+          },
+          {
+            "b": 1,
+            "s": 6,
+            "d": 1,
+            "eq": "Olla grande (sin presión)",
+            "t": "Máquina",
+            "pm": null,
+            "mm": 25,
+            "sc": false,
+            "n": "PENDIENTE: el tiempo hasta el hervor depende de la cantidad; medirlo con dos tamaños de lote",
+            "pend": true
+          },
+          {
+            "b": 1,
+            "s": 7,
+            "d": 1,
+            "eq": "Olla grande (sin presión)",
+            "t": "Espera",
+            "pm": null,
+            "mm": 10,
+            "sc": false
+          },
+          {
+            "b": 1,
+            "s": 8,
+            "d": 1,
+            "eq": "Manual",
+            "t": "Activo",
+            "pm": 10,
+            "mm": null,
+            "sc": false
+          },
+          {
+            "b": 2,
+            "s": 1,
+            "d": 1,
+            "eq": "Olla 25 L",
+            "t": "Activo + espera",
+            "pm": 5,
+            "mm": null,
+            "sc": false,
+            "n": "PENDIENTE: medir el tiempo hasta que hierve el agua",
+            "pend": true
+          },
+          {
+            "b": 2,
+            "s": 5,
+            "d": 1,
+            "eq": "Olla grande (sin presión)",
+            "t": "Espera",
+            "pm": null,
+            "mm": 10,
+            "sc": false
+          },
+          {
+            "b": 2,
+            "s": 7,
+            "d": 1,
+            "eq": "Olla 25 L",
+            "t": "Activo",
+            "pm": 5,
+            "mm": null,
+            "sc": true,
+            "n": "Caben 15 botes por olla de 25 L; un lote (unos 12 botes) entra de una vez"
+          },
+          {
+            "b": 2,
+            "s": 8,
+            "d": 1,
+            "eq": "Olla 25 L",
+            "t": "Activo",
+            "pm": 1,
+            "mm": null,
+            "sc": false
+          },
+          {
+            "b": 2,
+            "s": 9,
+            "d": 1,
+            "eq": "Olla 25 L",
+            "t": "Máquina",
+            "pm": null,
+            "mm": 3,
+            "sc": false,
+            "n": "PENDIENTE: más el tiempo hasta que sale vapor constante",
+            "pend": true
+          },
+          {
+            "b": 2,
+            "s": 10,
+            "d": 1,
+            "eq": "Olla 25 L",
+            "t": "Activo + espera",
+            "pm": 1,
+            "mm": null,
+            "sc": false,
+            "n": "PENDIENTE: medir el tiempo hasta llegar a 1 bar",
+            "pend": true
+          },
+          {
+            "b": 2,
+            "s": 11,
+            "d": 1,
+            "eq": "Olla 25 L",
+            "t": "Máquina",
+            "pm": null,
+            "mm": 70,
+            "sc": false
+          },
+          {
+            "b": 2,
+            "s": 12,
+            "d": 1,
+            "eq": "Olla 25 L",
+            "t": "Espera",
+            "pm": null,
+            "mm": null,
+            "sc": false,
+            "n": "PENDIENTE: medir el tiempo de bajada natural de la presión",
+            "pend": true
+          },
+          {
+            "b": 2,
+            "s": 13,
+            "d": 1,
+            "eq": "Olla 25 L",
+            "t": "Activo + espera",
+            "pm": 1,
+            "mm": 20,
+            "sc": false
+          },
+          {
+            "b": 2,
+            "s": 14,
+            "d": 1,
+            "eq": "Manual",
+            "t": "Activo",
+            "pm": 10,
+            "mm": null,
+            "sc": true
+          }
+        ],
+        "warnings": [
+          "fila 16 (2.1): falta tiempo para el tipo \"Activo + espera\".",
+          "fila 17: el texto del paso 2.2 ya no empieza por \"En la misma olla a presión, si\" (¿cambió el texto?). Fila ignorada.",
+          "fila 18: el texto del paso 2.3 ya no empieza por \"Colocar también las tapas.\" (¿cambió el texto?). Fila ignorada.",
+          "fila 19: el texto del paso 2.4 ya no empieza por \"Dejar hervir los botes complet\" (¿cambió el texto?). Fila ignorada.",
+          "fila 21: el texto del paso 2.6 ya no empieza por \"Una vez que hayan hervido los\" (¿cambió el texto?). Fila ignorada.",
+          "fila 25 (2.10): falta tiempo para el tipo \"Activo + espera\".",
+          "fila 27 (2.12): falta tiempo para el tipo \"Espera\"."
+        ]
+      },
       "sourceSheet": "B04 FUMET DE PESCADO"
     },
     {
@@ -266,7 +766,7 @@
         {
           "title": "PROCEDIMIENTO",
           "procedureTitle": null,
-          "description": "Caldo de pollo utilizado en las paellas de pato y de carrillera de cerdo.",
+          "description": "Caldo de pollo para la paella de pato (C25) y la paella de carrillera.",
           "ingredients": [
             {
               "qty": 2500,
@@ -315,18 +815,22 @@
             }
           ],
           "steps": [
-            "Precalentar el horno a 230 grados.",
-            "Repartir las carcasas en la bandeja.",
-            "Asar 50 minutos hasta obtener dorado intenso sin quemar.",
-            "Mientras se asan, poner en la olla a presión el agua fría, las verduras en trozos grandes, el ajo, la sal y el laurel.",
-            "Cuando estén tostadas, pasar las carcasas a la olla.",
-            "Verter el vino en la bandeja aún caliente, rascar el fondo y añadirlo a la olla.",
+            "Preparar la cesta de la airfryer: colocar aluminio en el fondo y las rejillas encima para facilitar la limpieza posterior.",
+            "Tostar las carcasas de pollo en la airfryer, 205 °C durante 20 minutos, sin aceite. Si es necesario, hacerlo en dos tandas.",
+            "Mientras se asan, pelar los ajos y cortar las verduras en trozos grandes.",
+            "Mientras tanto, poner en la olla a presión de 25 litros (la pequeña para tandas de hasta 2 litros de agua) el agua fría, las verduras, el ajo, la sal y el laurel.",
+            "Cuando estén tostadas, pasar las carcasas a la olla dejando escurrir la grasa en la cesta.",
+            "Retirar y DESECHAR toda la grasa que haya soltado el pollo en el aluminio y en la cesta. No se añade a la olla.",
+            "Agregar el vino directamente a la olla.",
             "Comprobar que el contenido no supera los dos tercios de la olla.",
-            "Calentar la olla a fuego fuerte hasta que la olla expulse el aire y salga vapor constante.",
+            "Calentar la olla a fuego fuerte hasta que expulse el aire y salga vapor constante.",
             "Colocar la válvula y, cuando suba la presión, bajar el nivel para que mantenga un seseo suave.",
-            "Cocinar 45 minutos desde que la olla alcanza la presión.",
+            "Cocinar 50 minutos desde que la olla alcanza la presión. Si es vitro, nivel 5.",
             "Apagar y dejar que la presión baje sola.",
-            "Colar con el chino."
+            "Colar con el chino.",
+            "Pasar el caldo a recipientes y dejar atemperar 1 hora.",
+            "DESGRASAR: retirar la capa de grasa de la superficie con una espumadera y desecharla.",
+            "Antes de envasar, volver a llevar el caldo a hervor en la misma olla en que se cocinó."
           ]
         },
         {
@@ -335,23 +839,326 @@
           "description": null,
           "ingredients": [],
           "steps": [
-            "Colocar la olla a presión de 25 litros con suficiente agua en su interior y la bandeja de metal a hervir.",
-            "En una olla grande, poner suficiente agua a hervir y sumergir los botes de cristal donde se envasará el caldo previamente lavados.",
-            "Colocar también las tapas.",
-            "Dejar hervir los botes completamente sumergidos en el agua durante 15 minutos.",
-            "Mantener el caldo a punto de hervor.",
-            "Una vez que hayan hervido los botes, sacarlos con cuidado del agua y rellenarlos con 430 gramos de caldo hirviendo.",
-            "Tapar con cuidado e introducirlos en la olla a presión que tendrá el agua interior hirviendo.",
-            "Una vez se hayan colocado todos los botes dentro de la olla a presión, taparla con cuidado SIN LA VALVULA DE PRESION COLOCADA.",
-            "Dejar que la olla a presión hierva sin válvula durante 10 minutos para asegurar que expulse todo el aire del interior.",
-            "Pasados los 10 minutos, colocar con cuidado la válvula y esperar a que llegue a 1 bar de presión.",
-            "Una vez alcanzada la presión necesaria, contabilizar 25 minutos.",
-            "Pasado el tiempo, apagar el fuego. NO TOCAR NADA. Dejar atemperar naturalmente.",
+            "Colocar la olla a presión de 25 litros en el fuego con agua fría. Colocar una primera fila de 8 botes de cristal de 450 ml, previamente lavados. Encima, colocar la bandeja de metal y sobre ella otros 7 botes. El agua fría debe cubrir todos los botes.",
+            "Sin tapar la olla, llevar el agua a ebullición. Los botes no se meten fríos en agua hirviendo para evitar el choque térmico, que podría romper el cristal.",
+            "Una vez que el agua hierve, contabilizar 10 minutos para esterilizar los botes.",
+            "Mientras tanto, hervir las tapas aparte, en otro recipiente, solo 5 minutos para no dañar las gomas que sellan el cierre.",
+            "Mientras tanto, mantener el caldo a punto de hervor.",
+            "Pasados los 10 minutos, sacar los botes con cuidado del agua y rellenarlos con 420 gramos de caldo hirviendo.",
+            "Tapar con cuidado e introducirlos en la olla a presión de 25 litros, que tendrá el agua bien caliente, con la misma disposición: 8 botes abajo, la bandeja y 7 botes arriba.",
+            "Una vez colocados todos los botes dentro de la olla a presión, taparla con cuidado SIN LA VÁLVULA DE PRESIÓN COLOCADA.",
+            "Cuando el vapor salga de forma constante, contabilizar 3 minutos para asegurar que se expulsa todo el aire del interior.",
+            "Pasados los 3 minutos, colocar con cuidado la válvula y esperar a que llegue a 1 bar de presión.",
+            "Una vez que la presión se mantenga en 1 bar, contabilizar 70 minutos.",
+            "Pasado el tiempo, apagar el fuego. NO TOCAR NADA: no quitar la válvula ni enfriar la olla. Dejar que la presión baje de forma natural.",
             "Una vez atemperada la olla, retirar la tapa y dejar los botes dentro del agua durante 20 minutos más.",
-            "Pasado ese tiempo, los botes habrán estabilizado la presión y podrán sacarse del agua."
+            "Pasado ese tiempo, los botes habrán estabilizado la presión y podrán sacarse del agua. Etiquetar, fechar y guardar en el almacén, a temperatura ambiente, un máximo de 3 meses."
           ]
         }
       ],
+      "plan": {
+        "phase": "Producción",
+        "shelfLifeDays": 90,
+        "storage": "Ambiente",
+        "requires": [],
+        "steps": [
+          {
+            "b": 1,
+            "s": 1,
+            "d": 1,
+            "eq": "Airfryer",
+            "t": "Activo",
+            "pm": 5,
+            "mm": null,
+            "sc": false
+          },
+          {
+            "b": 1,
+            "s": 2,
+            "d": 1,
+            "eq": "Airfryer",
+            "t": "Máquina",
+            "pm": null,
+            "mm": 20,
+            "sc": false,
+            "rp": "POR TANDA",
+            "ub": 2000,
+            "n": "2.500 g de carcasa = 2 tandas"
+          },
+          {
+            "b": 1,
+            "s": 3,
+            "d": 1,
+            "eq": "Manual",
+            "t": "Activo",
+            "pm": 10,
+            "mm": null,
+            "sc": true
+          },
+          {
+            "b": 1,
+            "s": 4,
+            "d": 1,
+            "eq": "Olla 25 L",
+            "t": "Activo",
+            "pm": 5,
+            "mm": null,
+            "sc": false
+          },
+          {
+            "b": 1,
+            "s": 5,
+            "d": 1,
+            "eq": "Olla 25 L",
+            "t": "Activo",
+            "pm": 5,
+            "mm": null,
+            "sc": false
+          },
+          {
+            "b": 1,
+            "s": 6,
+            "d": 1,
+            "eq": "Airfryer",
+            "t": "Activo",
+            "pm": 5,
+            "mm": null,
+            "sc": false
+          },
+          {
+            "b": 1,
+            "s": 7,
+            "d": 1,
+            "eq": "Olla 25 L",
+            "t": "Activo",
+            "pm": 1,
+            "mm": null,
+            "sc": false
+          },
+          {
+            "b": 1,
+            "s": 8,
+            "d": 1,
+            "eq": "Olla 25 L",
+            "t": "Activo",
+            "pm": 1,
+            "mm": null,
+            "sc": false
+          },
+          {
+            "b": 1,
+            "s": 9,
+            "d": 1,
+            "eq": "Olla 25 L",
+            "t": "Máquina",
+            "pm": null,
+            "mm": null,
+            "sc": false,
+            "n": "PENDIENTE: medir el tiempo hasta que sale vapor constante",
+            "pend": true
+          },
+          {
+            "b": 1,
+            "s": 10,
+            "d": 1,
+            "eq": "Olla 25 L",
+            "t": "Activo + espera",
+            "pm": 1,
+            "mm": null,
+            "sc": false,
+            "n": "PENDIENTE: medir el tiempo hasta alcanzar la presión",
+            "pend": true
+          },
+          {
+            "b": 1,
+            "s": 11,
+            "d": 1,
+            "eq": "Olla 25 L",
+            "t": "Máquina",
+            "pm": null,
+            "mm": 50,
+            "sc": false
+          },
+          {
+            "b": 1,
+            "s": 12,
+            "d": 1,
+            "eq": "Olla 25 L",
+            "t": "Espera",
+            "pm": null,
+            "mm": null,
+            "sc": false,
+            "n": "PENDIENTE: medir el tiempo de bajada natural de la presión",
+            "pend": true
+          },
+          {
+            "b": 1,
+            "s": 13,
+            "d": 1,
+            "eq": "Manual",
+            "t": "Activo",
+            "pm": 10,
+            "mm": null,
+            "sc": false
+          },
+          {
+            "b": 1,
+            "s": 14,
+            "d": 1,
+            "eq": "Manual",
+            "t": "Activo + espera",
+            "pm": 5,
+            "mm": 60,
+            "sc": true,
+            "n": "Atemperado desatendido; se desgrasa después de 1 hora"
+          },
+          {
+            "b": 1,
+            "s": 15,
+            "d": 1,
+            "eq": "Manual",
+            "t": "Activo",
+            "pm": 5,
+            "mm": null,
+            "sc": false
+          },
+          {
+            "b": 1,
+            "s": 16,
+            "d": 1,
+            "eq": "Olla 25 L",
+            "t": "Máquina",
+            "pm": null,
+            "mm": null,
+            "sc": false,
+            "n": "PENDIENTE: el tiempo hasta el hervor depende de la cantidad",
+            "pend": true
+          },
+          {
+            "b": 2,
+            "s": 1,
+            "d": 1,
+            "eq": "Olla 25 L",
+            "t": "Activo + espera",
+            "pm": 5,
+            "mm": null,
+            "sc": false,
+            "n": "PENDIENTE: medir el tiempo hasta que hierve el agua",
+            "pend": true
+          },
+          {
+            "b": 2,
+            "s": 5,
+            "d": 1,
+            "eq": "Olla 25 L",
+            "t": "Espera",
+            "pm": null,
+            "mm": 10,
+            "sc": false,
+            "n": "El caldo se mantiene caliente en la olla donde se cocinó"
+          },
+          {
+            "b": 2,
+            "s": 7,
+            "d": 1,
+            "eq": "Olla 25 L",
+            "t": "Activo",
+            "pm": 5,
+            "mm": null,
+            "sc": true,
+            "n": "Caben 15 botes por olla de 25 L; un lote (unos 12 botes) entra de una vez"
+          },
+          {
+            "b": 2,
+            "s": 8,
+            "d": 1,
+            "eq": "Olla 25 L",
+            "t": "Activo",
+            "pm": 1,
+            "mm": null,
+            "sc": false
+          },
+          {
+            "b": 2,
+            "s": 9,
+            "d": 1,
+            "eq": "Olla 25 L",
+            "t": "Máquina",
+            "pm": null,
+            "mm": 3,
+            "sc": false,
+            "n": "PENDIENTE: más el tiempo hasta que sale vapor constante",
+            "pend": true
+          },
+          {
+            "b": 2,
+            "s": 10,
+            "d": 1,
+            "eq": "Olla 25 L",
+            "t": "Activo + espera",
+            "pm": 1,
+            "mm": null,
+            "sc": false,
+            "n": "PENDIENTE: medir el tiempo hasta llegar a 1 bar",
+            "pend": true
+          },
+          {
+            "b": 2,
+            "s": 11,
+            "d": 1,
+            "eq": "Olla 25 L",
+            "t": "Máquina",
+            "pm": null,
+            "mm": 70,
+            "sc": false
+          },
+          {
+            "b": 2,
+            "s": 12,
+            "d": 1,
+            "eq": "Olla 25 L",
+            "t": "Espera",
+            "pm": null,
+            "mm": null,
+            "sc": false,
+            "n": "PENDIENTE: medir el tiempo de bajada natural de la presión",
+            "pend": true
+          },
+          {
+            "b": 2,
+            "s": 13,
+            "d": 1,
+            "eq": "Olla 25 L",
+            "t": "Activo + espera",
+            "pm": 1,
+            "mm": 20,
+            "sc": false
+          },
+          {
+            "b": 2,
+            "s": 14,
+            "d": 1,
+            "eq": "Manual",
+            "t": "Activo",
+            "pm": 10,
+            "mm": null,
+            "sc": true
+          }
+        ],
+        "warnings": [
+          "fila 16 (1.9): falta tiempo para el tipo \"Máquina\".",
+          "fila 17 (1.10): falta tiempo para el tipo \"Activo + espera\".",
+          "fila 19 (1.12): falta tiempo para el tipo \"Espera\".",
+          "fila 23 (1.16): falta tiempo para el tipo \"Máquina\".",
+          "fila 24 (2.1): falta tiempo para el tipo \"Activo + espera\".",
+          "fila 25: el texto del paso 2.2 ya no empieza por \"En la misma olla a presión, si\" (¿cambió el texto?). Fila ignorada.",
+          "fila 26: el texto del paso 2.3 ya no empieza por \"Colocar también las tapas.\" (¿cambió el texto?). Fila ignorada.",
+          "fila 27: el texto del paso 2.4 ya no empieza por \"Dejar hervir los botes complet\" (¿cambió el texto?). Fila ignorada.",
+          "fila 29: el texto del paso 2.6 ya no empieza por \"Una vez que hayan hervido los\" (¿cambió el texto?). Fila ignorada.",
+          "fila 33 (2.10): falta tiempo para el tipo \"Activo + espera\".",
+          "fila 35 (2.12): falta tiempo para el tipo \"Espera\"."
+        ]
+      },
       "sourceSheet": "B05 CALDO DE POLLO"
     },
     {
@@ -385,15 +1192,108 @@
             }
           ],
           "steps": [
-            "Laminar el ajo en rodajas muy finas.",
-            "Colocar el aceite en el vaso de la Thermomix junto con los ajos laminados.",
-            "Programar 12 minutos / Velocidad 1 AL REVES / 120 grados.",
+            "Pelar los ajos.",
+            "Laminar el ajo en rodajas muy finas con la cuchilla de laminar del rallador.",
+            "Colocar el aceite y los ajos laminados en el vaso de la Thermomix.",
+            "Programar 12 minutos, 120 °C, velocidad 1, marcha atrás.",
             "Agregar la cayena.",
-            "Programar 3 minutos / Velocidad 1 AL REVES / 120 grados.",
-            "Dejar atemperar. Envasar. Fechar. Conservar en frío."
+            "Programar 3 minutos, 120 °C, velocidad 1, marcha atrás.",
+            "Pasar el aceite a un túper y dejar atemperar.",
+            "Tapar el túper, etiquetar, fechar y guardar en nevera un máximo de 4 días."
           ]
         }
       ],
+      "plan": {
+        "phase": "Producción",
+        "shelfLifeDays": 4,
+        "storage": "Nevera",
+        "requires": [],
+        "steps": [
+          {
+            "b": 1,
+            "s": 1,
+            "d": 1,
+            "eq": "Manual",
+            "t": "Activo",
+            "pm": 6,
+            "mm": null,
+            "sc": true
+          },
+          {
+            "b": 1,
+            "s": 2,
+            "d": 1,
+            "eq": "Manual",
+            "t": "Activo",
+            "pm": 5,
+            "mm": null,
+            "sc": true,
+            "n": "Con la cuchilla de laminar del rallador"
+          },
+          {
+            "b": 1,
+            "s": 3,
+            "d": 1,
+            "eq": "Thermomix (cualquiera)",
+            "t": "Activo",
+            "pm": 1,
+            "mm": null,
+            "sc": false
+          },
+          {
+            "b": 1,
+            "s": 4,
+            "d": 1,
+            "eq": "Thermomix (cualquiera)",
+            "t": "Máquina",
+            "pm": null,
+            "mm": 12,
+            "sc": false
+          },
+          {
+            "b": 1,
+            "s": 5,
+            "d": 1,
+            "eq": "Thermomix (cualquiera)",
+            "t": "Activo",
+            "pm": 1,
+            "mm": null,
+            "sc": false
+          },
+          {
+            "b": 1,
+            "s": 6,
+            "d": 1,
+            "eq": "Thermomix (cualquiera)",
+            "t": "Máquina",
+            "pm": null,
+            "mm": 3,
+            "sc": false
+          },
+          {
+            "b": 1,
+            "s": 7,
+            "d": 1,
+            "eq": "Manual",
+            "t": "Activo + espera",
+            "pm": 5,
+            "mm": 30,
+            "sc": true,
+            "n": "Atemperado desatendido. Valor inicial, ajustar cuando se mida"
+          },
+          {
+            "b": 1,
+            "s": 8,
+            "d": 1,
+            "eq": "Manual",
+            "t": "Activo",
+            "pm": 5,
+            "mm": null,
+            "sc": false,
+            "n": "Ajo en aceite: máximo 4 días en nevera (riesgo de botulismo)"
+          }
+        ]
+      },
       "sourceSheet": "B06 ACEITE AJO Y CAYENA"
     },
     {
@@ -402,13 +1302,13 @@
       "code": "B07",
       "section": "Preparaciones base",
       "sectionOrder": 1,
-      "yieldAmount": 500,
+      "yieldAmount": 490,
       "yieldUnit": "g",
       "stages": [
         {
           "title": "PROCEDIMIENTO",
           "procedureTitle": null,
-          "description": "Aceite con sabor ahumado usado como ingrediente para otras preparaciones.",
+          "description": "Aceite ahumado para las alcachofas (C11), la burrata (C12), la coca de cristal y la base de tortilla (S04).",
           "ingredients": [
             {
               "qty": 500,
@@ -423,12 +1323,93 @@
           ],
           "steps": [
             "En el vaso de la Thermomix colocar el aceite y el polvo con aroma a humo.",
-            "Programar 15 minutos / Velocidad 2 / 37 grados.",
-            "Dejar atemperar.",
-            "Envasar y conservar refrigerado hasta su uso."
+            "Programar 15 minutos, 40 °C, velocidad 2.",
+            "Pasar el aceite a un túper y dejar atemperar.",
+            "Tapar y dejar reposar en nevera entre 12 y 24 horas."
+          ]
+        },
+        {
+          "title": "FILTRADO Y ENVASADO",
+          "procedureTitle": null,
+          "description": null,
+          "ingredients": [],
+          "steps": [
+            "Filtrar el aceite con una muselina para retirar el polvo (lleva sal y no se disuelve en el aceite).",
+            "Envasar, etiquetar, fechar y guardar en nevera un máximo de 15 días."
           ]
         }
       ],
+      "plan": {
+        "phase": "Producción",
+        "shelfLifeDays": 15,
+        "storage": "Nevera",
+        "requires": [],
+        "steps": [
+          {
+            "b": 1,
+            "s": 1,
+            "d": 1,
+            "eq": "Thermomix (cualquiera)",
+            "t": "Activo",
+            "pm": 1,
+            "mm": null,
+            "sc": false
+          },
+          {
+            "b": 1,
+            "s": 2,
+            "d": 1,
+            "eq": "Thermomix (cualquiera)",
+            "t": "Máquina",
+            "pm": null,
+            "mm": 15,
+            "sc": false
+          },
+          {
+            "b": 1,
+            "s": 3,
+            "d": 1,
+            "eq": "Manual",
+            "t": "Activo + espera",
+            "pm": 5,
+            "mm": 15,
+            "sc": true,
+            "n": "Atemperado desatendido; el aceite sale a 40 °C"
+          },
+          {
+            "b": 1,
+            "s": 4,
+            "d": 1,
+            "eq": "Nevera",
+            "t": "Activo + espera",
+            "pm": 1,
+            "mm": 720,
+            "sc": false,
+            "n": "Reposo de 12 a 24 h; se pone el mínimo (12 h)"
+          },
+          {
+            "b": 2,
+            "s": 1,
+            "d": 2,
+            "eq": "Manual",
+            "t": "Activo",
+            "pm": 10,
+            "mm": null,
+            "sc": false,
+            "n": "Muselina obligatoria (versión validada v20260423R2)"
+          },
+          {
+            "b": 2,
+            "s": 2,
+            "d": 2,
+            "eq": "Manual",
+            "t": "Activo",
+            "pm": 5,
+            "mm": null,
+            "sc": false
+          }
+        ]
+      },
       "sourceSheet": "B07 ACEITE AHUMADO"
     },
     {
@@ -473,13 +1454,97 @@
           ],
           "steps": [
             "Lavar y cortar el tomate en trozos medianos.",
+            "Deshojar el romero: solo las hojas, sin rama.",
             "En el vaso de la Thermomix, colocar todos los ingredientes excepto la salmorreta.",
-            "Programar 30 minutos / Velocidad 2 / 70 grados. Tapado con el cubilete.",
-            "Agregar la salmorreta y mezclar todo 15 minutos / Velocidad 3 marcha atrás / 90 grados. SIN CUBILETE.",
-            "Guardar refrigerado hasta su utilización."
+            "Programar 30 minutos, 70 °C, velocidad 2, con el cubilete puesto.",
+            "Agregar la salmorreta y programar 15 minutos, 90 °C, velocidad 3, marcha atrás, sin cubilete.",
+            "Pasar el tomate a un túper y dejar atemperar.",
+            "Tapar el túper, etiquetar y fechar. Guardar en nevera un máximo de 7 días, sin superar la fecha de la salmorreta usada, o congelar un máximo de 3 meses. Una vez descongelado, consumir dentro de los días que le quedaban a la salmorreta."
           ]
         }
       ],
+      "plan": {
+        "phase": "Producción",
+        "shelfLifeDays": 7,
+        "storage": "Mixta",
+        "requires": [
+          "B03"
+        ],
+        "steps": [
+          {
+            "b": 1,
+            "s": 1,
+            "d": 1,
+            "eq": "Manual",
+            "t": "Activo",
+            "pm": 3,
+            "mm": null,
+            "sc": true
+          },
+          {
+            "b": 1,
+            "s": 2,
+            "d": 1,
+            "eq": "Manual",
+            "t": "Activo",
+            "pm": 3,
+            "mm": null,
+            "sc": true
+          },
+          {
+            "b": 1,
+            "s": 3,
+            "d": 1,
+            "eq": "Thermomix (cualquiera)",
+            "t": "Activo",
+            "pm": 1,
+            "mm": null,
+            "sc": false
+          },
+          {
+            "b": 1,
+            "s": 4,
+            "d": 1,
+            "eq": "Thermomix (cualquiera)",
+            "t": "Máquina",
+            "pm": null,
+            "mm": 30,
+            "sc": false
+          },
+          {
+            "b": 1,
+            "s": 5,
+            "d": 1,
+            "eq": "Thermomix (cualquiera)",
+            "t": "Máquina",
+            "pm": null,
+            "mm": 15,
+            "sc": false
+          },
+          {
+            "b": 1,
+            "s": 6,
+            "d": 1,
+            "eq": "Manual",
+            "t": "Activo + espera",
+            "pm": 5,
+            "mm": 30,
+            "sc": true,
+            "n": "Atemperado desatendido. Valor inicial, ajustar cuando se mida"
+          },
+          {
+            "b": 1,
+            "s": 7,
+            "d": 1,
+            "eq": "Manual",
+            "t": "Activo",
+            "pm": 5,
+            "mm": null,
+            "sc": false,
+            "n": "Nevera 7 días (sin pasar la fecha de la salmorreta) o congelador 3 meses"
+          }
+        ]
+      },
       "sourceSheet": "B08 TOMATE CONFITADO"
     },
     {
@@ -494,7 +1559,7 @@
         {
           "title": "PROCEDIMIENTO PARA EL AMASADO",
           "procedureTitle": null,
-          "description": "Pan con masa madre al 50 % de hidratación.",
+          "description": "Pan de masa madre (masa madre al 100 % de hidratación; hidratación total de la masa, en torno al 56 %).",
           "ingredients": [
             {
               "qty": 100,
@@ -502,7 +1567,7 @@
               "name": "Masa madre"
             },
             {
-              "qty": 270,
+              "qty": 260,
               "unit": "ml",
               "name": "Agua"
             },
@@ -512,7 +1577,7 @@
               "name": "Harina"
             },
             {
-              "qty": 2,
+              "qty": 3,
               "unit": "g",
               "name": "Levadura seca"
             },
@@ -523,32 +1588,215 @@
             }
           ],
           "steps": [
-            "En la cubeta de la panificadora, colocar el agua y la masa madre.",
+            "Calentar el agua a 40 °C en el hervidor eléctrico.",
+            "En la cubeta de la panificadora, colocar el agua, la levadura y la masa madre.",
             "Con una espátula, deshacer la masa madre en el agua, diluyendo bien.",
-            "Agregar la harina y luego, la levadura en un extremo y la sal en el otro.",
-            "Colocar la cubeta en la máquina. Programar \"ESPONJOSO\" Prog. 2. Dejar amasar por 88 minutos.",
-            "Una vez amasado, retirar la masa de la cubeta. Retirar las palas de amasado. Darle forma a la masa y colocarla en la cubeta limpia.",
+            "Agregar la harina y la sal.",
+            "Colocar la cubeta en la máquina. Seleccionar el programa 2, el peso adecuado (la receta sin escalar es para un pan de hasta 1 kg) y el tostado máximo.",
+            "A la 1 hora y 28 minutos, retirar la masa de la cubeta y retirar las palas de amasado. Dar forma a la masa y colocarla en la cubeta limpia.",
+            "Cubrir la cubeta con papel de aluminio para que el pan se hornee sin perder tanta humedad.",
             "Dejar que el programa de horneado continúe hasta el final, unos 108 minutos.",
             "Cuando el programa termine, retirar el pan inmediatamente.",
             "Colocar en una rejilla y dejar enfriar mínimo durante 45 minutos antes de cortarlo.",
-            "El pan se guarda tapado con un paño de algodón durante el servicio. El sobrante de pan se filma para el día siguiente."
+            "El pan se guarda tapado con un paño de algodón durante el servicio. El sobrante se filma para el día siguiente."
           ]
         },
         {
-          "title": "ALIMENTADO DE LA MASA MADRE",
+          "title": "ALIMENTADO DE LA MASA MADRE (solo después de sacar la del último pan del día)",
           "procedureTitle": null,
           "description": null,
           "ingredients": [],
           "steps": [
-            "Colocar un tupper limpio sobre la balanza y poner tara del peso a 0.",
+            "Colocar un túper limpio sobre la balanza y poner la tara a 0.",
             "Llenar con la masa madre y pesar la cantidad de masa madre.",
-            "Agregar exactamente el mismo peso obtenido, pero con harina.",
-            "Agregar exactamente el mismo peso de antes, pero de agua.",
-            "Mezclar lentamente para integrar todos los ingredientes cuidando de que no hayan grumos.",
-            "Guardar en nevera al menos durante 8 horas como mínimo antes de usar la masa."
+            "Agregar exactamente el mismo peso obtenido, pero de harina.",
+            "Agregar exactamente el mismo peso, pero de agua.",
+            "Mezclar lentamente para integrar todos los ingredientes, cuidando de que no queden grumos.",
+            "Guardar en nevera al menos 8 horas antes de volver a usarla."
           ]
         }
       ],
+      "plan": {
+        "phase": "Producción",
+        "shelfLifeDays": 2,
+        "storage": "Ambiente",
+        "requires": [],
+        "steps": [
+          {
+            "b": 1,
+            "s": 1,
+            "d": 1,
+            "eq": "Manual",
+            "t": "Máquina",
+            "pm": null,
+            "mm": 3,
+            "sc": false,
+            "n": "Hervidor eléctrico (no está en la lista de equipos)"
+          },
+          {
+            "b": 1,
+            "s": 2,
+            "d": 1,
+            "eq": "Panificadora",
+            "t": "Activo",
+            "pm": 2,
+            "mm": null,
+            "sc": false
+          },
+          {
+            "b": 1,
+            "s": 3,
+            "d": 1,
+            "eq": "Panificadora",
+            "t": "Activo",
+            "pm": 2,
+            "mm": null,
+            "sc": false
+          },
+          {
+            "b": 1,
+            "s": 4,
+            "d": 1,
+            "eq": "Panificadora",
+            "t": "Activo",
+            "pm": 2,
+            "mm": null,
+            "sc": false
+          },
+          {
+            "b": 1,
+            "s": 5,
+            "d": 1,
+            "eq": "Panificadora",
+            "t": "Activo + espera",
+            "pm": 1,
+            "mm": 88,
+            "sc": false,
+            "n": "Amasado del programa 2 hasta retirar las palas (1 h 28 min)"
+          },
+          {
+            "b": 1,
+            "s": 6,
+            "d": 1,
+            "eq": "Panificadora",
+            "t": "Activo",
+            "pm": 5,
+            "mm": null,
+            "sc": false
+          },
+          {
+            "b": 1,
+            "s": 7,
+            "d": 1,
+            "eq": "Panificadora",
+            "t": "Activo",
+            "pm": 1,
+            "mm": null,
+            "sc": false
+          },
+          {
+            "b": 1,
+            "s": 8,
+            "d": 1,
+            "eq": "Panificadora",
+            "t": "Máquina",
+            "pm": null,
+            "mm": 108,
+            "sc": false
+          },
+          {
+            "b": 1,
+            "s": 9,
+            "d": 1,
+            "eq": "Panificadora",
+            "t": "Activo",
+            "pm": 1,
+            "mm": null,
+            "sc": false
+          },
+          {
+            "b": 1,
+            "s": 10,
+            "d": 1,
+            "eq": "Manual",
+            "t": "Activo + espera",
+            "pm": 1,
+            "mm": 45,
+            "sc": false
+          },
+          {
+            "b": 1,
+            "s": 11,
+            "d": 1,
+            "eq": "Manual",
+            "t": "Activo",
+            "pm": 1,
+            "mm": null,
+            "sc": false
+          },
+          {
+            "b": 2,
+            "s": 1,
+            "d": 1,
+            "eq": "Manual",
+            "t": "Activo",
+            "pm": 1,
+            "mm": null,
+            "sc": false
+          },
+          {
+            "b": 2,
+            "s": 2,
+            "d": 1,
+            "eq": "Manual",
+            "t": "Activo",
+            "pm": 1,
+            "mm": null,
+            "sc": false
+          },
+          {
+            "b": 2,
+            "s": 3,
+            "d": 1,
+            "eq": "Manual",
+            "t": "Activo",
+            "pm": 1,
+            "mm": null,
+            "sc": false
+          },
+          {
+            "b": 2,
+            "s": 4,
+            "d": 1,
+            "eq": "Manual",
+            "t": "Activo",
+            "pm": 1,
+            "mm": null,
+            "sc": false
+          },
+          {
+            "b": 2,
+            "s": 5,
+            "d": 1,
+            "eq": "Manual",
+            "t": "Activo",
+            "pm": 2,
+            "mm": null,
+            "sc": false
+          },
+          {
+            "b": 2,
+            "s": 6,
+            "d": 1,
+            "eq": "Nevera",
+            "t": "Activo + espera",
+            "pm": 1,
+            "mm": 480,
+            "sc": false,
+            "n": "Mínimo 8 h; no usar la masa madre antes"
+          }
+        ]
+      },
       "sourceSheet": "B09 PAN MASA MADRE"
     },
     {
@@ -557,56 +1805,235 @@
       "code": "B10",
       "section": "Preparaciones base",
       "sectionOrder": 1,
-      "yieldAmount": 4,
+      "yieldAmount": 2,
       "yieldUnit": "ud",
       "stages": [
         {
           "title": "PROCEDIMIENTO",
           "procedureTitle": null,
-          "description": "Receta del tradicional pan de cristal catalán.",
+          "description": "Pan de cristal con harina de fuerza (85 % de hidratación), 2 panes por masa. Se hornea, se congela y se regenera en servicio.",
           "ingredients": [
             {
-              "qty": 500,
+              "qty": 300,
               "unit": "g",
-              "name": "Harina"
+              "name": "Harina de fuerza"
             },
             {
-              "qty": 450,
+              "qty": 255,
               "unit": "ml",
               "name": "Agua"
             },
             {
-              "qty": 3,
+              "qty": 1.8,
               "unit": "g",
               "name": "Levadura seca"
             },
             {
-              "qty": 10,
+              "qty": 6,
               "unit": "g",
               "name": "Sal"
             },
             {
-              "qty": 15,
+              "qty": 9,
               "unit": "g",
               "name": "Aceite de Oliva"
             }
           ],
           "steps": [
-            "En un bol colocar el agua y la levadura. Mezclar suavemente para disolver la levadura.",
-            "Agregar la harina y mezclar todo hasta integrarlo. Tapar con film y dejar reposar 20 minutos.",
-            "Agregar la sal y mezclar suavemente para integrarla a la masa. Tapar con film y dejar reposar 10 minutos.",
-            "Agregar el aceite y mezclar suavemente para integrarlo a la masa.",
-            "Pasarlo a una fuente rectangular previamente engrasada y tapar. Dejar reposar 25 minutos.",
-            "Hacer la primera tanda de pliegues y dejar reposar otros 25 minutos.",
-            "Hacer la segunda tanda de pliegues y dejar reposar 25 minutos.",
-            "Hacer la tercera tanda de pliegues y dejar reposar 25 minutos.",
-            "Hacer la última tanda de pliegues y dejar reposar 25 minutos.",
-            "Desmoldar la masa sobre la mesa enharinada. Espolvorear harina por encima de la masa y darle forma rectangular.",
-            "Cortar 6 panecillos iguales, SIN BOLEAR NI AMASAR, y colocarlos sobre papel de horno en una bandeja.",
-            "Fermentación final: 45 minutos. Mientras tanto, calentar el horno a 230 grados calor arriba y abajo con una bandeja de horno colocada boca abajo y otra bandeja en la base del horno."
+            "Calentar el agua a 40 °C con el hervidor eléctrico.",
+            "En un bol, colocar el agua caliente con la levadura. Mezclar suavemente para disolver la levadura.",
+            "Agregar la harina de fuerza y mezclar hasta integrar. Tapar el bol con plástico y cubrir con un paño. Dejar reposar 20 minutos.",
+            "Agregar la sal y mezclar suavemente para incorporarla. Volver a cubrir con plástico y con el paño y dejar reposar 10 minutos.",
+            "Agregar el aceite y mezclar suavemente. Volver a cubrir con plástico y con el paño y dejar reposar 25 minutos.",
+            "Destapar. Hacer la primera tanda de pliegues a la masa, cuidando de no presionar y de mantener el aire dentro de la preparación. Volver a cubrir. Dejar reposar 25 minutos.",
+            "Repetir el proceso por segunda vez. Destapando. Plegando la masa. Cubriendo. Dejar reposar 25 minutos.",
+            "Repetir el proceso por tercera vez. Destapando. Plegando la masa. Cubriendo. Dejar reposar 25 minutos.",
+            "Repetir el proceso por cuarta vez. Destapando. Plegando la masa. Cubriendo. Dejar reposar 25 minutos.",
+            "Desmoldar la masa sobre la mesa enharinada. Espolvorear con un poco de harina sobre la masa y suavemente darle una forma rectangular.",
+            "Cortar la masa suavemente en dos trozos (los dos panes) y colocarlos sobre papel de horno y en una bandeja de horno.",
+            "Precalentar el horno a 180 °C, calor arriba y abajo.",
+            "Cubrir los panes y dejar fermentar durante 45 minutos.",
+            "Una vez fermentado, colocar la bandeja en el horno y cocer durante 25 minutos.",
+            "Retirar del horno. Dejar enfriar.",
+            "Cortar los panes por la mitad y luego en trozos. Una vez fríos, congelar un máximo de 1 mes hasta su uso."
           ]
         }
       ],
+      "plan": {
+        "phase": "Producción",
+        "shelfLifeDays": 30,
+        "storage": "Congelador",
+        "requires": [],
+        "steps": [
+          {
+            "b": 1,
+            "s": 1,
+            "d": 1,
+            "eq": "Manual",
+            "t": "Máquina",
+            "pm": null,
+            "mm": 3,
+            "sc": false,
+            "n": "Hervidor eléctrico (no está en la lista de equipos)"
+          },
+          {
+            "b": 1,
+            "s": 2,
+            "d": 1,
+            "eq": "Manual",
+            "t": "Activo",
+            "pm": 2,
+            "mm": null,
+            "sc": false
+          },
+          {
+            "b": 1,
+            "s": 3,
+            "d": 1,
+            "eq": "Manual",
+            "t": "Activo + espera",
+            "pm": 3,
+            "mm": 20,
+            "sc": false
+          },
+          {
+            "b": 1,
+            "s": 4,
+            "d": 1,
+            "eq": "Manual",
+            "t": "Activo + espera",
+            "pm": 2,
+            "mm": 10,
+            "sc": false
+          },
+          {
+            "b": 1,
+            "s": 5,
+            "d": 1,
+            "eq": "Manual",
+            "t": "Activo + espera",
+            "pm": 2,
+            "mm": 25,
+            "sc": false
+          },
+          {
+            "b": 1,
+            "s": 6,
+            "d": 1,
+            "eq": "Manual",
+            "t": "Activo + espera",
+            "pm": 2,
+            "mm": 25,
+            "sc": false
+          },
+          {
+            "b": 1,
+            "s": 7,
+            "d": 1,
+            "eq": "Manual",
+            "t": "Activo + espera",
+            "pm": 2,
+            "mm": 25,
+            "sc": false
+          },
+          {
+            "b": 1,
+            "s": 8,
+            "d": 1,
+            "eq": "Manual",
+            "t": "Activo + espera",
+            "pm": 2,
+            "mm": 25,
+            "sc": false
+          },
+          {
+            "b": 1,
+            "s": 9,
+            "d": 1,
+            "eq": "Manual",
+            "t": "Activo + espera",
+            "pm": 2,
+            "mm": 25,
+            "sc": false
+          },
+          {
+            "b": 1,
+            "s": 10,
+            "d": 1,
+            "eq": "Manual",
+            "t": "Activo",
+            "pm": 5,
+            "mm": null,
+            "sc": false
+          },
+          {
+            "b": 1,
+            "s": 11,
+            "d": 1,
+            "eq": "Manual",
+            "t": "Activo",
+            "pm": 5,
+            "mm": null,
+            "sc": false
+          },
+          {
+            "b": 1,
+            "s": 12,
+            "d": 1,
+            "eq": "Horno",
+            "t": "Activo",
+            "pm": 1,
+            "mm": null,
+            "sc": false,
+            "n": "El horno se precalienta durante los 45 min de fermentación (paso 13)"
+          },
+          {
+            "b": 1,
+            "s": 13,
+            "d": 1,
+            "eq": "Manual",
+            "t": "Activo + espera",
+            "pm": 1,
+            "mm": 45,
+            "sc": false
+          },
+          {
+            "b": 1,
+            "s": 14,
+            "d": 1,
+            "eq": "Horno",
+            "t": "Máquina",
+            "pm": null,
+            "mm": 25,
+            "sc": false
+          },
+          {
+            "b": 1,
+            "s": 15,
+            "d": 1,
+            "eq": "Manual",
+            "t": "Activo + espera",
+            "pm": 1,
+            "mm": null,
+            "sc": false,
+            "n": "PENDIENTE: tiempo de enfriado",
+            "pend": true
+          },
+          {
+            "b": 1,
+            "s": 16,
+            "d": 1,
+            "eq": "Congelador",
+            "t": "Activo",
+            "pm": 5,
+            "mm": null,
+            "sc": false
+          }
+        ],
+        "warnings": [
+          "fila 22 (1.15): falta tiempo para el tipo \"Activo + espera\"."
+        ]
+      },
       "sourceSheet": "B10 PAN DE CRISTAL"
     },
     {
@@ -621,7 +2048,7 @@
         {
           "title": "PROCEDIMIENTO PARA LA BASE DE LA LIMONADA",
           "procedureTitle": null,
-          "description": "Concentrado de limón azucarado para preparar limonada.",
+          "description": "Base de limón azucarada para la limonada y el tinto de verano.",
           "ingredients": [
             {
               "qty": 800,
@@ -652,27 +2079,307 @@
           "steps": [
             "Rallar la piel de limón. Reservar.",
             "Exprimir el zumo de limón y reservar.",
-            "En el vaso de la thermomix colocar el agua, la ralladura de limón, el azúcar y la sal.",
-            "Programar 8 minutos / Velocidad 3 / 100 grados",
+            "En el vaso de la Thermomix colocar el agua, la ralladura de limón, el azúcar y la sal.",
+            "Programar 8 minutos, 100 °C, velocidad 3, con el cubilete puesto del revés.",
             "Abrir la tapa y agregar el zumo de limón.",
-            "Programar  3 minutos / Velocidad 3 / 90 grados. (NO SUPERAR TIEMPO NI TEMPERATURA).",
-            "Dejar atemperar. Envasar en bolsas y congelar hasta su utilización."
+            "Programar 3 minutos, 90 °C, velocidad 2 (NO SUPERAR TIEMPO NI TEMPERATURA).",
+            "Pasar la base a una jarra y dejar atemperar.",
+            "Fechar la jarra y guardar en nevera un máximo de 7 días."
           ]
         },
         {
-          "title": "PREPARACIÓN DE LA LIMONADA",
+          "title": "USO EN SERVICIO (detalle en BEBIDAS)",
           "procedureTitle": null,
           "description": null,
           "ingredients": [],
           "steps": [
-            "Preparar una botella de agua (con o sin gas).",
-            "Agregar 3 medidas de la base de la limonada.",
-            "Remover suavemente.",
-            "Servir inmediatamente."
+            "Copa de limonada: 95 ml de base de limonada.",
+            "Tinto de verano: 55 ml de base de limonada."
           ]
         }
       ],
+      "plan": {
+        "phase": "Mixta",
+        "shelfLifeDays": 7,
+        "storage": "Nevera",
+        "requires": [],
+        "steps": [
+          {
+            "b": 1,
+            "s": 1,
+            "d": 1,
+            "eq": "Manual",
+            "t": "Activo",
+            "pm": 5,
+            "mm": null,
+            "sc": true
+          },
+          {
+            "b": 1,
+            "s": 2,
+            "d": 1,
+            "eq": "Manual",
+            "t": "Activo",
+            "pm": 15,
+            "mm": null,
+            "sc": true
+          },
+          {
+            "b": 1,
+            "s": 3,
+            "d": 1,
+            "eq": "Thermomix (cualquiera)",
+            "t": "Activo",
+            "pm": 1,
+            "mm": null,
+            "sc": false
+          },
+          {
+            "b": 1,
+            "s": 4,
+            "d": 1,
+            "eq": "Thermomix (cualquiera)",
+            "t": "Máquina",
+            "pm": null,
+            "mm": 8,
+            "sc": false
+          },
+          {
+            "b": 1,
+            "s": 5,
+            "d": 1,
+            "eq": "Thermomix (cualquiera)",
+            "t": "Activo",
+            "pm": 1,
+            "mm": null,
+            "sc": false
+          },
+          {
+            "b": 1,
+            "s": 6,
+            "d": 1,
+            "eq": "Thermomix (cualquiera)",
+            "t": "Máquina",
+            "pm": null,
+            "mm": 3,
+            "sc": false
+          },
+          {
+            "b": 1,
+            "s": 7,
+            "d": 1,
+            "eq": "Manual",
+            "t": "Activo + espera",
+            "pm": 5,
+            "mm": null,
+            "sc": true,
+            "n": "PENDIENTE: tiempo de atemperado de la jarra (unos 2,2 kg a 90 °C)",
+            "pend": true
+          },
+          {
+            "b": 1,
+            "s": 8,
+            "d": 1,
+            "eq": "Manual",
+            "t": "Activo",
+            "pm": 2,
+            "mm": null,
+            "sc": false
+          }
+        ],
+        "warnings": [
+          "fila 14 (1.7): falta tiempo para el tipo \"Activo + espera\"."
+        ]
+      },
       "sourceSheet": "B11 BASE LIMONADA"
+    },
+    {
+      "id": "caldo-de-verduras",
+      "name": "CALDO DE VERDURAS",
+      "code": "B12",
+      "section": "Preparaciones base",
+      "sectionOrder": 1,
+      "yieldAmount": 5160,
+      "yieldUnit": "g",
+      "stages": [
+        {
+          "title": "PROCEDIMIENTO (olla grande en placa de inducción IsEasy)",
+          "procedureTitle": null,
+          "description": "Caldo de verduras sin aceite para la paella de verduras (C24). Receta nueva del 01/11/2026, pendiente de prueba en cocina.",
+          "ingredients": [
+            {
+              "qty": 6000,
+              "unit": "ml",
+              "name": "Agua"
+            },
+            {
+              "qty": 800,
+              "unit": "g",
+              "name": "Cebolla blanca"
+            },
+            {
+              "qty": 500,
+              "unit": "g",
+              "name": "Puerro"
+            },
+            {
+              "qty": 500,
+              "unit": "g",
+              "name": "Zanahoria en cubos"
+            },
+            {
+              "qty": 200,
+              "unit": "g",
+              "name": "Pimiento"
+            },
+            {
+              "qty": 300,
+              "unit": "g",
+              "name": "Tomate"
+            },
+            {
+              "qty": 40,
+              "unit": "g",
+              "name": "Ajo pelado"
+            },
+            {
+              "qty": 3,
+              "unit": "g",
+              "name": "Laurel"
+            },
+            {
+              "qty": 36,
+              "unit": "g",
+              "name": "Sal"
+            }
+          ],
+          "steps": [
+            "Lavar todas las verduras. Pelar la cebolla y el ajo. Cortar cebolla, puerro, pimiento y tomate en trozos medianos. La zanahoria ya viene en cubos.",
+            "Poner en la olla el agua FRÍA, todas las verduras, la sal y el laurel. Sin aceite.",
+            "Placa a nivel 9 hasta que rompa a hervir.",
+            "Bajar a un hervor suave, sin borbotones fuertes, para que el caldo no se enturbie (nivel de partida 3; ajustar en la primera prueba y anotarlo).",
+            "Cocer 60 minutos desde que empieza a hervir, sin tapar del todo.",
+            "Colar con el chino, presionando bien las verduras.",
+            "Pasar el caldo a recipientes y dejar atemperar 30 minutos."
+          ]
+        },
+        {
+          "title": "ENVASADO",
+          "procedureTitle": null,
+          "description": null,
+          "ingredients": [],
+          "steps": [
+            "Envasar el caldo en bolsas de congelación.",
+            "Fechar las bolsas y congelar un máximo de 3 meses."
+          ]
+        }
+      ],
+      "plan": {
+        "phase": "Producción",
+        "shelfLifeDays": 90,
+        "storage": "Congelador",
+        "requires": [],
+        "steps": [
+          {
+            "b": 1,
+            "s": 1,
+            "d": 1,
+            "eq": "Manual",
+            "t": "Activo",
+            "pm": 15,
+            "mm": null,
+            "sc": true,
+            "n": "Valor inicial para el lote de la ficha; la receta se escala"
+          },
+          {
+            "b": 1,
+            "s": 2,
+            "d": 1,
+            "eq": "Olla grande (sin presión)",
+            "t": "Activo",
+            "pm": 5,
+            "mm": null,
+            "sc": false
+          },
+          {
+            "b": 1,
+            "s": 3,
+            "d": 1,
+            "eq": "Inducción IsEasy",
+            "t": "Máquina",
+            "pm": null,
+            "mm": null,
+            "sc": false,
+            "n": "PENDIENTE: tiempo hasta que rompe a hervir (depende de la cantidad)",
+            "pend": true
+          },
+          {
+            "b": 1,
+            "s": 4,
+            "d": 1,
+            "eq": "Inducción IsEasy",
+            "t": "Activo",
+            "pm": 1,
+            "mm": null,
+            "sc": false
+          },
+          {
+            "b": 1,
+            "s": 5,
+            "d": 1,
+            "eq": "Inducción IsEasy",
+            "t": "Máquina",
+            "pm": null,
+            "mm": 60,
+            "sc": false
+          },
+          {
+            "b": 1,
+            "s": 6,
+            "d": 1,
+            "eq": "Manual",
+            "t": "Activo",
+            "pm": 10,
+            "mm": null,
+            "sc": false
+          },
+          {
+            "b": 1,
+            "s": 7,
+            "d": 1,
+            "eq": "Manual",
+            "t": "Activo + espera",
+            "pm": 5,
+            "mm": 30,
+            "sc": true,
+            "n": "Atemperado desatendido"
+          },
+          {
+            "b": 2,
+            "s": 1,
+            "d": 1,
+            "eq": "Manual",
+            "t": "Activo",
+            "pm": 10,
+            "mm": null,
+            "sc": true
+          },
+          {
+            "b": 2,
+            "s": 2,
+            "d": 1,
+            "eq": "Congelador",
+            "t": "Activo",
+            "pm": 2,
+            "mm": null,
+            "sc": false
+          }
+        ],
+        "warnings": [
+          "fila 10 (1.3): falta tiempo para el tipo \"Máquina\"."
+        ]
+      },
+      "sourceSheet": "B12 CALDO DE VERDURAS"
     },
     {
       "id": "mayonesa-casera",
@@ -680,37 +2387,37 @@
       "code": "S01",
       "section": "Sub-preparaciones",
       "sectionOrder": 2,
-      "yieldAmount": 480,
+      "yieldAmount": 209,
       "yieldUnit": "g",
       "stages": [
         {
           "title": "PROCEDIMIENTO",
           "procedureTitle": null,
-          "description": "Mayonesa casera para la ensaladilla rusa (antes, bloque dentro de la ficha ENSALADILLA).",
+          "description": "FICHA ARCHIVADA (10/11/2026): ya no se usa. La ensaladilla rusa (C03) pasa a usar mayonesa industrial pasteurizada (producto pendiente de decidir). Antes: mayonesa casera para la ensaladilla rusa.",
           "ingredients": [
             {
-              "qty": 2,
+              "qty": 1,
               "unit": "ud",
               "name": "Huevos"
             },
             {
-              "qty": 350,
+              "qty": 175,
               "unit": "ml",
               "name": "Aceite de girasol"
             },
             {
-              "qty": 8,
+              "qty": 4,
               "unit": "g",
               "name": "Sal"
             },
             {
-              "qty": 20,
+              "qty": 10,
               "unit": "g",
               "name": "Vinagre de Jerez"
             }
           ],
           "steps": [
-            "Colocar los huevos en el vaso de la turmix (el vaso debe estar bien seco).",
+            "Colocar el huevo en el vaso de la turmix (el vaso debe estar bien seco).",
             "Cubrir con el aceite de girasol, agregándolo suavemente para que el huevo quede en el fondo del vaso.",
             "Agregar el resto de ingredientes con cuidado.",
             "Introducir las cuchillas de la túrmix con mucho cuidado, dejando salir todo el aire.",
@@ -727,23 +2434,28 @@
       "code": "S02",
       "section": "Sub-preparaciones",
       "sectionOrder": 2,
-      "yieldAmount": 364,
+      "yieldAmount": null,
       "yieldUnit": "g",
       "stages": [
         {
-          "title": "PROCEDIMIENTO",
+          "title": "PROCEDIMIENTO MCC",
           "procedureTitle": null,
-          "description": "Salsa brava tipo mayonesa picante (antes, bloque dentro de la ficha BRAVAS).",
+          "description": "Salsa brava RTMY de tomate, cebolla pochada y pimentón, elaborada en MCC (versión del 20/10/2026; sustituye a la salsa tipo mayonesa con huevo, girasol y Tabasco).",
           "ingredients": [
             {
-              "qty": 1,
-              "unit": "ud",
-              "name": "Huevos"
+              "qty": 60,
+              "unit": "g",
+              "name": "Aceite de Oliva"
             },
             {
-              "qty": 275,
-              "unit": "ml",
-              "name": "Aceite de girasol"
+              "qty": 20,
+              "unit": "g",
+              "name": "Ajo pelado"
+            },
+            {
+              "qty": 200,
+              "unit": "g",
+              "name": "Cebolla pochada RTMY"
             },
             {
               "qty": 10,
@@ -751,32 +2463,176 @@
               "name": "Pimentón dulce"
             },
             {
-              "qty": 8,
-              "unit": "ml",
-              "name": "Tabasco"
-            },
-            {
-              "qty": 14,
+              "qty": 2,
               "unit": "g",
-              "name": "Vinagre de Jerez"
+              "name": "Pimienta de cayena molida"
             },
             {
-              "qty": 6,
+              "qty": 50,
+              "unit": "ml",
+              "name": "Vino blanco de cocina"
+            },
+            {
+              "qty": 300,
+              "unit": "g",
+              "name": "Tomate pera"
+            },
+            {
+              "qty": 200,
+              "unit": "ml",
+              "name": "Agua"
+            },
+            {
+              "qty": 5,
               "unit": "g",
               "name": "Sal"
+            },
+            {
+              "qty": 10,
+              "unit": "g",
+              "name": "Vinagre de Jerez"
             }
           ],
           "steps": [
-            "Colocar el huevo en el vaso de la turmix (el vaso debe estar bien seco).",
-            "Cubrir con el aceite de girasol, agregándolo suavemente para que el huevo quede en el fondo del vaso.",
-            "Agregar el resto de ingredientes con cuidado.",
-            "Introducir las cuchillas de la túrmix con mucho cuidado, dejando salir todo el aire.",
-            "Sin mover las cuchillas, mezclar a máxima velocidad y esperar hasta que la mayonesa emulsione.",
-            "Lentamente ir mezclando todos los ingredientes con mucho cuidado y lentamente.",
-            "Envasar en bote fechado y refrigerado hasta su utilización."
+            "Lavar y rallar el tomate. Reservar.",
+            "Ajo 5 s / V5, bajar restos. Añadir el AOVE: 4 min / 120 °C / V1.",
+            "Cebolla pochada: 3 min / 120 °C / V1 inversa.",
+            "Pimentón y cayena: 30 s / 100 °C / V2.",
+            "Vino: 2 min / 120 °C / V1 sin cubilete.",
+            "Tomate, agua y sal: 120 °C / V1 inversa sin cubilete (cestillo sobre la tapa contra salpicaduras) hasta hervor; desde el hervor, 25 min.",
+            "Sin temperatura: 30 s / V8 + 30 s / V10.",
+            "Vinagre: 10 s / V3.",
+            "Pesar la salsa.",
+            "Pasar la salsa a un túper y dejar atemperar.",
+            "Envasar en biberones, fechar y guardar en nevera."
           ]
         }
       ],
+      "plan": {
+        "phase": "Producción",
+        "shelfLifeDays": 7,
+        "storage": "Nevera",
+        "requires": [
+          "B02"
+        ],
+        "steps": [
+          {
+            "b": 1,
+            "s": 1,
+            "d": 1,
+            "eq": "Manual",
+            "t": "Activo",
+            "pm": 10,
+            "mm": null,
+            "sc": true,
+            "n": "Valor inicial para el lote de la ficha; la receta se escala"
+          },
+          {
+            "b": 1,
+            "s": 2,
+            "d": 1,
+            "eq": "Thermomix (cualquiera)",
+            "t": "Máquina",
+            "pm": null,
+            "mm": 4.1,
+            "sc": false
+          },
+          {
+            "b": 1,
+            "s": 3,
+            "d": 1,
+            "eq": "Thermomix (cualquiera)",
+            "t": "Máquina",
+            "pm": null,
+            "mm": 3,
+            "sc": false
+          },
+          {
+            "b": 1,
+            "s": 4,
+            "d": 1,
+            "eq": "Thermomix (cualquiera)",
+            "t": "Máquina",
+            "pm": null,
+            "mm": 0.5,
+            "sc": false
+          },
+          {
+            "b": 1,
+            "s": 5,
+            "d": 1,
+            "eq": "Thermomix (cualquiera)",
+            "t": "Máquina",
+            "pm": null,
+            "mm": 2,
+            "sc": false
+          },
+          {
+            "b": 1,
+            "s": 6,
+            "d": 1,
+            "eq": "Thermomix (cualquiera)",
+            "t": "Máquina",
+            "pm": null,
+            "mm": 25,
+            "sc": true,
+            "n": "PENDIENTE: tiempo hasta el hervor (depende de la cantidad). Los 25 min se cuentan desde el hervor",
+            "pend": true
+          },
+          {
+            "b": 1,
+            "s": 7,
+            "d": 1,
+            "eq": "Thermomix (cualquiera)",
+            "t": "Máquina",
+            "pm": null,
+            "mm": 1,
+            "sc": false
+          },
+          {
+            "b": 1,
+            "s": 8,
+            "d": 1,
+            "eq": "Thermomix (cualquiera)",
+            "t": "Máquina",
+            "pm": null,
+            "mm": 0.2,
+            "sc": false
+          },
+          {
+            "b": 1,
+            "s": 9,
+            "d": 1,
+            "eq": "Manual",
+            "t": "Activo",
+            "pm": 1,
+            "mm": null,
+            "sc": false
+          },
+          {
+            "b": 1,
+            "s": 10,
+            "d": 1,
+            "eq": "Manual",
+            "t": "Espera",
+            "pm": null,
+            "mm": 30,
+            "sc": false,
+            "n": "Atemperado desatendido"
+          },
+          {
+            "b": 1,
+            "s": 11,
+            "d": 1,
+            "eq": "Manual",
+            "t": "Activo",
+            "pm": 5,
+            "mm": null,
+            "sc": true,
+            "n": "Valor inicial para el lote de la ficha; la receta se escala. Caducidad: 7 días, sin pasar la fecha de la cebolla pochada (B02)"
+          }
+        ]
+      },
       "sourceSheet": "S02 SALSA BRAVA"
     },
     {
@@ -785,13 +2641,13 @@
       "code": "S03",
       "section": "Sub-preparaciones",
       "sectionOrder": 2,
-      "yieldAmount": 2000,
+      "yieldAmount": 2555,
       "yieldUnit": "g",
       "stages": [
         {
           "title": "PROCEDIMIENTO",
           "procedureTitle": null,
-          "description": "Patatas cortadas en gajo, confitadas y doradas en aceite, envasadas al vacío en raciones de 200 g.",
+          "description": "Patatas peladas y cortadas en bastones, pochadas y doradas en freidora, envasadas al vacío en raciones de 200 g.",
           "ingredients": [
             {
               "qty": 3500,
@@ -805,20 +2661,155 @@
             }
           ],
           "steps": [
-            "Lavar y pelar las patatas y cortarlas en gajos con la máquina cortadora.",
-            "Calentar el aceite (2 litros, 12 minutos nivel 6)",
-            "Una vez caliente el aceite, bajar el nivel de la vitro a 5.",
-            "Pochar las patatas en tandas de 380 gramos (9 minutos por tanda nivel 5).",
-            "Dejar recuperar la temperatura del aceite entre tanda de patatas (4 minutos)",
-            "Una vez pochadas todas la patatas, subir temperatura del aceite (Nivel 9 esperar 4 minutos).",
-            "Dorar las patatas en tandas de 380 gramos (4 minutos por tanda Nivel 9)",
-            "Dejar recuperar la temperatura del aceite entre tanda de patatas (3 minutos)",
-            "Dejar reposar las patatas después de la segunda fritura.",
-            "Racionar en porciones de 200 gramos en bolsas al vacío.",
-            "Refrigerar hasta consumir."
+            "Lavar y pelar las patatas.",
+            "Cortarlas en bastones con la cortadora VEVOR.",
+            "Calentar el aceite de la freidora (3 L de girasol) a 160 °C, hasta que se encienda el piloto.",
+            "Pochar las patatas en tandas de 380 g, 6 minutos por tanda.",
+            "Entre tanda y tanda, esperar a que el piloto indique que el aceite ha recuperado la temperatura.",
+            "Una vez pochadas todas las patatas, subir el aceite a 180 °C y esperar al piloto.",
+            "Dorar las patatas en tandas de 380 g, 2 minutos por tanda.",
+            "Entre tanda y tanda, esperar a que el piloto indique que el aceite ha recuperado la temperatura.",
+            "Pasar las patatas a una bandeja y dejar atemperar 1 hora, hasta que estén completamente frías. Si se envasan calientes, la humedad se condensa dentro de la bolsa y aparece moho.",
+            "Racionar en porciones de 200 g en bolsas de vacío y envasar al vacío con intensidad baja, para no aplastar la patata.",
+            "Fechar y guardar en nevera."
           ]
         }
       ],
+      "plan": {
+        "phase": "Producción",
+        "shelfLifeDays": 10,
+        "storage": "Vacío en nevera",
+        "requires": [],
+        "steps": [
+          {
+            "b": 1,
+            "s": 1,
+            "d": 1,
+            "eq": "Manual",
+            "t": "Activo",
+            "pm": 20,
+            "mm": null,
+            "sc": true,
+            "n": "Valor inicial para el lote de la ficha; la receta se escala"
+          },
+          {
+            "b": 1,
+            "s": 3,
+            "d": 1,
+            "eq": "Freidora",
+            "t": "Máquina",
+            "pm": null,
+            "mm": null,
+            "sc": false,
+            "n": "Sin tiempo fijo: se espera al piloto de temperatura"
+          },
+          {
+            "b": 1,
+            "s": 4,
+            "d": 1,
+            "eq": "Freidora",
+            "t": "Cocción atendida",
+            "pm": null,
+            "mm": 6,
+            "sc": false,
+            "rp": "POR TANDA",
+            "ub": 380,
+            "n": "3.500 g en 10 tandas"
+          },
+          {
+            "b": 1,
+            "s": 5,
+            "d": 1,
+            "eq": "Freidora",
+            "t": "Espera",
+            "pm": null,
+            "mm": null,
+            "sc": false,
+            "rp": "ENTRE TANDAS",
+            "n": "Sin tiempo fijo: se espera al piloto de temperatura"
+          },
+          {
+            "b": 1,
+            "s": 6,
+            "d": 1,
+            "eq": "Freidora",
+            "t": "Máquina",
+            "pm": null,
+            "mm": null,
+            "sc": false,
+            "n": "Sin tiempo fijo: se espera al piloto de temperatura"
+          },
+          {
+            "b": 1,
+            "s": 7,
+            "d": 1,
+            "eq": "Freidora",
+            "t": "Cocción atendida",
+            "pm": null,
+            "mm": 2,
+            "sc": false,
+            "rp": "POR TANDA",
+            "ub": 380,
+            "n": "3.500 g en 10 tandas"
+          },
+          {
+            "b": 1,
+            "s": 8,
+            "d": 1,
+            "eq": "Freidora",
+            "t": "Espera",
+            "pm": null,
+            "mm": null,
+            "sc": false,
+            "rp": "ENTRE TANDAS",
+            "n": "Sin tiempo fijo: se espera al piloto de temperatura"
+          },
+          {
+            "b": 1,
+            "s": 9,
+            "d": 1,
+            "eq": "Manual",
+            "t": "Espera",
+            "pm": null,
+            "mm": 60,
+            "sc": false,
+            "n": "Atemperado desatendido: las patatas deben estar completamente frías antes de envasar"
+          },
+          {
+            "b": 1,
+            "s": 10,
+            "d": 1,
+            "eq": "Envasadora",
+            "t": "Activo",
+            "pm": 20,
+            "mm": null,
+            "sc": true,
+            "n": "PENDIENTE: configuración de la envasadora (vacío bajo para no aplastar la patata); se registra en la próxima producción",
+            "pend": true
+          },
+          {
+            "b": 1,
+            "s": 11,
+            "d": 1,
+            "eq": "Manual",
+            "t": "Activo",
+            "pm": null,
+            "mm": null,
+            "sc": false,
+            "n": "Incluido en los 20 min del paso 10. Caducidad: 10 días"
+          }
+        ],
+        "warnings": [
+          "fila 9: Equipo no válido (Cortadora). Fila ignorada.",
+          "fila 10 (1.3): falta tiempo para el tipo \"Máquina\".",
+          "fila 11 (1.4): falta tiempo para el tipo \"Cocción atendida\".",
+          "fila 12 (1.5): falta tiempo para el tipo \"Espera\".",
+          "fila 13 (1.6): falta tiempo para el tipo \"Máquina\".",
+          "fila 14 (1.7): falta tiempo para el tipo \"Cocción atendida\".",
+          "fila 15 (1.8): falta tiempo para el tipo \"Espera\".",
+          "fila 18 (1.11): falta tiempo para el tipo \"Activo\"."
+        ]
+      },
       "sourceSheet": "S03 BASE PATATAS BRAVAS"
     },
     {
@@ -841,14 +2832,14 @@
               "name": "Patatas"
             },
             {
-              "qty": 380,
+              "qty": 200,
               "unit": "g",
-              "name": "Cebolla blanca"
+              "name": "Cebolla pochada RTMY"
             },
             {
               "qty": 100,
               "unit": "g",
-              "name": "Aceite de Oliva"
+              "name": "Aceite ahumado RTMY"
             },
             {
               "qty": 25,
@@ -857,15 +2848,104 @@
             }
           ],
           "steps": [
-            "Laminar las patatas y la cebolla con la mandolina.",
-            "Coloca en la olla a presión junto con el aceite y la sal.",
-            "Tapar y cocinar a nivel 2 en la vitro durante 38 minutos.",
-            "Dejar reposar. Abrir y colar la mezcla de patatas y cebollas.",
-            "Embolsar en raciones de 205 gramos.",
-            "Envasar al vacío y refrigerar máximo 6 días."
+            "Pelar las patatas.",
+            "Laminarlas con la mandolina.",
+            "Colocarlas en un bol, agregar la cebolla pochada, el aceite ahumado y la sal, y mezclar bien. Pasar la mezcla a la olla a presión y tapar.",
+            "Cocinar en la IsEasy a nivel 2 durante 38 minutos, contados desde que se enciende la placa.",
+            "Apagar y dejar que la olla pierda la presión sola (unos 20 minutos).",
+            "Abrir y pasar la mezcla a un colador. Dejar atemperar 25 minutos para que escurra el exceso de aceite.",
+            "Embolsar en raciones de 205 g, envasar al vacío, fechar y guardar en nevera."
           ]
         }
       ],
+      "plan": {
+        "phase": "Producción",
+        "shelfLifeDays": 7,
+        "storage": "Vacío en nevera",
+        "requires": [
+          "B02",
+          "B07"
+        ],
+        "steps": [
+          {
+            "b": 1,
+            "s": 1,
+            "d": 1,
+            "eq": "Manual",
+            "t": "Activo",
+            "pm": 10,
+            "mm": null,
+            "sc": true,
+            "n": "Valor inicial para el lote de la ficha; la receta se escala"
+          },
+          {
+            "b": 1,
+            "s": 2,
+            "d": 1,
+            "eq": "Manual",
+            "t": "Activo",
+            "pm": 10,
+            "mm": null,
+            "sc": true,
+            "n": "Mandolina. Valor inicial para el lote de la ficha; la receta se escala"
+          },
+          {
+            "b": 1,
+            "s": 3,
+            "d": 1,
+            "eq": "Manual",
+            "t": "Activo",
+            "pm": 3,
+            "mm": null,
+            "sc": true,
+            "n": "Valor inicial para el lote de la ficha; la receta se escala"
+          },
+          {
+            "b": 1,
+            "s": 4,
+            "d": 1,
+            "eq": "Inducción IsEasy",
+            "t": "Máquina",
+            "pm": null,
+            "mm": 38,
+            "sc": false,
+            "n": "En olla a presión pequeña. Los 38 min se cuentan desde que se enciende la placa"
+          },
+          {
+            "b": 1,
+            "s": 5,
+            "d": 1,
+            "eq": "Olla pequeña",
+            "t": "Espera",
+            "pm": null,
+            "mm": 20,
+            "sc": false,
+            "n": "Despresurizado natural"
+          },
+          {
+            "b": 1,
+            "s": 6,
+            "d": 1,
+            "eq": "Manual",
+            "t": "Espera",
+            "pm": null,
+            "mm": 25,
+            "sc": false,
+            "n": "Atemperado y escurrido en colador"
+          },
+          {
+            "b": 1,
+            "s": 7,
+            "d": 1,
+            "eq": "Envasadora",
+            "t": "Activo",
+            "pm": 15,
+            "mm": null,
+            "sc": true,
+            "n": "Caducidad: 7 días, sin pasar la fecha de la cebolla pochada (B02)"
+          }
+        ]
+      },
       "sourceSheet": "S04 BASE DE TORTILLA"
     },
     {
@@ -874,7 +2954,7 @@
       "code": "S05",
       "section": "Sub-preparaciones",
       "sectionOrder": 2,
-      "yieldAmount": 220,
+      "yieldAmount": 230,
       "yieldUnit": "g",
       "stages": [
         {
@@ -900,15 +2980,76 @@
           ],
           "steps": [
             "Atemperar la mantequilla durante unos 90 minutos a temperatura ambiente (para obtener un punto pomada).",
-            "Trabajar la mantequilla con espátula para obtener una textura lisa y homogénea.",
-            "Mezclar el resto de ingredientes en un recipiente aparte. Incorporarlos a la mantequilla en dos tandas, mezclando bien.",
-            "Una vez bien mezclado, colocar la mantequilla en nevera (5 minutos) para que recupere algo de consistencia.",
-            "Colocar la mantequilla dentro del molde plástico redondo y endurecer en el congelador durante 10 minutos.",
-            "Extraer el cilindro de mantequilla empujando suavemente con el disco de plástico por un extremo.",
-            "Envolver la mantequilla con papel de horno y refrigerar hasta su utilización."
+            "Trabajar la mantequilla con espátula hasta obtener una textura lisa y homogénea. Mezclar el resto de ingredientes en un recipiente aparte e incorporarlos a la mantequilla en dos tandas, mezclando bien.",
+            "Colocar la mantequilla dentro del molde plástico redondo.",
+            "Guardar en nevera durante 1 hora para que endurezca.",
+            "Extraer el cilindro empujando suavemente con el disco de plástico por un extremo. Envolver con papel de horno, fechar y guardar en nevera."
           ]
         }
       ],
+      "plan": {
+        "phase": "Producción",
+        "shelfLifeDays": 14,
+        "storage": "Nevera",
+        "requires": [],
+        "steps": [
+          {
+            "b": 1,
+            "s": 1,
+            "d": 1,
+            "eq": "Manual",
+            "t": "Espera",
+            "pm": null,
+            "mm": 90,
+            "sc": false,
+            "n": "Atemperado desatendido (punto pomada)"
+          },
+          {
+            "b": 1,
+            "s": 2,
+            "d": 1,
+            "eq": "Manual",
+            "t": "Activo",
+            "pm": 5,
+            "mm": null,
+            "sc": true,
+            "n": "Valor inicial para el lote de la ficha; la receta se escala"
+          },
+          {
+            "b": 1,
+            "s": 3,
+            "d": 1,
+            "eq": "Manual",
+            "t": "Activo",
+            "pm": 5,
+            "mm": null,
+            "sc": true,
+            "n": "Valor inicial para el lote de la ficha; la receta se escala"
+          },
+          {
+            "b": 1,
+            "s": 4,
+            "d": 1,
+            "eq": "Nevera",
+            "t": "Espera",
+            "pm": null,
+            "mm": 60,
+            "sc": false,
+            "n": "Sin congelador, para no alterar la textura de la mantequilla"
+          },
+          {
+            "b": 1,
+            "s": 5,
+            "d": 1,
+            "eq": "Manual",
+            "t": "Activo",
+            "pm": 5,
+            "mm": null,
+            "sc": true,
+            "n": "Caducidad: 14 días en nevera"
+          }
+        ]
+      },
       "sourceSheet": "S05 MANTEQUILLA AHUMADA"
     },
     {
@@ -917,7 +3058,7 @@
       "code": "S06",
       "section": "Sub-preparaciones",
       "sectionOrder": 2,
-      "yieldAmount": 220,
+      "yieldAmount": 230,
       "yieldUnit": "g",
       "stages": [
         {
@@ -953,15 +3094,76 @@
           ],
           "steps": [
             "Atemperar la mantequilla durante unos 90 minutos a temperatura ambiente (para obtener un punto pomada).",
-            "Trabajar la mantequilla con espátula para obtener una textura lisa y homogénea.",
-            "Mezclar el resto de ingredientes en un recipiente aparte. Incorporarlos a la mantequilla en dos tandas, mezclando bien.",
-            "Una vez bien mezclado, colocar la mantequilla en nevera (5 minutos) para que recupere algo de consistencia.",
-            "Colocar la mantequilla dentro del molde plástico redondo y endurecer en el congelador durante 10 minutos.",
-            "Extraer el cilindro de mantequilla empujando suavemente con el disco de plástico por un extremo.",
-            "Envolver la mantequilla con papel de horno y refrigerar hasta su utilización."
+            "Trabajar la mantequilla con espátula hasta obtener una textura lisa y homogénea. Mezclar el resto de ingredientes en un recipiente aparte e incorporarlos a la mantequilla en dos tandas, mezclando bien.",
+            "Colocar la mantequilla dentro del molde plástico redondo.",
+            "Guardar en nevera durante 1 hora para que endurezca.",
+            "Extraer el cilindro empujando suavemente con el disco de plástico por un extremo. Envolver con papel de horno, fechar y guardar en nevera."
           ]
         }
       ],
+      "plan": {
+        "phase": "Producción",
+        "shelfLifeDays": 14,
+        "storage": "Nevera",
+        "requires": [],
+        "steps": [
+          {
+            "b": 1,
+            "s": 1,
+            "d": 1,
+            "eq": "Manual",
+            "t": "Espera",
+            "pm": null,
+            "mm": 90,
+            "sc": false,
+            "n": "Atemperado desatendido (punto pomada)"
+          },
+          {
+            "b": 1,
+            "s": 2,
+            "d": 1,
+            "eq": "Manual",
+            "t": "Activo",
+            "pm": 5,
+            "mm": null,
+            "sc": true,
+            "n": "Valor inicial para el lote de la ficha; la receta se escala"
+          },
+          {
+            "b": 1,
+            "s": 3,
+            "d": 1,
+            "eq": "Manual",
+            "t": "Activo",
+            "pm": 5,
+            "mm": null,
+            "sc": true,
+            "n": "Valor inicial para el lote de la ficha; la receta se escala"
+          },
+          {
+            "b": 1,
+            "s": 4,
+            "d": 1,
+            "eq": "Nevera",
+            "t": "Espera",
+            "pm": null,
+            "mm": 60,
+            "sc": false,
+            "n": "Sin congelador, para no alterar la textura de la mantequilla"
+          },
+          {
+            "b": 1,
+            "s": 5,
+            "d": 1,
+            "eq": "Manual",
+            "t": "Activo",
+            "pm": 5,
+            "mm": null,
+            "sc": true,
+            "n": "Caducidad: 14 días en nevera"
+          }
+        ]
+      },
       "sourceSheet": "S06 MANTEQUILLA PICANTE"
     },
     {
@@ -970,7 +3172,7 @@
       "code": "S07",
       "section": "Sub-preparaciones",
       "sectionOrder": 2,
-      "yieldAmount": 220,
+      "yieldAmount": 230,
       "yieldUnit": "g",
       "stages": [
         {
@@ -1001,15 +3203,88 @@
           ],
           "steps": [
             "Atemperar la mantequilla durante unos 90 minutos a temperatura ambiente (para obtener un punto pomada).",
-            "Trabajar la mantequilla con espátula para obtener una textura lisa y homogénea.",
-            "Mezclar el resto de ingredientes en un recipiente aparte. Incorporarlos a la mantequilla en dos tandas, mezclando bien.",
-            "Una vez bien mezclado, colocar la mantequilla en nevera (5 minutos) para que recupere algo de consistencia.",
-            "Colocar la mantequilla dentro del molde plástico redondo y endurecer en el congelador durante 10 minutos.",
-            "Extraer el cilindro de mantequilla empujando suavemente con el disco de plástico por un extremo.",
-            "Envolver la mantequilla con papel de horno y refrigerar hasta su utilización."
+            "Mientras tanto, rallar la piel del limón.",
+            "Trabajar la mantequilla con espátula hasta obtener una textura lisa y homogénea. Mezclar el resto de ingredientes en un recipiente aparte e incorporarlos a la mantequilla en dos tandas, mezclando bien.",
+            "Colocar la mantequilla dentro del molde plástico redondo.",
+            "Guardar en nevera durante 1 hora para que endurezca.",
+            "Extraer el cilindro empujando suavemente con el disco de plástico por un extremo. Envolver con papel de horno, fechar y guardar en nevera."
           ]
         }
       ],
+      "plan": {
+        "phase": "Producción",
+        "shelfLifeDays": 14,
+        "storage": "Nevera",
+        "requires": [],
+        "steps": [
+          {
+            "b": 1,
+            "s": 1,
+            "d": 1,
+            "eq": "Manual",
+            "t": "Espera",
+            "pm": null,
+            "mm": 90,
+            "sc": false,
+            "n": "Atemperado desatendido (punto pomada)"
+          },
+          {
+            "b": 1,
+            "s": 2,
+            "d": 1,
+            "eq": "Manual",
+            "t": "Activo",
+            "pm": 3,
+            "mm": null,
+            "sc": true,
+            "n": "Valor inicial para el lote de la ficha; la receta se escala"
+          },
+          {
+            "b": 1,
+            "s": 3,
+            "d": 1,
+            "eq": "Manual",
+            "t": "Activo",
+            "pm": 5,
+            "mm": null,
+            "sc": true,
+            "n": "Valor inicial para el lote de la ficha; la receta se escala"
+          },
+          {
+            "b": 1,
+            "s": 4,
+            "d": 1,
+            "eq": "Manual",
+            "t": "Activo",
+            "pm": 5,
+            "mm": null,
+            "sc": true,
+            "n": "Valor inicial para el lote de la ficha; la receta se escala"
+          },
+          {
+            "b": 1,
+            "s": 5,
+            "d": 1,
+            "eq": "Nevera",
+            "t": "Espera",
+            "pm": null,
+            "mm": 60,
+            "sc": false,
+            "n": "Sin congelador, para no alterar la textura de la mantequilla"
+          },
+          {
+            "b": 1,
+            "s": 6,
+            "d": 1,
+            "eq": "Manual",
+            "t": "Activo",
+            "pm": 5,
+            "mm": null,
+            "sc": true,
+            "n": "Caducidad: 14 días en nevera"
+          }
+        ]
+      },
       "sourceSheet": "S07 MANTEQUILLA TOMILLO LIMÓN"
     },
     {
@@ -1018,13 +3293,13 @@
       "code": "S08",
       "section": "Sub-preparaciones",
       "sectionOrder": 2,
-      "yieldAmount": 1000,
+      "yieldAmount": 1048,
       "yieldUnit": "g",
       "stages": [
         {
           "title": "PROCEDIMIENTO",
           "procedureTitle": null,
-          "description": "Mezcla de verduras cocidas, base de la ensaladilla rusa. Se almacena en medias preparaciones al vacío en nevera.",
+          "description": "Base de verduras de la ensaladilla rusa: patata entera cocida con piel (2/3 en dados, 1/3 chafada), zanahoria y guisantes al vapor, aliñada. Se divide en 2 bolsas al vacío y se guarda en nevera.",
           "ingredients": [
             {
               "qty": 600,
@@ -1032,12 +3307,12 @@
               "name": "Patatas"
             },
             {
-              "qty": 17,
+              "qty": 25,
               "unit": "g",
               "name": "Sal"
             },
             {
-              "qty": 1700,
+              "qty": 2500,
               "unit": "ml",
               "name": "Agua"
             },
@@ -1050,20 +3325,154 @@
               "qty": 300,
               "unit": "g",
               "name": "Zanahoria en cubos"
+            },
+            {
+              "qty": 6,
+              "unit": "g",
+              "name": "Vinagre de Jerez"
             }
           ],
           "steps": [
-            "Poner a hervir el agua con la sal. Nivel 8 en vitro (aproximadamente 15 minutos).",
-            "Pelar y cortar las patatas en cubos con la máquina cortadora.",
-            "Cuando hierva el agua, bajar el nivel a 5 y cocer las zanahorias durante 8 minutos.",
-            "Agregar las patatas y cocer 12 minutos.",
-            "Agregar los guisantes y cocer 2 minutos.",
-            "Retirar del fuego. Colar y atemperar en bandeja metálica.",
-            "Cuando haya enfriado, embolsar al vacío en dos partes.",
-            "Refrigerar hasta su utilización."
+            "Lavar las patatas enteras, con piel y de tamaño lo más uniforme posible. Ponerlas en la olla mediana con 2,5 L de agua fría y 25 g de sal; el agua debe cubrirlas 2–3 cm.",
+            "Calentar en la IsEasy a nivel 9 hasta que hierva (unos 10 minutos). Bajar a nivel 5 para un hervor suave.",
+            "Cuando hierva, poner la zanahoria congelada en el cestillo sobre la olla, sin que toque el agua, y tapar. Cocer al vapor 18 minutos, removiendo suavemente de vez en cuando.",
+            "Sacar la zanahoria a una bandeja en capa fina. Poner los guisantes en el cestillo, tapar y cocer al vapor 5 minutos. Sacarlos a la bandeja.",
+            "A partir de los 20 minutos de hervor, pinchar la patata más grande con una brocheta. Retirar las patatas cuando entre sin resistencia (unos 30 minutos de hervor).",
+            "Escurrir las patatas, dejar que pierdan el vapor 3–5 minutos y pelarlas templadas con guantes.",
+            "Cortar a cuchillo 2/3 de la patata en dados de 1 cm y chafar 1/3 con un tenedor.",
+            "Aliñar la patata templada con el vinagre, el aceite del atún (12 g) y la sal. Mezclar con la zanahoria y los guisantes sin romperlos.",
+            "Pesar. Extender en una bandeja y meter en nevera 30 minutos para que se evapore el vapor y se enfríe.",
+            "Dividir el lote en dos partes iguales, embolsar, envasar al vacío, fechar y guardar en nevera."
           ]
         }
       ],
+      "plan": {
+        "phase": "Producción",
+        "shelfLifeDays": 14,
+        "storage": "Vacío en nevera",
+        "requires": [],
+        "steps": [
+          {
+            "b": 1,
+            "s": 1,
+            "d": 1,
+            "eq": "Manual",
+            "t": "Activo",
+            "pm": null,
+            "mm": null,
+            "sc": true,
+            "n": "PENDIENTE: tiempo de lavar las patatas y preparar la olla",
+            "pend": true
+          },
+          {
+            "b": 1,
+            "s": 2,
+            "d": 1,
+            "eq": "Inducción IsEasy",
+            "t": "Máquina",
+            "pm": null,
+            "mm": 10,
+            "sc": true,
+            "n": "Olla mediana con cestillo. Tiempo de la prueba 1 (2,5 L de agua)"
+          },
+          {
+            "b": 1,
+            "s": 3,
+            "d": 1,
+            "eq": "Inducción IsEasy",
+            "t": "Cocción atendida",
+            "pm": null,
+            "mm": 18,
+            "sc": false,
+            "n": "Zanahoria al vapor en el cestillo"
+          },
+          {
+            "b": 1,
+            "s": 4,
+            "d": 1,
+            "eq": "Inducción IsEasy",
+            "t": "Cocción atendida",
+            "pm": null,
+            "mm": 5,
+            "sc": false,
+            "n": "Guisantes al vapor en el cestillo"
+          },
+          {
+            "b": 1,
+            "s": 5,
+            "d": 1,
+            "eq": "Inducción IsEasy",
+            "t": "Cocción atendida",
+            "pm": null,
+            "mm": 30,
+            "sc": false,
+            "n": "30 min desde el hervor; se solapa con los pasos 3 y 4"
+          },
+          {
+            "b": 1,
+            "s": 6,
+            "d": 1,
+            "eq": "Manual",
+            "t": "Activo",
+            "pm": 5,
+            "mm": null,
+            "sc": true,
+            "n": "Antes de pelar, 3–5 min para que pierdan el vapor"
+          },
+          {
+            "b": 1,
+            "s": 7,
+            "d": 1,
+            "eq": "Manual",
+            "t": "Activo",
+            "pm": 5,
+            "mm": null,
+            "sc": true,
+            "n": "A cuchillo"
+          },
+          {
+            "b": 1,
+            "s": 8,
+            "d": 1,
+            "eq": "Manual",
+            "t": "Activo",
+            "pm": null,
+            "mm": null,
+            "sc": true,
+            "n": "PENDIENTE: tiempo de aliñar y mezclar; gramos de sal del aliño. Aceite del atún 12 g sin coste (incluido en el atún de C03)",
+            "pend": true
+          },
+          {
+            "b": 1,
+            "s": 9,
+            "d": 1,
+            "eq": "Nevera",
+            "t": "Espera",
+            "pm": null,
+            "mm": 30,
+            "sc": false,
+            "n": "En bandeja: se evapora el vapor y se enfría"
+          },
+          {
+            "b": 1,
+            "s": 10,
+            "d": 1,
+            "eq": "Envasadora",
+            "t": "Activo",
+            "pm": 5,
+            "mm": null,
+            "sc": true,
+            "n": "2 bolsas iguales. Caducidad: 14 días (decisión de Leo; por encima de la referencia de 10 días de la Chilled Food Association)"
+          }
+        ],
+        "warnings": [
+          "fila 8 (1.1): falta tiempo para el tipo \"Activo\".",
+          "fila 10 (1.3): falta tiempo para el tipo \"Cocción atendida\".",
+          "fila 11 (1.4): falta tiempo para el tipo \"Cocción atendida\".",
+          "fila 12 (1.5): falta tiempo para el tipo \"Cocción atendida\".",
+          "fila 15 (1.8): falta tiempo para el tipo \"Activo\"."
+        ]
+      },
       "sourceSheet": "S08 VERDURAS ENSALADILLA"
     },
     {
@@ -1102,14 +3511,25 @@
             }
           ],
           "steps": [
-            "Cortar una rebanada de cada una de las mantequillas.",
-            "Colocarlas en la base metálica de tres divisiones.",
-            "Dejar atemperar las mantequillas antes de servir.",
-            "Emplatar en plato de aluminio, colocando la bandeja de mantequillas en el centro.",
-            "Colocar 3 rebanadas de pan cortadas por la mitad (tostadas o no, según corresponda)."
+            "Cortar una rebanada de 20 g de cada una de las tres mantequillas y colocarlas en la base metálica de tres divisiones, para que se vayan atemperando mientras se prepara el pan.",
+            "Mientras tanto, cortar 3 rebanadas de pan de 50 g y partirlas por la mitad.",
+            "Calentar el pan en la tostadora, sin que llegue a tostarse: se sirve caliente, no tostado.",
+            "Emplatar en plato de aluminio, con la bandeja de mantequillas en el centro y las 6 medias rebanadas de pan."
           ]
         }
       ],
+      "plan": {
+        "phase": "Servicio",
+        "shelfLifeDays": null,
+        "storage": null,
+        "requires": [
+          "B09",
+          "S05",
+          "S06",
+          "S07"
+        ],
+        "steps": []
+      },
       "sourceSheet": "C01 PAN CON MANTEQUILLAS"
     },
     {
@@ -1124,7 +3544,7 @@
         {
           "title": "EMPLATADO",
           "procedureTitle": null,
-          "description": "Patatas en gajo regeneradas en airfryer con mezcla de especias y salsa brava aparte.",
+          "description": "Patatas en bastones regeneradas en airfryer con mezcla de especias y salsa brava aparte.",
           "ingredients": [
             {
               "qty": 200,
@@ -1157,14 +3577,37 @@
           ],
           "steps": [
             "Retirar las patatas de la bolsa refrigerada.",
-            "Colocar en Airfryer a 205 grados durante 7 minutos.",
-            "Mientras tanto, colocar 40 gramos de salsa brava en un bote metálico pequeño.",
-            "Una vez doradas, retirar las patatas de la airfryer y sazonar con la mezcla de especias (sal, pimentón y ajo en polvo).",
+            "Colocar en la airfryer a 205 °C durante 7 minutos.",
+            "Mientras tanto, colocar 40 g de salsa brava del biberón refrigerado en un bote metálico pequeño. La salsa se sirve fría, sin calentar.",
+            "Una vez doradas, retirar las patatas de la airfryer y sazonar con 4,4 g de la mezcla de especias.",
             "Colocar las patatas en la cacerola mediana de metal.",
-            "Servir sobre bandeja pequeña, la cacerola con la salsa aparte."
+            "Servir sobre bandeja pequeña, con la salsa aparte."
+          ]
+        },
+        {
+          "title": "MEZCLA DE ESPECIAS (LOTE PARA 10 RACIONES)",
+          "procedureTitle": null,
+          "description": null,
+          "ingredients": [],
+          "steps": [
+            "Mezclar 23 g de sal, 13 g de pimentón dulce y 8 g de ajo en polvo en un bote hermético (44 g, para 10 raciones).",
+            "Tapar, fechar y guardar a temperatura ambiente. Se dosifican 4,4 g por ración."
           ]
         }
       ],
+      "plan": {
+        "phase": "Mixta",
+        "shelfLifeDays": null,
+        "storage": "Ambiente",
+        "requires": [
+          "S02",
+          "S03"
+        ],
+        "steps": [],
+        "warnings": [
+          "fila 8: el texto del paso 1.1 ya no empieza por \"Mezclar 23 g de sal, 13 g de p\" (¿cambió el texto?). Fila ignorada."
+        ]
+      },
       "sourceSheet": "C02 PATATAS BRAVAS"
     },
     {
@@ -1173,39 +3616,98 @@
       "code": "C03",
       "section": "Platos de carta",
       "sectionOrder": 3,
-      "yieldAmount": 1650,
+      "yieldAmount": 718,
       "yieldUnit": "g",
       "stages": [
         {
           "title": "ELABORACIÓN DE LA ENSALADILLA",
           "procedureTitle": null,
-          "description": "Ensaladilla rusa con atún y mayonesa casera.",
+          "description": "Ensaladilla rusa con atún y mayonesa.",
           "ingredients": [
             {
-              "qty": 1000,
+              "qty": 524,
               "unit": "g",
               "name": "Verduras cocidas ensaladilla RTMY"
             },
             {
-              "qty": 170,
+              "qty": 89,
               "unit": "g",
               "name": "Atún"
             },
             {
-              "qty": 480,
+              "qty": 105,
               "unit": "g",
-              "name": "Mayonesa casera RTMY"
+              "name": "Mayonesa"
             }
           ],
           "steps": [
-            "Colocar la verdura cocida en una bandeja de metal.",
-            "Agregar el atún y remover con cuidado.",
-            "Preparar la mayonesa según receta y agregar a la mezcla de verduras y atún removiendo suavemente.",
-            "Colocar un film a piel.",
-            "Cubrir la bandeja, fechar y conservar refrigerada máximo 5 días."
+            "Abrir una bolsa de verduras cocidas (S08) y pasarla a una bandeja de metal.",
+            "Agregar el atún escurrido y desmigado, y remover con cuidado.",
+            "Agregar la mayonesa y mezclar suavemente hasta integrar. Se empieza con 105 g (20 % del peso de la verdura) y se añade más solo si hace falta.",
+            "Colocar film a piel, tapar, fechar y guardar en nevera."
           ]
         }
       ],
+      "plan": {
+        "phase": "Mixta",
+        "shelfLifeDays": 7,
+        "storage": "Nevera",
+        "requires": [
+          "S08"
+        ],
+        "steps": [
+          {
+            "b": 1,
+            "s": 1,
+            "d": 1,
+            "eq": "Manual",
+            "t": "Activo",
+            "pm": 5,
+            "mm": null,
+            "sc": true,
+            "n": "5 min para todo el lote (pasos 1 a 4)"
+          },
+          {
+            "b": 1,
+            "s": 2,
+            "d": 1,
+            "eq": "Manual",
+            "t": "Activo",
+            "pm": null,
+            "mm": null,
+            "sc": true,
+            "n": "Incluido en los 5 min del paso 1"
+          },
+          {
+            "b": 1,
+            "s": 3,
+            "d": 1,
+            "eq": "Manual",
+            "t": "Activo",
+            "pm": null,
+            "mm": null,
+            "sc": true,
+            "n": "Incluido en los 5 min del paso 1"
+          },
+          {
+            "b": 1,
+            "s": 4,
+            "d": 1,
+            "eq": "Manual",
+            "t": "Activo",
+            "pm": null,
+            "mm": null,
+            "sc": true,
+            "n": "Caducidad: 7 días (decisión de Leo), sin pasar la fecha de la bolsa de S08 ni la vida útil de la mayonesa y el atún abiertos. PENDIENTE: confirmar con APPCC el límite del RD 1021/2022",
+            "pend": true
+          }
+        ],
+        "warnings": [
+          "fila 9 (1.2): falta tiempo para el tipo \"Activo\".",
+          "fila 10 (1.3): falta tiempo para el tipo \"Activo\".",
+          "fila 11 (1.4): falta tiempo para el tipo \"Activo\"."
+        ]
+      },
       "sourceSheet": "C03 ENSALADILLA RUSA"
     },
     {
@@ -1256,15 +3758,22 @@
               "qty": 7,
               "unit": "g",
               "name": "Sal"
+            },
+            {
+              "qty": 38.5,
+              "unit": "ml",
+              "name": "AOVE Arbequina Bellavista garrafa PET 2 L",
+              "phase": "Emplatado"
             }
           ],
           "steps": [
             "Lavar, limpiar y cortar todas las verduras.",
-            "Curar el ajo (quitar gérmen y colocar 1 minuto en un vaso con agua en el micro nivel máximo).",
-            "En la thermomix, colocar todas las verduras y la sal. Triturar 3 minutos / Velocidad 10 / Sin calor.",
-            "Con velocidad 4, quitar el cubilete de la tapa y echar el aceite en hilo fino durante 2 minutos.",
-            "Agregar el vinagre y mezclar todo 15 segundos / Velocidad 10 / Sin calor.",
-            "Envasar en una jarra, tapar con film y refrigerar hasta su consumo. Máximo 5 días."
+            "Quitar la pulpa y las semillas de los tomates y usar solo la carne. La pulpa se guarda para otra preparación.",
+            "Curar el ajo: quitar el germen y calentarlo 1 minuto en el microondas a potencia máxima, en un vaso con agua.",
+            "En la Thermomix, colocar todas las verduras y la sal. Triturar 3 minutos / velocidad 10 / sin calor.",
+            "Con velocidad 4, quitar el cubilete y echar el aceite en hilo fino durante 2 minutos.",
+            "Agregar el vinagre y mezclar 15 segundos / velocidad 10 / sin calor.",
+            "Envasar en una jarra, tapar con film, fechar y guardar en nevera."
           ]
         },
         {
@@ -1273,12 +3782,95 @@
           "description": null,
           "ingredients": [],
           "steps": [
-            "Servir 150 gramos de gazpacho en un vaso frío.",
-            "Agregar un chorrito de aceite de oliva por encima.",
+            "Servir 150 g de gazpacho en un vaso frío.",
+            "Agregar 5 g de aceite de oliva virgen extra arbequina por encima.",
             "Servir inmediatamente."
           ]
         }
       ],
+      "plan": {
+        "phase": "Mixta",
+        "shelfLifeDays": 5,
+        "storage": "Nevera",
+        "requires": [],
+        "steps": [
+          {
+            "b": 1,
+            "s": 1,
+            "d": 1,
+            "eq": "Manual",
+            "t": "Activo",
+            "pm": 5,
+            "mm": null,
+            "sc": true,
+            "n": "Valor inicial para el lote de la ficha; la receta se escala"
+          },
+          {
+            "b": 1,
+            "s": 2,
+            "d": 1,
+            "eq": "Manual",
+            "t": "Activo",
+            "pm": 10,
+            "mm": null,
+            "sc": true,
+            "n": "La pulpa se guarda para otra preparación (su coste va a esa receta)"
+          },
+          {
+            "b": 1,
+            "s": 3,
+            "d": 1,
+            "eq": "Microondas",
+            "t": "Activo",
+            "pm": 5,
+            "mm": null,
+            "sc": false,
+            "n": "Incluye 1 min de microondas"
+          },
+          {
+            "b": 1,
+            "s": 4,
+            "d": 1,
+            "eq": "Thermomix (cualquiera)",
+            "t": "Máquina",
+            "pm": null,
+            "mm": 3,
+            "sc": false
+          },
+          {
+            "b": 1,
+            "s": 5,
+            "d": 1,
+            "eq": "Thermomix (cualquiera)",
+            "t": "Activo",
+            "pm": 2,
+            "mm": null,
+            "sc": false,
+            "n": "Aceite en hilo con la máquina en marcha"
+          },
+          {
+            "b": 1,
+            "s": 6,
+            "d": 1,
+            "eq": "Thermomix (cualquiera)",
+            "t": "Máquina",
+            "pm": null,
+            "mm": 0.25,
+            "sc": false
+          },
+          {
+            "b": 1,
+            "s": 7,
+            "d": 1,
+            "eq": "Manual",
+            "t": "Activo",
+            "pm": 3,
+            "mm": null,
+            "sc": true,
+            "n": "Caducidad: 5 días"
+          }
+        ]
+      },
       "sourceSheet": "C04 GAZPACHO"
     },
     {
@@ -1293,7 +3885,7 @@
         {
           "title": "PROCEDIMIENTO PARA LA BASE DE LAS CROQUETAS",
           "procedureTitle": null,
-          "description": "Croquetas caseras de jamón.",
+          "description": "Croquetas caseras de jamón con masa cremosa (gelatina). Versión v20261105R2.",
           "ingredients": [
             {
               "qty": 300,
@@ -1302,13 +3894,13 @@
               "phase": "Masa"
             },
             {
-              "qty": 1000,
+              "qty": 1400,
               "unit": "ml",
               "name": "Leche",
               "phase": "Masa"
             },
             {
-              "qty": 240,
+              "qty": 225,
               "unit": "g",
               "name": "Jamón a dados",
               "phase": "Masa"
@@ -1320,25 +3912,25 @@
               "phase": "Masa"
             },
             {
-              "qty": 125,
+              "qty": 50,
               "unit": "g",
               "name": "Aceite de Oliva",
               "phase": "Masa"
             },
             {
-              "qty": 250,
+              "qty": 120,
               "unit": "g",
               "name": "Mantequilla",
               "phase": "Masa"
             },
             {
-              "qty": 425,
+              "qty": 155,
               "unit": "g",
               "name": "Harina",
               "phase": "Masa"
             },
             {
-              "qty": 10,
+              "qty": 0,
               "unit": "g",
               "name": "Sal",
               "phase": "Masa"
@@ -1366,22 +3958,35 @@
               "unit": "g",
               "name": "Pan rallado crujiente",
               "phase": "Empanado"
+            },
+            {
+              "qty": 11,
+              "unit": "ud",
+              "name": "Gelatina",
+              "phase": "Masa"
+            },
+            {
+              "qty": 329,
+              "unit": "ml",
+              "name": "Aceite de girasol",
+              "phase": "Fritura"
             }
           ],
           "steps": [
-            "Infusionar la leche con los huesos de jamón (30 minutos / Velocidad 1  MARCHA ATRAS / 100 grados)",
-            "Colar la leche infusionada y reservar.",
-            "Colocar el jamón en dados en el vaso del MCC y triturar con el Turbo durante 3 segundos. Reservar aparte.",
-            "Triturar la cebolla durante 7 segundos a velocidad Turbo.",
-            "Empujar los restos de cebolla de las paredes hacia abajo con espátula.",
-            "Agregar el aceite y la mantequilla.",
-            "Rehogar 3 minutos / Velocidad 1 Marcha atrás / 120 grados.",
-            "Agregar la harina. Cocinar 3 minutos / Velocidad 3 / 120 grados.",
-            "Agregar la leche infusionada, la sal, la pimienta y 2 gramos de nuez moscada.",
-            "Mezclar 10 segundos a velocidad 6.",
-            "Agregar un tercio del jamón triturado y cocinar 7 minutos/ Velocidad 3 / 120 grados.",
-            "Dejar reposar la masa durante 5 minutos.",
-            "Mezclar el resto del jamón. Y colocar en una bandeja metálica con film a piel y refrigerar 24 horas antes de bolear las croquetas."
+            "Infusionar la leche con los huesos: 30 min / 100 °C / V1 / giro inverso, con el cubilete puesto.",
+            "Colar y pesar en gramos. Si no se llega a 1.400 g, completar con leche. Reservar caliente.",
+            "Hidratar las 11 hojas de gelatina en agua fría.",
+            "Triturar 1 tarrina de jamón (75 g) con Turbo 3 s y reservar. Las otras 2 tarrinas se quedan enteras para el final.",
+            "Cebolla: Turbo 7 s. Bajar los restos de las paredes.",
+            "Añadir la mantequilla y el AOVE: 3 min / 120 °C / V1 / giro inverso.",
+            "Añadir la harina: 3 min / 120 °C / V3.",
+            "Añadir la leche caliente (unos 85 °C), la pimienta y la nuez moscada: 10 s / V6.",
+            "Añadir el jamón triturado y programar 13 min / 120 °C / V3. Debería empezar a hervir hacia el minuto 8 y hervir 5 minutos más. Si a los 13 minutos no ha completado 5 minutos de hervor, alargar hasta completarlos.",
+            "Sin temperatura, añadir la gelatina escurrida y mezclar 1 min / V3.",
+            "Incorporar las 2 tarrinas de jamón con la espátula.",
+            "Pesar la masa (el vaso vacío pesa 1.640 g). Deberían salir unos 2.000 g.",
+            "Pasar la masa a una bandeja, cubrir con film a piel y dejar atemperar 2 horas.",
+            "Guardar en la nevera 24 h."
           ]
         },
         {
@@ -1390,14 +3995,10 @@
           "description": null,
           "ingredients": [],
           "steps": [
-            "Preparar un bol con los huevos batidos.",
-            "Preparar dos bandejas con la mitad del pan rallado en cada uno de ellas.",
-            "Con el boleador de helados, coger trozos de masa, y con las manos darle forma de croqueta.",
-            "Colocarlas en la bolas recién formadas en la primera bandeja de pan rallado y empanarlas bien.",
-            "Después de haber preparado unas 8 bolas, pasarlas de la primera bandeja al bol con huevo.",
-            "Remojar bien las bolas ya empanadas por primera vez. Una vez hecho, cogerlas suavemente con dos tenedores y pasarlas a la segunda bandeja del pan rallado.",
-            "Empanar bien las croquetas y colocarlas ordenadamente en una bandeja.",
-            "Una vez empanadas todas las croquetas, dejarlas reposar 24 horas en el congelador."
+            "Preparar un bol con los huevos batidos y repartir el pan rallado en dos bandejas.",
+            "Bolear con la masa recién sacada de la nevera, a 40 g por croqueta, pesando cada una.",
+            "Pasar cada bola por la primera bandeja de pan rallado y después por el huevo, en tandas de 8. Terminar en la segunda bandeja, ayudándose de dos tenedores.",
+            "Congelar 24 h."
           ]
         },
         {
@@ -1406,14 +4007,282 @@
           "description": null,
           "ingredients": [],
           "steps": [
-            "Preparación del aceite: en la olla de freir, colocar 2 litros de aceite de girasol.",
-            "Calentar el aceite a nivel 9 durante 11 minutos en la vitrocerámica para llegar a 175 grados.",
-            "Freír las croquetas en tandas de 10 unidades durante 3 minutos cada tanda.",
-            "Entre tanda y tanda, esperar 3 minutos para que el aceite recupere los 175 grados de temperatura.",
-            "Una vez freídas todas las croquetas, dejarlas atemperar y luego congelarlas hasta su uso."
+            "Poner la freidora con 3 L de aceite de girasol a 185 °C y esperar a que se encienda el piloto.",
+            "Freír en tandas de 6 croquetas durante 2 minutos y medio. Entre tanda y tanda, dejar que el aceite recupere la temperatura (esperar al piloto).",
+            "Pasar las croquetas a una bandeja y dejar atemperar 30 minutos.",
+            "Congelar una noche en bandeja plana y después guardar en túper, fechado, en el congelador. Máximo 1 mes."
+          ]
+        },
+        {
+          "title": "REGENERACIÓN (SERVICIO)",
+          "procedureTitle": null,
+          "description": null,
+          "ingredients": [],
+          "steps": [
+            "Regenerar en la airfryer, directamente desde congeladas: 205 °C durante 10 minutos."
           ]
         }
       ],
+      "plan": {
+        "phase": "Mixta",
+        "shelfLifeDays": 30,
+        "storage": "Congelador",
+        "requires": [],
+        "steps": [
+          {
+            "b": 1,
+            "s": 1,
+            "d": 1,
+            "eq": "Thermomix grande",
+            "t": "Máquina",
+            "pm": null,
+            "mm": 30,
+            "sc": false
+          },
+          {
+            "b": 1,
+            "s": 2,
+            "d": 1,
+            "eq": "Manual",
+            "t": "Activo",
+            "pm": null,
+            "mm": null,
+            "sc": true,
+            "n": "PENDIENTE: tiempo",
+            "pend": true
+          },
+          {
+            "b": 1,
+            "s": 3,
+            "d": 1,
+            "eq": "Manual",
+            "t": "Activo",
+            "pm": null,
+            "mm": null,
+            "sc": false,
+            "n": "PENDIENTE: tiempo. Se puede hacer mientras infusiona",
+            "pend": true
+          },
+          {
+            "b": 1,
+            "s": 4,
+            "d": 1,
+            "eq": "Thermomix grande",
+            "t": "Máquina",
+            "pm": null,
+            "mm": 0.1,
+            "sc": false
+          },
+          {
+            "b": 1,
+            "s": 5,
+            "d": 1,
+            "eq": "Thermomix grande",
+            "t": "Máquina",
+            "pm": null,
+            "mm": 0.1,
+            "sc": false
+          },
+          {
+            "b": 1,
+            "s": 6,
+            "d": 1,
+            "eq": "Thermomix grande",
+            "t": "Máquina",
+            "pm": null,
+            "mm": 3,
+            "sc": false
+          },
+          {
+            "b": 1,
+            "s": 7,
+            "d": 1,
+            "eq": "Thermomix grande",
+            "t": "Máquina",
+            "pm": null,
+            "mm": 3,
+            "sc": false
+          },
+          {
+            "b": 1,
+            "s": 8,
+            "d": 1,
+            "eq": "Thermomix grande",
+            "t": "Máquina",
+            "pm": null,
+            "mm": 0.2,
+            "sc": false
+          },
+          {
+            "b": 1,
+            "s": 9,
+            "d": 1,
+            "eq": "Thermomix grande",
+            "t": "Máquina",
+            "pm": null,
+            "mm": 13,
+            "sc": false,
+            "n": "Alargar si no ha completado 5 min de hervor"
+          },
+          {
+            "b": 1,
+            "s": 10,
+            "d": 1,
+            "eq": "Thermomix grande",
+            "t": "Máquina",
+            "pm": null,
+            "mm": 1,
+            "sc": false
+          },
+          {
+            "b": 1,
+            "s": 11,
+            "d": 1,
+            "eq": "Manual",
+            "t": "Activo",
+            "pm": null,
+            "mm": null,
+            "sc": false,
+            "n": "PENDIENTE: tiempo",
+            "pend": true
+          },
+          {
+            "b": 1,
+            "s": 12,
+            "d": 1,
+            "eq": "Manual",
+            "t": "Activo",
+            "pm": null,
+            "mm": null,
+            "sc": false,
+            "n": "PENDIENTE: tiempo",
+            "pend": true
+          },
+          {
+            "b": 1,
+            "s": 13,
+            "d": 1,
+            "eq": "Manual",
+            "t": "Espera",
+            "pm": null,
+            "mm": 120,
+            "sc": false,
+            "n": "Atemperado desatendido"
+          },
+          {
+            "b": 1,
+            "s": 14,
+            "d": 1,
+            "eq": "Nevera",
+            "t": "Espera",
+            "pm": null,
+            "mm": 1440,
+            "sc": false,
+            "n": "24 h: el boleado pasa al día siguiente"
+          },
+          {
+            "b": 2,
+            "s": 1,
+            "d": 2,
+            "eq": "Manual",
+            "t": "Activo",
+            "pm": 45,
+            "mm": null,
+            "sc": true,
+            "n": "45 min para preparar, bolear y empanar las 50 (pasos 1 a 3)"
+          },
+          {
+            "b": 2,
+            "s": 2,
+            "d": 2,
+            "eq": "Manual",
+            "t": "Activo",
+            "pm": null,
+            "mm": null,
+            "sc": true,
+            "n": "Incluido en los 45 min del paso 1"
+          },
+          {
+            "b": 2,
+            "s": 3,
+            "d": 2,
+            "eq": "Manual",
+            "t": "Activo",
+            "pm": null,
+            "mm": null,
+            "sc": true,
+            "n": "Incluido en los 45 min del paso 1"
+          },
+          {
+            "b": 2,
+            "s": 4,
+            "d": 2,
+            "eq": "Congelador",
+            "t": "Espera",
+            "pm": null,
+            "mm": 1440,
+            "sc": false,
+            "n": "24 h: la fritura pasa al día siguiente"
+          },
+          {
+            "b": 3,
+            "s": 1,
+            "d": 3,
+            "eq": "Freidora",
+            "t": "Máquina",
+            "pm": null,
+            "mm": null,
+            "sc": false,
+            "n": "Sin tiempo fijo: se espera al piloto"
+          },
+          {
+            "b": 3,
+            "s": 2,
+            "d": 3,
+            "eq": "Freidora",
+            "t": "Cocción atendida",
+            "pm": null,
+            "mm": 2.5,
+            "sc": false,
+            "rp": "POR TANDA",
+            "ub": 6,
+            "n": "POR TANDA: 50 croquetas en 9 tandas de 6 (8 de 6 y 1 de 2). Entre tandas: se espera al piloto"
+          },
+          {
+            "b": 3,
+            "s": 3,
+            "d": 3,
+            "eq": "Manual",
+            "t": "Espera",
+            "pm": null,
+            "mm": 30,
+            "sc": false,
+            "n": "Atemperado desatendido"
+          },
+          {
+            "b": 3,
+            "s": 4,
+            "d": 3,
+            "eq": "Congelador",
+            "t": "Espera",
+            "pm": null,
+            "mm": null,
+            "sc": false,
+            "n": "Una noche en bandeja plana; después túper. Caducidad: 1 mes"
+          }
+        ],
+        "warnings": [
+          "fila 9 (1.2): falta tiempo para el tipo \"Activo\".",
+          "fila 10 (1.3): falta tiempo para el tipo \"Activo\".",
+          "fila 18 (1.11): falta tiempo para el tipo \"Activo\".",
+          "fila 19 (1.12): falta tiempo para el tipo \"Activo\".",
+          "fila 23 (2.2): falta tiempo para el tipo \"Activo\".",
+          "fila 24 (2.3): falta tiempo para el tipo \"Activo\".",
+          "fila 26 (3.1): falta tiempo para el tipo \"Máquina\".",
+          "fila 27 (3.2): falta tiempo para el tipo \"Cocción atendida\".",
+          "fila 29 (3.4): falta tiempo para el tipo \"Espera\"."
+        ]
+      },
       "sourceSheet": "C05 CROQUETAS DE JAMÓN"
     },
     {
@@ -1422,13 +4291,13 @@
       "code": "C06",
       "section": "Platos de carta",
       "sectionOrder": 3,
-      "yieldAmount": 42,
+      "yieldAmount": 45,
       "yieldUnit": "ud",
       "stages": [
         {
           "title": "PROCEDIMIENTO PARA LA BECHAMEL DE SETAS",
           "procedureTitle": null,
-          "description": "Croquetas caseras de setas.",
+          "description": "Croquetas caseras de setas con masa cremosa (gelatina). Versión v20261107R3.",
           "ingredients": [
             {
               "qty": 1000,
@@ -1437,7 +4306,7 @@
               "phase": "Setas"
             },
             {
-              "qty": 47,
+              "qty": 45,
               "unit": "g",
               "name": "Aceite de Oliva",
               "phase": "Setas"
@@ -1449,19 +4318,19 @@
               "phase": "Bechamel"
             },
             {
-              "qty": 78,
+              "qty": 35,
               "unit": "g",
               "name": "Aceite de Oliva",
               "phase": "Bechamel"
             },
             {
-              "qty": 250,
+              "qty": 85,
               "unit": "g",
               "name": "Mantequilla",
               "phase": "Bechamel"
             },
             {
-              "qty": 425,
+              "qty": 110,
               "unit": "g",
               "name": "Harina",
               "phase": "Bechamel"
@@ -1473,13 +4342,13 @@
               "phase": "Bechamel"
             },
             {
-              "qty": 25,
+              "qty": 20,
               "unit": "g",
               "name": "Sal",
               "phase": "Bechamel"
             },
             {
-              "qty": 3,
+              "qty": 2,
               "unit": "g",
               "name": "Pimienta negra",
               "phase": "Bechamel"
@@ -1497,24 +4366,40 @@
               "phase": "Empanado"
             },
             {
-              "qty": 400,
+              "qty": 200,
               "unit": "g",
               "name": "Pan rallado crujiente",
               "phase": "Empanado"
+            },
+            {
+              "qty": 9,
+              "unit": "ud",
+              "name": "Gelatina",
+              "phase": "Masa"
+            },
+            {
+              "qty": 329,
+              "unit": "ml",
+              "name": "Aceite de girasol",
+              "phase": "Fritura"
             }
           ],
           "steps": [
-            "Dividir las setas en tres parte (333 gramos). Colocarlas en el vaso de la thermomix grande con 15 gramos de aceite de oliva.",
-            "Programar 18 minutos, 130 grados, velocidad 1.",
-            "En mitad del proceso, pausar, abrir la tapa y bajar los restos.",
-            "Al terminar las tres tandas tienen que quedar unos 500 gramos de setas cocinadas. Si pesan mucho más, todavía contienen agua.",
-            "Reservar las setas cocinadas.",
-            "Colocar la cebolla y programar 6 segundos, velocidad 6. Bajar los restos.",
-            "Añadir los 78 gramos de aceite y la mantequilla. Programar 7 minutos, 120 grados, velocidad 1 sin cubilete.",
-            "Incorporar la harina. Programar 7 minutos, 100 grados, velocidad 2 sin cubilete.",
-            "Añadir la leche, la sal, la pimienta y 2 gramos de nuez moscada. Mezclar 20 segundos, velocidad 5, sin temperatura.",
-            "Cocinar 13 minutos, 100 grados, velocidad 3, con el cubilete colocado.",
-            "Añadir las setas cocinadas. Programar 5 minutos, 100 grados, velocidad 2 marcha atrás, sin cubilete."
+            "Cocinar las setas en 3 tandas de 333 g con 15 g de AOVE cada una: 18 min / 130 °C / V1. A mitad de tiempo, bajar los restos de las paredes.",
+            "Pesar todas las setas cocinadas: máximo 500 g. Si pesan más, añadir 5 min / 130 °C / V1 sin cubilete y volver a pesar.",
+            "Picar todas las setas juntas en el vaso: 3 s / V5 con giro normal. Bajar los restos. Si quedan trozos grandes, añadir 2 s / V5. Deben quedar trozos pequeños, sin llegar a pasta. Reservar en un bol.",
+            "Hidratar las 9 hojas de gelatina en agua fría.",
+            "Sin lavar el vaso, calentar la leche: 10 min / 100 °C / V1, giro inverso, con cubilete. Comprobar con el termómetro que está a 80–85 °C sin hervir; si no llega, añadir 2 min. Pasarla a una jarra.",
+            "Cebolla: 6 s / V6. Bajar los restos.",
+            "Añadir la mantequilla y el AOVE: 3 min / 120 °C / V1, giro inverso.",
+            "Añadir la harina: 3 min / 120 °C / V3.",
+            "Añadir la leche caliente, la sal, la pimienta y la nuez moscada: 10 s / V6.",
+            "Programar 120 °C / V3 con cubilete hasta que hierva (en la prueba, hacia el minuto 15). Desde el hervor, 5 min más.",
+            "Añadir las setas picadas: 5 min / 100 °C / V2, giro inverso, sin cubilete.",
+            "Sin temperatura, añadir la gelatina escurrida: 1 min / V3, giro inverso.",
+            "Pesar la masa (el vaso vacío pesa 1.640 g). Deberían salir unos 1.800 g.",
+            "Pasar la masa a una bandeja, cubrir con film a piel y dejar atemperar 2 horas.",
+            "Guardar en la nevera 24 h."
           ]
         },
         {
@@ -1523,14 +4408,10 @@
           "description": null,
           "ingredients": [],
           "steps": [
-            "Preparar un bol con los huevos batidos.",
-            "Preparar dos bandejas con la mitad del pan rallado en cada uno de ellas.",
-            "Con el boleador de helados, coger trozos de masa, y con las manos darle forma de croqueta.",
-            "Colocarlas en la bolas recién formadas en la primera bandeja de pan rallado y empanarlas bien.",
-            "Después de haber preparado unas 8 bolas, pasarlas de la primera bandeja al bol con huevo.",
-            "Remojar bien las bolas ya empanadas por primera vez. Una vez hecho, cogerlas suavemente con dos tenedores y pasarlas a la segunda bandeja del pan rallado.",
-            "Empanar bien las croquetas y colocarlas ordenadamente en una bandeja.",
-            "Una vez empanadas todas las croquetas, dejarlas reposar 24 horas en el congelador."
+            "Preparar un bol con los huevos batidos y repartir el pan rallado en dos bandejas.",
+            "Bolear con la masa recién sacada de la nevera, a 40 g por croqueta, pesando cada una.",
+            "Pasar cada bola por la primera bandeja de pan rallado y después por el huevo, en tandas de 8. Terminar en la segunda bandeja, ayudándose de dos tenedores.",
+            "Congelar 24 h."
           ]
         },
         {
@@ -1539,14 +4420,293 @@
           "description": null,
           "ingredients": [],
           "steps": [
-            "Preparación del aceite: en la olla de freir, colocar 2 litros de aceite de girasol.",
-            "Calentar el aceite a nivel 9 durante 11 minutos en la vitrocerámica para llegar a 175 grados.",
-            "Freír las croquetas en tandas de 10 unidades durante 3 minutos cada tanda.",
-            "Entre tanda y tanda, esperar 3 minutos para que el aceite recupere los 175 grados de temperatura.",
-            "Una vez freídas todas las croquetas, dejarlas atemperar y luego congelarlas hasta su uso."
+            "Poner la freidora con 3 L de aceite de girasol a 185 °C y esperar a que se encienda el piloto.",
+            "Freír en tandas de 6 croquetas durante 2 minutos y medio. Entre tanda y tanda, dejar que el aceite recupere la temperatura (esperar al piloto).",
+            "Pasar las croquetas a una bandeja y dejar atemperar 30 minutos.",
+            "Congelar una noche en bandeja plana y después guardar en túper, fechado, en el congelador. Máximo 1 mes."
+          ]
+        },
+        {
+          "title": "REGENERACIÓN (SERVICIO)",
+          "procedureTitle": null,
+          "description": null,
+          "ingredients": [],
+          "steps": [
+            "Regenerar en la airfryer, directamente desde congeladas: 205 °C durante 10 minutos."
           ]
         }
       ],
+      "plan": {
+        "phase": "Mixta",
+        "shelfLifeDays": 30,
+        "storage": "Congelador",
+        "requires": [],
+        "steps": [
+          {
+            "b": 1,
+            "s": 1,
+            "d": 1,
+            "eq": "Thermomix grande",
+            "t": "Máquina",
+            "pm": null,
+            "mm": 18,
+            "sc": false,
+            "rp": "POR TANDA",
+            "ub": 333,
+            "n": "3 tandas de 333 g (54 min en total)"
+          },
+          {
+            "b": 1,
+            "s": 2,
+            "d": 1,
+            "eq": "Manual",
+            "t": "Activo",
+            "pm": null,
+            "mm": null,
+            "sc": false,
+            "n": "PENDIENTE: tiempo. +5 min de máquina si pesan más de 500 g",
+            "pend": true
+          },
+          {
+            "b": 1,
+            "s": 3,
+            "d": 1,
+            "eq": "Thermomix grande",
+            "t": "Máquina",
+            "pm": null,
+            "mm": 0.1,
+            "sc": false
+          },
+          {
+            "b": 1,
+            "s": 4,
+            "d": 1,
+            "eq": "Manual",
+            "t": "Activo",
+            "pm": null,
+            "mm": null,
+            "sc": false,
+            "n": "PENDIENTE: tiempo. Se puede hacer mientras se cocinan las setas",
+            "pend": true
+          },
+          {
+            "b": 1,
+            "s": 5,
+            "d": 1,
+            "eq": "Thermomix grande",
+            "t": "Máquina",
+            "pm": null,
+            "mm": 10,
+            "sc": false,
+            "n": "Añadir 2 min si no llega a 80–85 °C"
+          },
+          {
+            "b": 1,
+            "s": 6,
+            "d": 1,
+            "eq": "Thermomix grande",
+            "t": "Máquina",
+            "pm": null,
+            "mm": 0.1,
+            "sc": false
+          },
+          {
+            "b": 1,
+            "s": 7,
+            "d": 1,
+            "eq": "Thermomix grande",
+            "t": "Máquina",
+            "pm": null,
+            "mm": 3,
+            "sc": false
+          },
+          {
+            "b": 1,
+            "s": 8,
+            "d": 1,
+            "eq": "Thermomix grande",
+            "t": "Máquina",
+            "pm": null,
+            "mm": 3,
+            "sc": false
+          },
+          {
+            "b": 1,
+            "s": 9,
+            "d": 1,
+            "eq": "Thermomix grande",
+            "t": "Máquina",
+            "pm": null,
+            "mm": 0.2,
+            "sc": false
+          },
+          {
+            "b": 1,
+            "s": 10,
+            "d": 1,
+            "eq": "Thermomix grande",
+            "t": "Máquina",
+            "pm": null,
+            "mm": 20,
+            "sc": false,
+            "n": "≈15 min hasta el hervor (prueba 07/11) + 5 min de hervor"
+          },
+          {
+            "b": 1,
+            "s": 11,
+            "d": 1,
+            "eq": "Thermomix grande",
+            "t": "Máquina",
+            "pm": null,
+            "mm": 5,
+            "sc": false
+          },
+          {
+            "b": 1,
+            "s": 12,
+            "d": 1,
+            "eq": "Thermomix grande",
+            "t": "Máquina",
+            "pm": null,
+            "mm": 1,
+            "sc": false
+          },
+          {
+            "b": 1,
+            "s": 13,
+            "d": 1,
+            "eq": "Manual",
+            "t": "Activo",
+            "pm": null,
+            "mm": null,
+            "sc": false,
+            "n": "PENDIENTE: tiempo",
+            "pend": true
+          },
+          {
+            "b": 1,
+            "s": 14,
+            "d": 1,
+            "eq": "Manual",
+            "t": "Espera",
+            "pm": null,
+            "mm": 120,
+            "sc": false,
+            "n": "Atemperado desatendido"
+          },
+          {
+            "b": 1,
+            "s": 15,
+            "d": 1,
+            "eq": "Nevera",
+            "t": "Espera",
+            "pm": null,
+            "mm": 1440,
+            "sc": false,
+            "n": "24 h: el boleado pasa al día siguiente"
+          },
+          {
+            "b": 2,
+            "s": 1,
+            "d": 2,
+            "eq": "Manual",
+            "t": "Activo",
+            "pm": 45,
+            "mm": null,
+            "sc": true,
+            "n": "45 min para preparar, bolear y empanar (pasos 1 a 3)"
+          },
+          {
+            "b": 2,
+            "s": 2,
+            "d": 2,
+            "eq": "Manual",
+            "t": "Activo",
+            "pm": null,
+            "mm": null,
+            "sc": true,
+            "n": "Incluido en los 45 min del paso 1"
+          },
+          {
+            "b": 2,
+            "s": 3,
+            "d": 2,
+            "eq": "Manual",
+            "t": "Activo",
+            "pm": null,
+            "mm": null,
+            "sc": true,
+            "n": "Incluido en los 45 min del paso 1"
+          },
+          {
+            "b": 2,
+            "s": 4,
+            "d": 2,
+            "eq": "Congelador",
+            "t": "Espera",
+            "pm": null,
+            "mm": 1440,
+            "sc": false,
+            "n": "24 h: la fritura pasa al día siguiente"
+          },
+          {
+            "b": 3,
+            "s": 1,
+            "d": 3,
+            "eq": "Freidora",
+            "t": "Máquina",
+            "pm": null,
+            "mm": null,
+            "sc": false,
+            "n": "Sin tiempo fijo: se espera al piloto"
+          },
+          {
+            "b": 3,
+            "s": 2,
+            "d": 3,
+            "eq": "Freidora",
+            "t": "Cocción atendida",
+            "pm": null,
+            "mm": 2.5,
+            "sc": false,
+            "rp": "POR TANDA",
+            "ub": 6,
+            "n": "POR TANDA: ≈45 croquetas en 8 tandas (7 de 6 y 1 de 3). Entre tandas: se espera al piloto"
+          },
+          {
+            "b": 3,
+            "s": 3,
+            "d": 3,
+            "eq": "Manual",
+            "t": "Espera",
+            "pm": null,
+            "mm": 30,
+            "sc": false,
+            "n": "Atemperado desatendido"
+          },
+          {
+            "b": 3,
+            "s": 4,
+            "d": 3,
+            "eq": "Congelador",
+            "t": "Espera",
+            "pm": null,
+            "mm": null,
+            "sc": false,
+            "n": "Una noche en bandeja plana; después túper. Caducidad: 1 mes"
+          }
+        ],
+        "warnings": [
+          "fila 9 (1.2): falta tiempo para el tipo \"Activo\".",
+          "fila 11 (1.4): falta tiempo para el tipo \"Activo\".",
+          "fila 20 (1.13): falta tiempo para el tipo \"Activo\".",
+          "fila 24 (2.2): falta tiempo para el tipo \"Activo\".",
+          "fila 25 (2.3): falta tiempo para el tipo \"Activo\".",
+          "fila 27 (3.1): falta tiempo para el tipo \"Máquina\".",
+          "fila 28 (3.2): falta tiempo para el tipo \"Cocción atendida\".",
+          "fila 30 (3.4): falta tiempo para el tipo \"Espera\"."
+        ]
+      },
       "sourceSheet": "C06 CROQUETAS DE SETAS"
     },
     {
@@ -1606,12 +4766,6 @@
               "phase": "Relleno"
             },
             {
-              "qty": 0.01,
-              "unit": "g",
-              "name": "Azafrán en hebras Dehesa lata metálica 5 g",
-              "phase": "Relleno"
-            },
-            {
               "qty": 200,
               "unit": "g",
               "name": "Atún",
@@ -1651,12 +4805,12 @@
           "steps": [
             "Introducir en el vaso de la MCC el tomate cortado a trozos y el ajo.",
             "Triturar 5 segundos, velocidad 5. Retirar y reservar aparte.",
-            "Introducir en el vaso de la MCC la cebolla y el pimiento en trozos de unos 3 cm. Picar 5 segundos a velocidad 5. Bajar los restos. Volver a picar 5 segundos a velocidad 4. No buscamos un picado fino.",
+            "Introducir en el vaso la cebolla y el pimiento en trozos de unos 3 cm. Picar 5 segundos a velocidad 5. Bajar los restos. Volver a picar 5 segundos a velocidad 4. No buscamos un picado fino.",
             "Añadir el aceite y la sal. Programar REHOGAR, 14 minutos, 130 grados, sin cubilete.",
-            "Añadir el tomate con el ajo reservado, el pimentón y el azafrán. Programar 18 minutos, 120 grados, marcha atrás, velocidad 1 sin cubilete.",
-            "Escurrir en caliente durante 10 minutos sin prensar. Pesar el aceite recuperado y agregar la cantidad hasta completar 55 gramos.",
+            "Añadir el tomate con el ajo reservado y el pimentón. Programar 18 minutos, 120 grados, marcha atrás, velocidad 1, sin cubilete.",
+            "Escurrir en caliente durante 10 minutos sin prensar. Pesar el aceite recuperado y completar hasta 55 gramos; reservarlo para la masa.",
             "Dejar enfriar el sofrito.",
-            "Precalentar la Airfryer 4 minutos a 130 grados. Cocer los huevos en la airfryer durante 15 minutos a 130 grados.",
+            "Precalentar la airfryer 4 minutos a 130 grados. Cocer los huevos en la airfryer 15 minutos a 130 grados.",
             "Enfriar los huevos, pelarlos y cortarlos en trozos pequeños.",
             "Mezclar el sofrito, el atún y los huevos picados."
           ]
@@ -1667,17 +4821,45 @@
           "description": null,
           "ingredients": [],
           "steps": [
-            "En la cesta de la panificadora incorporar los ingredientes en este orden:",
-            "Agua, el aceite del sofrito reservado, la sal, el harina y la levadura.",
-            "Programar AMASADO (programa 9) 20 minutos.",
-            "Al terminar, formar un bola sin agregar harina. Colocarla en un recipiente ligeramente aceitado y tapar. Dejar fermentar 45 minutos.",
-            "Dividir la masa una vez fermentada: un 60% para la base y un 40% para la tapa.",
-            "Bolear suavemente ambas piezas, taparlas y dejarlas reposar 15 minutos para relajar el gluten y evitar que la masa se encoja al estirarla.",
-            "Estirar la masa hasta unos 2-3 mm. Colocarla en una bandeja de horno y distribuir el relleno completamente frío y escurrido.",
-            "Estirar la tapa un poco más fina que la base, aproximadamente 2 mm. Cubrir y sellar."
+            "En la cesta de la panificadora, incorporar los ingredientes en este orden: agua, el aceite del sofrito reservado, la sal, la harina y la levadura.",
+            "Programar AMASADO (programa 9), 20 minutos.",
+            "Al terminar, formar una bola sin agregar harina. Colocarla en un bol, cubrir con film y un paño, y dejar fermentar 45 minutos.",
+            "Dividir la masa fermentada: un 60 % para la base y un 40 % para la tapa.",
+            "Bolear suavemente ambas piezas, taparlas y dejarlas reposar 15 minutos para relajar el gluten.",
+            "Estirar la base hasta unos 2–3 mm. Colocarla en una bandeja de horno y distribuir el relleno completamente frío y escurrido.",
+            "Estirar la tapa un poco más fina, unos 2 mm. Cubrir, sellar los bordes y pintar la superficie con huevo batido.",
+            "Hornear. PENDIENTE: temperatura y tiempo (a confirmar por Leo)."
           ]
         }
       ],
+      "plan": {
+        "phase": "Producción",
+        "shelfLifeDays": null,
+        "storage": "Congelador",
+        "requires": [],
+        "steps": [],
+        "warnings": [
+          "fila 8: el texto del paso 1.1 ya no empieza por \"Preparar y trocear las verdur\" (¿cambió el texto?). Fila ignorada.",
+          "fila 9: el texto del paso 1.2 ya no empieza por \"Triturar el tomate y el ajo\" (¿cambió el texto?). Fila ignorada.",
+          "fila 10: el texto del paso 1.3 ya no empieza por \"Picar la cebolla y el pimient\" (¿cambió el texto?). Fila ignorada.",
+          "fila 11: el texto del paso 1.4 ya no empieza por \"Rehogar: 14 min / 130 °C\" (¿cambió el texto?). Fila ignorada.",
+          "fila 12: el texto del paso 1.5 ya no empieza por \"Añadir tomate, ajo y pimentón\" (¿cambió el texto?). Fila ignorada.",
+          "fila 13: el texto del paso 1.6 ya no empieza por \"Escurrir el sofrito en calien\" (¿cambió el texto?). Fila ignorada.",
+          "fila 14: el texto del paso 1.7 ya no empieza por \"Enfriar el sofrito\" (¿cambió el texto?). Fila ignorada.",
+          "fila 15: el texto del paso 1.8 ya no empieza por \"Cocer los huevos en la airfry\" (¿cambió el texto?). Fila ignorada.",
+          "fila 16: el texto del paso 1.9 ya no empieza por \"Pelar y cortar los huevos\" (¿cambió el texto?). Fila ignorada.",
+          "fila 17: el texto del paso 1.10 ya no empieza por \"Mezclar sofrito, atún y huevo\" (¿cambió el texto?). Fila ignorada.",
+          "fila 18: el bloque 1 paso 11 no existe en la ficha.",
+          "fila 19: el bloque 1 paso 12 no existe en la ficha.",
+          "fila 20: el bloque 1 paso 13 no existe en la ficha.",
+          "fila 21: el bloque 1 paso 14 no existe en la ficha.",
+          "fila 22: el bloque 1 paso 15 no existe en la ficha.",
+          "fila 23: el bloque 1 paso 16 no existe en la ficha.",
+          "fila 24: el bloque 1 paso 17 no existe en la ficha.",
+          "fila 25: el bloque 1 paso 18 no existe en la ficha.",
+          "fila 26: el bloque 1 paso 19 no existe en la ficha."
+        ]
+      },
       "sourceSheet": "C07 EMPANADA GALLEGA"
     },
     {
@@ -1781,11 +4963,12 @@
           "ingredients": [],
           "steps": [
             "Escurrir el exceso de leche de las tiras de pollo maceradas.",
-            "Triturar los copos de maiz para obtener una textura fina pero irregular (no tiene que ser un polvo).",
-            "Preparar tres estaciones para el rebozado: en un plato colocar el huevo batido, en otro plato la harina y en el tercero los copos de maíz triturados.",
-            "Pasar las tiras primero por harina, luego por el huevo y finalmente por los copos de maíz.",
-            "Freirlas con un marcado en abundante aceite de girasol caliente durante 3 minutos a nivel 6.",
-            "Embolsar en raciones de 150 gramos. Fechar y congelar."
+            "Triturar los copos de maíz hasta obtener una textura fina pero irregular (no un polvo).",
+            "Preparar tres estaciones: un plato con la harina, otro con el huevo batido y otro con los copos de maíz triturados.",
+            "Pasar las tiras primero por la harina, luego por el huevo y finalmente por los copos de maíz.",
+            "Freír en la freidora a 185 °C (esperar al piloto), 6 minutos. Entre tandas, dejar que el aceite recupere la temperatura.",
+            "Pasar las tiras a una bandeja y dejar atemperar 30 minutos.",
+            "Embolsar en raciones de 150 g, fechar y congelar."
           ]
         },
         {
@@ -1802,6 +4985,24 @@
           ]
         }
       ],
+      "plan": {
+        "phase": "Mixta",
+        "shelfLifeDays": 30,
+        "storage": "Congelador",
+        "requires": [],
+        "steps": [],
+        "warnings": [
+          "fila 8: el texto del paso 1.1 ya no empieza por \"Preparar el macerado (leche, l\" (¿cambió el texto?). Fila ignorada.",
+          "fila 9: el texto del paso 1.2 ya no empieza por \"Limpiar y cortar el pollo en t\" (¿cambió el texto?). Fila ignorada.",
+          "fila 10: el texto del paso 1.3 ya no empieza por \"Sumergir el pollo, tapar y ref\" (¿cambió el texto?). Fila ignorada.",
+          "fila 11: el texto del paso 2.4 ya no empieza por \"Triturar los copos de maíz\" (¿cambió el texto?). Fila ignorada.",
+          "fila 12: el texto del paso 2.5 ya no empieza por \"Escurrir y rebozar las tiras\" (¿cambió el texto?). Fila ignorada.",
+          "fila 13: el texto del paso 2.6 ya no empieza por \"Freír en la freidora a 185 °C\" (¿cambió el texto?). Fila ignorada.",
+          "fila 14: el texto del paso 2.7 ya no empieza por \"Pasar las tiras a una bandeja\" (¿cambió el texto?). Fila ignorada.",
+          "fila 15: el bloque 2 paso 8 no existe en la ficha.",
+          "fila 16: el bloque 2 paso 9 no existe en la ficha."
+        ]
+      },
       "sourceSheet": "C08 TIRAS DE POLLO"
     },
     {
@@ -1810,8 +5011,8 @@
       "code": "C09",
       "section": "Platos de carta",
       "sectionOrder": 3,
-      "yieldAmount": 10,
-      "yieldUnit": "raciones",
+      "yieldAmount": 1424,
+      "yieldUnit": "g",
       "stages": [
         {
           "title": "PROCEDIMIENTO PARA GUISAR LA CARRILLERA",
@@ -1903,35 +5104,140 @@
             "Limpiar bien las carrilleras quitando membranas y exceso de grasa.",
             "Salpimentar con sal y pimienta y dejar reposar 15 minutos en la nevera.",
             "Mientras tanto, cortar en trozos medianos la verdura para preparar la salsa.",
-            "Pasado el tiempo de reposo de la carne, sacarlas del frigorífico. Pasarlas por harina y sellarlas durante 2-3 minutos para que quede una costra dorada.",
-            "No apilarlas dentro de la cazuela. Retirarlas y reservar.",
+            "Una vez reposada la carne, sacarlas del frigorífico. Poner a calentar el aceite en una paella. Mientras tanto, enharinar la carne.",
+            "Sellar las carrilleras durante 2-3 minutos sin apilarlas en la paella. Retirarlas y reservar.",
             "En el aceite donde se marcaron las carrilleras, saltear el ajo, el puerro, la cebolla y la zanahoria durante 10 minutos vitro a nivel 5.",
             "Añadir el tomate y el pimentón. Remover durante 2 minutos.",
             "Agregar el vino y el vermut, subir la temperatura a nivel 7 y dejar reducir durante 5 minutos.",
             "Agregar el agua.",
             "Dividir la salsa con verduras en dos partes y colocarlas en dos olla a presión.",
             "Repartir las carrilleras por encima y agregar las hierbas aromáticas.",
-            "Tapar las ollas y llevar a cocción a nivel 3 durante 55 minutos.",
-            "Dejar atemperar. Luego abrir las ollas y retirar las carrilleras. Reservar.",
-            "Retirar las hierbas aromáticas. Pasar la salsa por túrmix para lograr una consistencia uniforme.",
-            "Volver a llevar la salsa al fuego para reducir. 15 minutos a nivel 3 en la vitro.",
-            "Cuando haya reducido, colocar en bolsas para las raciones: 100 gramos de carrilleras y 60 gramos de salsa.",
-            "Fechar bolsas y congelar hasta su uso"
+            "Tapar las ollas pequeñas y llevar a cocción a nivel 3 en la vitro. Contar 40 minutos desde que se colocan en la vitro.",
+            "Dejar atemperar durante 30 minutos. Luego abrir las ollas y retirar las carrilleras. Reservarlas. Dejar la salsa en la olla.",
+            "Retirar las hierbas aromáticas. Pasar la salsa por túrmix para lograr una consistencia uniforme."
           ]
         },
         {
-          "title": "EMPLATADO",
+          "title": "ENVASADO",
           "procedureTitle": null,
           "description": null,
           "ingredients": [],
           "steps": [
-            "Retirar la ración de carrillera del congelador.",
-            "Colocar en un tupper y llevar al microondas tiempo y potencias marcadas con \"C\".",
-            "Una vez caliente, emplatar en plato hondo. Colocar primero las carrilleras y por encima cubrir con la salsa caliente.",
-            "Servir inmediatamente."
+            "Colocar la olla a presión de 25 litros en el fuego con agua fría. Colocar una primera fila de 8 botes de cristal de 450 ml, previamente lavados. Encima, colocar la bandeja de metal y sobre ella otros 7 botes. El agua fría debe cubrir todos los botes.",
+            "Sin tapar la olla, llevar el agua a ebullición. Los botes no se meten fríos en agua hirviendo para evitar el choque térmico, que podría romper el cristal.",
+            "Una vez que el agua hierve, contabilizar 10 minutos para esterilizar los botes.",
+            "Mientras tanto, hervir las tapas aparte, en otro recipiente, solo 5 minutos para no dañar las gomas que sellan el cierre.",
+            "Mientras tanto, mantener la salsa hirviendo en las mismas ollas en las que se cocinó.",
+            "Calentar las carrilleras en el microondas, en un tupper. PENDIENTE: potencia y minutos.",
+            "Pasados los 10 minutos, sacar los botes con cuidado del agua y rellenar cada uno con 150 g de carrillera y 100 g de salsa, calientes.",
+            "Tapar con cuidado e introducir los botes en la olla a presión de 25 litros, que tendrá el agua bien caliente, con la misma disposición: 8 botes abajo, la bandeja y 7 botes arriba.",
+            "Una vez colocados todos los botes, tapar la olla con cuidado SIN LA VÁLVULA DE PRESIÓN COLOCADA.",
+            "Cuando el vapor salga de forma constante, contabilizar 3 minutos para asegurar que se expulsa todo el aire del interior.",
+            "Pasados los 3 minutos, colocar con cuidado la válvula y esperar a que llegue a 1 bar de presión.",
+            "Una vez que la presión se mantiene en 1 bar, contabilizar 70 minutos.",
+            "Pasado el tiempo, apagar el fuego. NO TOCAR NADA: no quitar la válvula ni enfriar la olla. Dejar que la presión baje de forma natural.",
+            "Una vez atemperada la olla, retirar la tapa y dejar los botes dentro del agua durante 20 minutos más.",
+            "Sacar los botes. Etiquetar y fechar. Conservación: temperatura ambiente. PENDIENTE: validar el proceso y fijar la vida útil."
+          ]
+        },
+        {
+          "title": "SERVICIO",
+          "procedureTitle": null,
+          "description": null,
+          "ingredients": [],
+          "steps": [
+            "Abrir el bote, volcar el contenido en una sartén y calentar en la vitro a nivel 3 durante 5 minutos. Esto calienta la carne y espesa y reduce un poco la salsa."
           ]
         }
       ],
+      "plan": {
+        "phase": "Mixta",
+        "shelfLifeDays": null,
+        "storage": "Ambiente",
+        "requires": [],
+        "steps": [
+          {
+            "b": 1,
+            "s": 1,
+            "d": 1,
+            "eq": "Manual",
+            "t": "Activo",
+            "pm": 45,
+            "mm": null,
+            "sc": true,
+            "n": "45 min para el lote de 1.200 g limpios (aprox. 1.469 g sin limpiar, aprox. 20 carrilleras)"
+          },
+          {
+            "b": 1,
+            "s": 3,
+            "d": 1,
+            "eq": "Manual",
+            "t": "Activo",
+            "pm": 10,
+            "mm": null,
+            "sc": true
+          },
+          {
+            "b": 1,
+            "s": 7,
+            "d": 1,
+            "eq": "Vitro",
+            "t": "Cocción atendida",
+            "pm": null,
+            "mm": 2,
+            "sc": false
+          },
+          {
+            "b": 1,
+            "s": 9,
+            "d": 1,
+            "eq": "Manual",
+            "t": "Activo",
+            "pm": 3,
+            "mm": null,
+            "sc": false
+          },
+          {
+            "b": 1,
+            "s": 13,
+            "d": 1,
+            "eq": "Olla pequeña",
+            "t": "Espera",
+            "pm": null,
+            "mm": 30,
+            "sc": false,
+            "n": "Después, retirar las carrilleras (tiempo de persona sin medir)"
+          }
+        ],
+        "warnings": [
+          "fila 9: el texto del paso 1.2 ya no empieza por \"Salpimentar y dejar reposar 15 minutos\" (¿cambió el texto?). Fila ignorada.",
+          "fila 11: el texto del paso 1.4 ya no empieza por \"Calentar el aceite en una paella y enharinar\" (¿cambió el texto?). Fila ignorada.",
+          "fila 12: el texto del paso 1.5 ya no empieza por \"Sellar las carrilleras 2-3 minutos sin apilarlas\" (¿cambió el texto?). Fila ignorada.",
+          "fila 13: el texto del paso 1.6 ya no empieza por \"Saltear el ajo, el puerro, la cebolla y la zanahoria\" (¿cambió el texto?). Fila ignorada.",
+          "fila 14 (1.7): falta tiempo para el tipo \"Cocción atendida\".",
+          "fila 15: el texto del paso 1.8 ya no empieza por \"Agregar el vino y el vermut y reducir\" (¿cambió el texto?). Fila ignorada.",
+          "fila 17: el texto del paso 1.10 ya no empieza por \"Dividir la salsa con verduras en dos ollas\" (¿cambió el texto?). Fila ignorada.",
+          "fila 18: el texto del paso 1.11 ya no empieza por \"Repartir las carrilleras y agregar las hierbas\" (¿cambió el texto?). Fila ignorada.",
+          "fila 19: el texto del paso 1.12 ya no empieza por \"Tapar las ollas pequeñas y cocer a nivel 3\" (¿cambió el texto?). Fila ignorada.",
+          "fila 21: el texto del paso 1.14 ya no empieza por \"Retirar las hierbas y triturar la salsa\" (¿cambió el texto?). Fila ignorada.",
+          "fila 22: el bloque 1 paso 15 no existe en la ficha.",
+          "fila 23: el bloque 1 paso 16 no existe en la ficha.",
+          "fila 24: el bloque 1 paso 17 no existe en la ficha.",
+          "fila 25: el bloque 1 paso 18 no existe en la ficha.",
+          "fila 26: el bloque 1 paso 19 no existe en la ficha.",
+          "fila 27: el bloque 1 paso 20 no existe en la ficha.",
+          "fila 28: el bloque 1 paso 21 no existe en la ficha.",
+          "fila 29: el bloque 1 paso 22 no existe en la ficha.",
+          "fila 30: el bloque 1 paso 23 no existe en la ficha.",
+          "fila 31: el bloque 1 paso 24 no existe en la ficha.",
+          "fila 32: el bloque 1 paso 25 no existe en la ficha.",
+          "fila 33: el bloque 1 paso 26 no existe en la ficha.",
+          "fila 34: el bloque 1 paso 27 no existe en la ficha.",
+          "fila 35: el bloque 1 paso 28 no existe en la ficha.",
+          "fila 36: el bloque 1 paso 29 no existe en la ficha.",
+          "fila 37: el bloque 2 paso 30 no existe en la ficha."
+        ]
+      },
       "sourceSheet": "C09 CARRILLERAS"
     },
     {
@@ -1949,7 +5255,7 @@
           "description": "Langostinos con aceite macerado de ajos y cayena.",
           "ingredients": [
             {
-              "qty": 3,
+              "qty": 4,
               "unit": "u",
               "name": "Langostinos"
             },
@@ -1975,6 +5281,67 @@
           ]
         }
       ],
+      "plan": {
+        "phase": "Servicio",
+        "shelfLifeDays": null,
+        "storage": "Nevera",
+        "requires": [
+          "B06"
+        ],
+        "steps": [
+          {
+            "b": 1,
+            "s": 1,
+            "d": 1,
+            "eq": "Manual",
+            "t": "Activo",
+            "pm": 2,
+            "mm": null,
+            "sc": true,
+            "n": "Una ración por sartén"
+          },
+          {
+            "b": 1,
+            "s": 3,
+            "d": 1,
+            "eq": "Vitro",
+            "t": "Cocción atendida",
+            "pm": null,
+            "mm": 3,
+            "sc": true,
+            "rp": "POR TANDA",
+            "ub": 1,
+            "n": "Por un lado"
+          },
+          {
+            "b": 1,
+            "s": 6,
+            "d": 1,
+            "eq": "Manual",
+            "t": "Activo",
+            "pm": 3,
+            "mm": null,
+            "sc": true,
+            "n": "Con todo el aceite de la cocción por encima"
+          },
+          {
+            "b": 1,
+            "s": 7,
+            "d": 1,
+            "eq": "Manual",
+            "t": "Activo",
+            "pm": 1,
+            "mm": null,
+            "sc": true
+          }
+        ],
+        "warnings": [
+          "fila 9: el texto del paso 1.2 ya no empieza por \"Colocar dos cucharadas del aceite base en la sartén\" (¿cambió el texto?). Fila ignorada.",
+          "fila 10 (1.3): falta tiempo para el tipo \"Cocción atendida\".",
+          "fila 11: el texto del paso 1.4 ya no empieza por \"Dar la vuelta los langostinos y agregar una cucharada más\" (¿cambió el texto?). Fila ignorada.",
+          "fila 12: el texto del paso 1.5 ya no empieza por \"Dejar que se cocinen por el otro lado\" (¿cambió el texto?). Fila ignorada."
+        ]
+      },
       "sourceSheet": "C10 LANGOSTINOS AL AJILLO"
     },
     {
@@ -2070,7 +5437,8 @@
             }
           ],
           "steps": [
-            "En un plato hondo colocar una cucharada del tomate confitado templado.",
+            "En un plato hondo colocar 80 g de salmorreta templada como base del plato.",
+            "Encima, una cucharada del tomate confitado templado.",
             "Sobre el tomate, colocar una pieza de burrata atemperada. Remojarla en agua tibia (antes de abrir la bolsa) si fuera necesario.",
             "Rociar con unas gotas de aceite ahumado por encima de la burrata y el tomate.",
             "Colocar una ramita pequeña de romero sobre la burrata."
@@ -2213,7 +5581,7 @@
               "phase": "Emplatado"
             },
             {
-              "qty": 40,
+              "qty": 50,
               "unit": "g",
               "name": "Pan Masa Madre RTMY",
               "phase": "Emplatado"
@@ -2284,7 +5652,7 @@
               "phase": "Emplatado"
             },
             {
-              "qty": 40,
+              "qty": 50,
               "unit": "g",
               "name": "Pan Masa Madre RTMY",
               "phase": "Emplatado"
@@ -2355,7 +5723,7 @@
               "phase": "Emplatado"
             },
             {
-              "qty": 40,
+              "qty": 50,
               "unit": "g",
               "name": "Pan Masa Madre RTMY",
               "phase": "Emplatado"
@@ -2421,7 +5789,7 @@
               "phase": "Emplatado"
             },
             {
-              "qty": 40,
+              "qty": 50,
               "unit": "g",
               "name": "Pan Masa Madre RTMY",
               "phase": "Emplatado"
@@ -2492,7 +5860,7 @@
               "phase": "Emplatado"
             },
             {
-              "qty": 40,
+              "qty": 50,
               "unit": "g",
               "name": "Pan Masa Madre RTMY",
               "phase": "Emplatado"
@@ -2527,7 +5895,7 @@
       "code": "C21",
       "section": "Platos de carta",
       "sectionOrder": 3,
-      "yieldAmount": 9,
+      "yieldAmount": 12,
       "yieldUnit": "raciones",
       "stages": [
         {
@@ -2572,13 +5940,15 @@
             }
           ],
           "steps": [
-            "Precalentar el horno a 200 grados.",
-            "Fundir la mantequilla y el chocolate en el microondas, 2 minutos a nivel medio.",
+            "Precalentar el horno a 180 grados.",
+            "Fundir la mantequilla y el chocolate en el microondas, 3 minutos a nivel medio.",
             "Después de fundida la mantequilla y mientras aún está caliente, incorporar el azúcar y mezclar bien.",
             "Dejar enfriar la mezcla durante 10 minutos para que baje la temperatura.",
             "Incorporar los huevos, uno a uno mezclando bien.",
             "Incorporar el cacao, la harina y la sal tamizando y mezclando lentamente.",
-            "Hornear a 200 grados durante 25 minutos."
+            "Colocar toda la preparación en una bolsa grande para hacer una manga.",
+            "Engrasar los moldes y rellenar con 60 gramos de masa cada uno.",
+            "Hornear a 180 grados durante 15 minutos."
           ]
         }
       ],
@@ -2680,6 +6050,297 @@
         }
       ],
       "sourceSheet": "C22 CREMA CATALANA"
+    },
+    {
+      "id": "paella-de-marisco",
+      "name": "PAELLA DE MARISCO",
+      "code": "C23",
+      "section": "Platos de carta",
+      "sectionOrder": 3,
+      "yieldAmount": 1,
+      "yieldUnit": "ración",
+      "stages": [
+        {
+          "title": "PROCEDIMIENTO (paellera de gas; cantidades × nº de raciones)",
+          "procedureTitle": null,
+          "description": "Paella de marisco con fumet de pescado, langostinos y calamar.",
+          "ingredients": [
+            {
+              "qty": 120,
+              "unit": "g",
+              "name": "Arroz D.O. Albufera Dehesa saco plástico 5 kg",
+              "phase": "Arroz"
+            },
+            {
+              "qty": 70,
+              "unit": "g",
+              "name": "Sofrito base RTMY",
+              "phase": "Base"
+            },
+            {
+              "qty": 80,
+              "unit": "g",
+              "name": "Salmorreta RTMY",
+              "phase": "Base"
+            },
+            {
+              "qty": 10,
+              "unit": "g",
+              "name": "Aceite de Oliva",
+              "phase": "Base"
+            },
+            {
+              "qty": 5,
+              "unit": "g",
+              "name": "Ajo pelado",
+              "phase": "Base"
+            },
+            {
+              "qty": 50,
+              "unit": "ml",
+              "name": "Vino blanco de cocina",
+              "phase": "Base"
+            },
+            {
+              "qty": 537,
+              "unit": "g",
+              "name": "Fumet de pescado RTMY",
+              "phase": "Caldo"
+            },
+            {
+              "qty": 2,
+              "unit": "u",
+              "name": "Langostinos",
+              "phase": "Marisco"
+            },
+            {
+              "qty": 120,
+              "unit": "g",
+              "name": "Calamar",
+              "phase": "Marisco"
+            }
+          ],
+          "steps": [
+            "Paellera a fuego máximo con el aceite. Marcar los langostinos y retirarlos. Marcar el calamar.",
+            "Fuego mínimo. Aromatizar el aceite con el ajo y retirarlo.",
+            "Añadir el sofrito B01 y rehogar a fuego mínimo.",
+            "Añadir el vino y dejar reducir.",
+            "Añadir la salmorreta.",
+            "Añadir el arroz y nacarar 1 minuto.\nLangostinos: devolverlos a la paella en el minuto 7 de cocción del arroz (al pasar a fuego mínimo).\nPaso 7 en adelante (común):",
+            "Añadir el caldo hirviendo. Cantidad por paellera: 40 cm (2 raciones) 1.073 g · 50 cm (3) 1.592 g · 60 cm (4) 2.122 g.",
+            "7 minutos a fuego máximo.",
+            "6 minutos a fuego mínimo.",
+            "2 minutos subiendo el fuego para el socarrat.",
+            "Reposar 2 minutos SIN TAPAR."
+          ]
+        },
+        {
+          "title": "NOTAS (01/11/2026)",
+          "procedureTitle": null,
+          "description": null,
+          "ingredients": [],
+          "steps": [
+            "• Caldo por ración: absorción validada del arroz ×2,38 (120 g × 2,38 = 286 g) + evaporación medida en mayo de 2026 (40 cm 502 g; 50 cm 735 g; 60 cm 980 g) repartida entre las raciones. 40 cm: 2 × 286 + 502 = 1.073 g → 537 g/ración. Supone que la evaporación medida con 100 g de arroz no cambia con 120 g: A VALIDAR.\n• Arroz 120 g/ración (estándar confirmado en octubre de 2026). Sofrito B01 70 g = 80 g cebolla + 30 g pimiento (1/10 del lote).\n• Basada en la paella de marisco validada en mayo de 2026. Cambios del 01/11/2026 (decisión de Leo): sofrito B01 en lugar de 30 g de pimiento + 20 g de cebolla caramelizada; 10 g de aceite para marcar (antes 25 g); arroz 120 g (antes 100 g). La combinación nueva está pendiente de prueba en cocina."
+          ]
+        }
+      ],
+      "sourceSheet": "C23 PAELLA DE MARISCO"
+    },
+    {
+      "id": "paella-de-verduras",
+      "name": "PAELLA DE VERDURAS",
+      "code": "C24",
+      "section": "Platos de carta",
+      "sectionOrder": 3,
+      "yieldAmount": 1,
+      "yieldUnit": "ración",
+      "stages": [
+        {
+          "title": "PROCEDIMIENTO (paellera de gas; cantidades × nº de raciones)",
+          "procedureTitle": null,
+          "description": "Paella de verduras con caldo de verduras, alcachofa y setas.",
+          "ingredients": [
+            {
+              "qty": 120,
+              "unit": "g",
+              "name": "Arroz D.O. Albufera Dehesa saco plástico 5 kg",
+              "phase": "Arroz"
+            },
+            {
+              "qty": 70,
+              "unit": "g",
+              "name": "Sofrito base RTMY",
+              "phase": "Base"
+            },
+            {
+              "qty": 80,
+              "unit": "g",
+              "name": "Salmorreta RTMY",
+              "phase": "Base"
+            },
+            {
+              "qty": 10,
+              "unit": "g",
+              "name": "Aceite de Oliva",
+              "phase": "Base"
+            },
+            {
+              "qty": 5,
+              "unit": "g",
+              "name": "Ajo pelado",
+              "phase": "Base"
+            },
+            {
+              "qty": 50,
+              "unit": "ml",
+              "name": "Vino blanco de cocina",
+              "phase": "Base"
+            },
+            {
+              "qty": 537,
+              "unit": "g",
+              "name": "Caldo de verduras RTMY",
+              "phase": "Caldo"
+            },
+            {
+              "qty": 60,
+              "unit": "g",
+              "name": "Alcachofas confitadas",
+              "phase": "Verdura"
+            },
+            {
+              "qty": 140,
+              "unit": "g",
+              "name": "Setas silvestres",
+              "phase": "Verdura"
+            }
+          ],
+          "steps": [
+            "Paellera a fuego máximo con el aceite. Marcar las setas y la alcachofa.",
+            "Fuego mínimo. Aromatizar el aceite con el ajo y retirarlo.",
+            "Añadir el sofrito B01 y rehogar a fuego mínimo.",
+            "Añadir el vino y dejar reducir.",
+            "Añadir la salmorreta.",
+            "Añadir el arroz y nacarar 1 minuto.\nPaso 7 en adelante (común):",
+            "Añadir el caldo hirviendo. Cantidad por paellera: 40 cm (2 raciones) 1.073 g · 50 cm (3) 1.592 g · 60 cm (4) 2.122 g.",
+            "7 minutos a fuego máximo.",
+            "6 minutos a fuego mínimo.",
+            "2 minutos subiendo el fuego para el socarrat.",
+            "Reposar 2 minutos SIN TAPAR."
+          ]
+        },
+        {
+          "title": "NOTAS (01/11/2026)",
+          "procedureTitle": null,
+          "description": null,
+          "ingredients": [],
+          "steps": [
+            "• Caldo por ración: absorción validada del arroz ×2,38 (120 g × 2,38 = 286 g) + evaporación medida en mayo de 2026 (40 cm 502 g; 50 cm 735 g; 60 cm 980 g) repartida entre las raciones. 40 cm: 2 × 286 + 502 = 1.073 g → 537 g/ración. Supone que la evaporación medida con 100 g de arroz no cambia con 120 g: A VALIDAR.\n• Arroz 120 g/ración (estándar confirmado en octubre de 2026). Sofrito B01 70 g = 80 g cebolla + 30 g pimiento (1/10 del lote).\n• Cantidades de alcachofa y setas de la hoja ARROCES (120 g y 280 g para 2 raciones). Ajo y vino confirmados por Leo el 01/11/2026. El uso de los 10 g de aceite para marcar setas y alcachofa es una suposición: confirmar.\n• Caldo de verduras B12: receta nueva, pendiente de prueba."
+          ]
+        }
+      ],
+      "sourceSheet": "C24 PAELLA DE VERDURAS"
+    },
+    {
+      "id": "paella-de-pato",
+      "name": "PAELLA DE PATO",
+      "code": "C25",
+      "section": "Platos de carta",
+      "sectionOrder": 3,
+      "yieldAmount": 1,
+      "yieldUnit": "ración",
+      "stages": [
+        {
+          "title": "PROCEDIMIENTO (paellera de gas; cantidades × nº de raciones)",
+          "procedureTitle": null,
+          "description": "Paella de pato con caldo de pollo, magret, alcachofa y setas.",
+          "ingredients": [
+            {
+              "qty": 120,
+              "unit": "g",
+              "name": "Arroz D.O. Albufera Dehesa saco plástico 5 kg",
+              "phase": "Arroz"
+            },
+            {
+              "qty": 70,
+              "unit": "g",
+              "name": "Sofrito base RTMY",
+              "phase": "Base"
+            },
+            {
+              "qty": 80,
+              "unit": "g",
+              "name": "Salmorreta RTMY",
+              "phase": "Base"
+            },
+            {
+              "qty": 10,
+              "unit": "g",
+              "name": "Aceite de Oliva",
+              "phase": "Base"
+            },
+            {
+              "qty": 5,
+              "unit": "g",
+              "name": "Ajo pelado",
+              "phase": "Base"
+            },
+            {
+              "qty": 50,
+              "unit": "ml",
+              "name": "Vino blanco de cocina",
+              "phase": "Base"
+            },
+            {
+              "qty": 537,
+              "unit": "g",
+              "name": "Caldo de pollo RTMY",
+              "phase": "Caldo"
+            },
+            {
+              "qty": 40,
+              "unit": "g",
+              "name": "Magret de pato",
+              "phase": "Carne"
+            },
+            {
+              "qty": 60,
+              "unit": "g",
+              "name": "Alcachofas confitadas",
+              "phase": "Verdura"
+            },
+            {
+              "qty": 140,
+              "unit": "g",
+              "name": "Setas silvestres",
+              "phase": "Verdura"
+            }
+          ],
+          "steps": [
+            "Paellera a fuego máximo con el aceite. Marcar las lonchas de magret y retirarlas. Marcar las setas y la alcachofa.",
+            "Fuego mínimo. Aromatizar el aceite con el ajo y retirarlo.",
+            "Añadir el sofrito B01 y rehogar a fuego mínimo.",
+            "Añadir el vino y dejar reducir.",
+            "Añadir la salmorreta.",
+            "Añadir el arroz y nacarar 1 minuto.\nMagret: momento de devolverlo a la paella PENDIENTE de definir en cocina.\nPaso 7 en adelante (común):",
+            "Añadir el caldo hirviendo. Cantidad por paellera: 40 cm (2 raciones) 1.073 g · 50 cm (3) 1.592 g · 60 cm (4) 2.122 g.",
+            "7 minutos a fuego máximo.",
+            "6 minutos a fuego mínimo.",
+            "2 minutos subiendo el fuego para el socarrat.",
+            "Reposar 2 minutos SIN TAPAR."
+          ]
+        },
+        {
+          "title": "NOTAS (01/11/2026)",
+          "procedureTitle": null,
+          "description": null,
+          "ingredients": [],
+          "steps": [
+            "• Caldo por ración: absorción validada del arroz ×2,38 (120 g × 2,38 = 286 g) + evaporación medida en mayo de 2026 (40 cm 502 g; 50 cm 735 g; 60 cm 980 g) repartida entre las raciones. 40 cm: 2 × 286 + 502 = 1.073 g → 537 g/ración. Supone que la evaporación medida con 100 g de arroz no cambia con 120 g: A VALIDAR.\n• Arroz 120 g/ración (estándar confirmado en octubre de 2026). Sofrito B01 70 g = 80 g cebolla + 30 g pimiento (1/10 del lote).\n• Magret 40 g por ración (≈4 lonchas), decisión de Leo del 01/11/2026. Alcachofa y setas de la hoja ARROCES. Ajo y vino confirmados. Uso de los 10 g de aceite: suposición, confirmar."
+          ]
+        }
+      ],
+      "sourceSheet": "C25 PAELLA DE PATO"
     }
   ]
 }
