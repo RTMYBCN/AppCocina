@@ -86,7 +86,11 @@
       // after it, so the exclusion has to fire at either boundary or the
       // "at the space" attempt slips through as the leftmost match.
       const re = new RegExp(
-        `(?<![A-Za-zÁÉÍÓÚÜÑáéíóúüñ])(?<!\\d+\\s*(?:g|gramos?|kg|kilos?|ml|mililitros?|ud|unidades?)\\s+de\\s*)(el|la|los|las)?(\\s*)\\b(${escapeRegex(key)}(?:es|s)?)\\b`,
+        `(?<![A-Za-zÁÉÍÓÚÜÑáéíóúüñ])(?<!\\d+\\s*(?:g|gramos?|kg|kilos?|ml|mililitros?|ud|unidades?)\\s+de\\s*)` +
+          // Si la frase ya pone un número delante del ingrediente ("añadir 2
+          // huevos"), es una parte, no el lote: añadirle el total del lote
+          // detrás solo confunde.
+          `(?<!\\d[\\d.,]*\\s{0,3})(el|la|los|las)?(\\s*)\\b(${escapeRegex(key)}(?:es|s)?)\\b`,
         "i"
       );
       const m = result.match(re);
@@ -195,6 +199,23 @@
             : (ing.qty * base.k * ratio) / written.k;
         return `${fmtQty(scaled)}${sep}${unitWord}${middle}${name}`;
       });
+
+      // Segundo patrón: la ficha nombra la cantidad sin unidad, pegada al
+      // ingrediente ("otra con 4 huevos batidos"), a veces con la unidad
+      // repetida detrás entre paréntesis ("4 huevos (4 ud)"). Si no se
+      // reescribe, al escalar la frase se contradice sola: "4 huevos (8 ud)".
+      // Solo se toca cuando el número es exactamente el de la ficha.
+      const reBare = new RegExp(
+        `(?<![\\d.,])(\\d+(?:[.,]\\d+)?)(\\s+)(${escapeRegex(key)}(?:es|s)?)\\b` +
+          `(\\s*\\(\\s*\\d+(?:[.,]\\d+)?\\s*(?:${UNIT_WORDS.join("|")})\\s*\\))?`,
+        "gi"
+      );
+      out = out.replace(reBare, (whole, num, sep, name) => {
+        if (!(Math.abs(parseFloat(num.replace(",", ".")) - ing.qty) < 0.01)) return whole;
+        touched.push(key);
+        // El paréntesis sobra: el número de delante ya dice la cantidad.
+        return `${fmtQty(scaleQty(ing.qty, ing.unit, ratio || 1))}${sep}${name}`;
+      });
     });
     return { text: out, touched };
   }
@@ -228,6 +249,78 @@
     });
   }
 
+  /* ---------------- Fases de ingredientes ----------------
+     Una receta de varias etapas lleva TODA la tabla de ingredientes en la
+     primera etapa (es la que se escala). Sin más datos, el cocinero que solo
+     va a hacer la masa de las croquetas alista también los huevos y el pan
+     rallado del boleado. Cada ingrediente trae su fase (columna B de la ficha)
+     y cada etapa declara qué fases se alistan en ella (celda de al lado del
+     título). Aquí se cruzan las dos cosas. */
+
+  function phaseKey(value) {
+    return (value === undefined || value === null ? "" : String(value))
+      .trim()
+      .toLowerCase()
+      .normalize("NFD")
+      .replace(/[\u0300-\u036f]/g, "");
+  }
+
+  // La declaración puede llegar como lista ya partida o como el texto crudo
+  // de la celda ("Setas, Bechamel, Masa").
+  function stagePhases(stage) {
+    const raw = (stage || {}).phases;
+    if (Array.isArray(raw)) return raw.map((x) => String(x).trim()).filter(Boolean);
+    if (typeof raw === "string") return raw.split(/[,;]/).map((x) => x.trim()).filter(Boolean);
+    return [];
+  }
+
+  function recipeUsesPhases(recipe) {
+    const stages = (recipe || {}).stages || [];
+    return stages.some((stage) => stagePhases(stage).length > 0);
+  }
+
+  /* Qué ingredientes hay que alistar para una etapa. Dos reglas de seguridad,
+     porque en cocina esconder un ingrediente es peor que mostrar uno de más:
+     - Si la ficha no declara ninguna fase, se comporta como siempre: todo en
+       la primera etapa.
+     - Un ingrediente cuya fase no reclama ninguna etapa (celda en blanco, una
+       errata) cae en la primera etapa en vez de desaparecer. */
+  function ingredientsForStage(recipe, stageIndex) {
+    const stages = (recipe || {}).stages || [];
+    const stage = stages[stageIndex];
+    if (!stage) return [];
+    const table = ((stages[0] || {}).ingredients || []).slice();
+    const own = stage.ingredients && stage.ingredients.length ? stage.ingredients : null;
+    if (!recipeUsesPhases(recipe)) return stageIndex === 0 ? table : own || [];
+
+    const claimed = new Set();
+    stages.forEach((s) => stagePhases(s).forEach((p) => claimed.add(phaseKey(p))));
+    const wanted = new Set(stagePhases(stage).map(phaseKey));
+    const orphan = stageIndex === 0;
+    return table.filter((ing) => {
+      const key = phaseKey(ing.phase);
+      if (wanted.has(key)) return true;
+      return orphan && !claimed.has(key);
+    });
+  }
+
+  // Grupos de la tabla de ingredientes, en el orden en que aparecen en la
+  // ficha. Devuelve un único grupo sin nombre cuando la ficha no usa fases.
+  function groupByPhase(ingredients) {
+    const groups = [];
+    const byKey = new Map();
+    (ingredients || []).forEach((ing, index) => {
+      const key = phaseKey(ing.phase);
+      if (!byKey.has(key)) {
+        const group = { phase: (ing.phase || "").trim(), items: [] };
+        byKey.set(key, group);
+        groups.push(group);
+      }
+      byKey.get(key).items.push({ ingredient: ing, index });
+    });
+    return groups;
+  }
+
   const RTMYText = {
     fmtQty,
     isCountableUnit,
@@ -239,6 +332,11 @@
     rescaleLiteralQuantities,
     stepTextWithQuantities,
     stepTexts,
+    phaseKey,
+    stagePhases,
+    recipeUsesPhases,
+    ingredientsForStage,
+    groupByPhase,
   };
 
   if (typeof module !== "undefined" && module.exports) module.exports = RTMYText;

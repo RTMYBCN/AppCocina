@@ -678,6 +678,21 @@ input[type=range].rtmy-slider::-moz-range-track{
   white-space:nowrap;
 }
 
+/* Cabecera de fase dentro de la tabla de ingredientes: dice a qué etapa
+   pertenece cada grupo, para no alistar lo que no toca. */
+.rtmy-ingredients li.rtmy-ingredient-group{
+  display:block;
+  padding:14px 0 4px;
+  border-bottom:none;
+  font-size:12px;
+  font-weight:700;
+  letter-spacing:.07em;
+  text-transform:uppercase;
+  color: var(--rtmy-brown);
+  opacity:.75;
+}
+.rtmy-ingredients li.rtmy-ingredient-group:first-child{padding-top:8px;}
+
 /* Selectable ingredients (choose which one scales the recipe) */
 .rtmy-ingredients-selectable li{
   padding:0;

@@ -43,10 +43,10 @@ test("recipes.json has valid unique recipes and executable stages", () => {
 
 test("HTML references the current cache-busted assets and accessibility regions", () => {
   const html = fs.readFileSync(path.join(root, "index.html"), "utf8");
-  assert.match(html, /styles\.css\?v=17/);
-  assert.match(html, /planner\.js\?v=17/);
-  assert.match(html, /app\.js\?v=17/);
-  assert.match(html, /text\.js\?v=17/);
+  assert.match(html, /styles\.css\?v=18/);
+  assert.match(html, /planner\.js\?v=18/);
+  assert.match(html, /app\.js\?v=18/);
+  assert.match(html, /text\.js\?v=18/);
   assert.match(html, /id="timer-bar"[^>]+aria-live="assertive"/);
 });
 
@@ -128,4 +128,25 @@ test("the bottom bar splits into one lane per cook while the plan is open", () =
   assert.match(source, /const loose = state\.timers\.filter/);
   assert.match(css, /\.rtmy-timer-grid\{/);
   assert.match(css, /grid-template-columns:repeat\(var\(--cols,2\)/);
+});
+
+test("each stage declares which ingredient phases it needs", () => {
+  const code = fs.readFileSync(path.join(root, "Code.gs"), "utf8");
+  // la celda de al lado del título de la etapa (columna D del getValues = col. C)
+  assert.match(code, /function splitPhases\(text\)/);
+  assert.match(code, /phases: splitPhases\(cleanText\(valueAt\(values, r, 3\)\)\)/);
+  assert.match(code, /phases: b\.phases \|\| \[\]/);
+
+  const source = fs.readFileSync(path.join(root, "app.js"), "utf8");
+  const css = fs.readFileSync(path.join(root, "styles.css"), "utf8");
+  // la tabla se agrupa por fases y el índice que escala sigue siendo el real
+  assert.match(source, /function renderIngredientPicker\(recipe\)/);
+  assert.match(source, /onSelectMainIngredient\(\$\{index\}\)/);
+  assert.match(css, /\.rtmy-ingredients li\.rtmy-ingredient-group\{/);
+  // el selector de etapa dice cuántos ingredientes hay que alistar
+  assert.match(source, /function stageIngredientNote\(recipe, stageIndex\)/);
+  // los pasos de las etapas 2ª y siguientes ya reciben su tabla escalada
+  assert.match(source, /RTMYText\.ingredientsForStage\(r, item\.stageIndex\)/);
+  assert.match(source, /usesPhases \|\| isMainStage \? session\.scaleFactor : 1/);
+  assert.match(source, /applyScale\(stageIngredients, stageRatio\)/);
 });

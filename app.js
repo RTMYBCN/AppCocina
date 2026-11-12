@@ -1060,6 +1060,46 @@ window.onSearch = function (val) {
   if (container) container.innerHTML = buildListItemsHtml();
 };
 
+/* Cuántos ingredientes hay que alistar para empezar por esa etapa. Solo se
+   dice cuando la ficha reparte la tabla por fases; si no, no aporta nada. */
+function stageIngredientNote(recipe, stageIndex) {
+  if (!RTMYText.recipeUsesPhases(recipe)) return "";
+  const n = RTMYText.ingredientsForStage(recipe, stageIndex).length;
+  if (!n) return " · sin ingredientes propios";
+  return ` · ${n} ingrediente${n === 1 ? "" : "s"}`;
+}
+
+/* La tabla de ingredientes se agrupa por fases (Masa, Empanado, Fritura…)
+   para que se vea de un golpe qué es de cada etapa. El índice que se le pasa
+   a onSelectMainIngredient tiene que seguir siendo el de la tabla sin agrupar:
+   es el que escala la receta. */
+function renderIngredientPicker(recipe) {
+  const groups = RTMYText.groupByPhase(scaledIngredients(recipe));
+  const showHeads = groups.length > 1;
+  return groups
+    .map((group) => {
+      const head =
+        showHeads && group.phase
+          ? `<li class="rtmy-ingredient-group">${escapeHtml(titleCase(group.phase))}</li>`
+          : "";
+      const rows = group.items
+        .map(({ ingredient, index }) => {
+          const selected = index === (state.scaleIngredientIndex || 0);
+          return `
+          <li>
+            <button class="rtmy-ingredient-select ${selected ? "selected" : ""}" onclick="onSelectMainIngredient(${index})" aria-pressed="${selected}">
+              <span class="rtmy-ingredient-radio" aria-hidden="true"></span>
+              <span class="name">${escapeHtml(titleCase(ingredient.name))}</span>
+              <span class="qty">${fmtQty(ingredient.qty)} ${escapeHtml(ingredient.unit)}</span>
+            </button>
+          </li>`;
+        })
+        .join("");
+      return head + rows;
+    })
+    .join("");
+}
+
 function renderDetail() {
   const r = state.currentRecipe;
   const stage0 = r.stages[0];
@@ -1113,20 +1153,7 @@ function renderDetail() {
 
       <div class="rtmy-scale-label" style="margin-top:14px;">Toca un ingrediente para escalar por él</div>
       <ul class="rtmy-ingredients rtmy-ingredients-selectable">
-        ${scaledIngredients(r)
-          .map((i, idx) => {
-            const selected = idx === (state.scaleIngredientIndex || 0);
-            return `
-          <li>
-            <button class="rtmy-ingredient-select ${selected ? "selected" : ""}" onclick="onSelectMainIngredient(${idx})" aria-pressed="${selected}">
-              <span class="rtmy-ingredient-radio" aria-hidden="true"></span>
-              <span class="name">${escapeHtml(titleCase(i.name))}</span>
-              <span class="qty">${fmtQty(i.qty)} ${escapeHtml(i.unit)}</span>
-            </button>
-          </li>
-        `;
-          })
-          .join("")}
+        ${renderIngredientPicker(r)}
       </ul>
       `
           : `<p style="opacity:.7;font-size:14px;">Esta preparación no tiene una tabla de ingredientes propia (usa componentes de otra receta).</p>`
@@ -1152,7 +1179,7 @@ function renderDetail() {
             <span class="rtmy-stage-num">${i + 1}</span>
             <span>
               <div class="stage-title">${escapeHtml(titleCase(s.title))}</div>
-              <div class="stage-sub">${(s.steps && s.steps.length) || 0} paso${(s.steps || []).length === 1 ? "" : "s"}</div>
+              <div class="stage-sub">${(s.steps && s.steps.length) || 0} paso${(s.steps || []).length === 1 ? "" : "s"}${stageIngredientNote(r, i)}</div>
             </span>
           </button>
         `
@@ -1240,9 +1267,13 @@ function renderSteps() {
   // así se reescriben también las cantidades que la ficha ya trae escritas.
   // Se procesa la etapa entera, no solo este paso, porque la cantidad de
   // cada ingrediente se dice una sola vez: la primera que aparece.
+  // Con fases declaradas, cada etapa saca sus ingredientes de la tabla
+  // escalada: así los pasos del boleado también dicen "los 6 ud de huevos",
+  // que antes salían sin cantidad porque esa etapa no tenía tabla propia.
+  const usesPhases = RTMYText.recipeUsesPhases(r);
   const isMainStage = item.stageIndex === 0;
-  const stageIngredients = isMainStage ? r.stages[0].ingredients : stage.ingredients;
-  const stageRatio = isMainStage ? session.scaleFactor : 1;
+  const stageIngredients = RTMYText.ingredientsForStage(r, item.stageIndex);
+  const stageRatio = usesPhases || isMainStage ? session.scaleFactor : 1;
   const stepText = RTMYText.stepTexts(stageStepsOf(stage), stageIngredients, stageRatio)[
     item.stepIndexInStage
   ];
@@ -1276,12 +1307,12 @@ function renderSteps() {
         : ""
     }
     ${
-      item.stepIndexInStage === 0 && item.stageIndex !== 0 && stage.ingredients.length
+      item.stepIndexInStage === 0 && (usesPhases || item.stageIndex !== 0) && stageIngredients.length
         ? `
     <div class="rtmy-panel" style="padding:14px 16px;">
       <div class="rtmy-scale-label" style="margin-bottom:2px;">Ingredientes de esta etapa</div>
       <ul class="rtmy-ingredients">
-        ${stage.ingredients
+        ${applyScale(stageIngredients, stageRatio)
           .map(
             (i) => `
           <li><span class="name">${escapeHtml(titleCase(i.name))}</span><span class="qty">${fmtQty(i.qty)} ${escapeHtml(i.unit)}</span></li>

@@ -136,6 +136,18 @@
     return s === '' ? null : s;
   }
   
+  // Fases declaradas en la celda de al lado del título de la etapa (columna C):
+  // "Setas, Bechamel, Masa". Dicen qué ingredientes de la tabla se alistan en
+  // esa etapa, para que el cocinero que solo hace la masa no saque de la nevera
+  // los huevos del empanado.
+  function splitPhases(text) {
+    if (!text) return [];
+    return text
+      .split(/[,;]/)
+      .map(function (x) { return x.trim(); })
+      .filter(function (x) { return x.length > 0; });
+  }
+
   function looksNumbered(text) {
     return /^\s*\d+\.\s/.test(text);
   }
@@ -229,12 +241,12 @@
       var isStepText = looksNumbered(bVal) || bVal.indexOf('\n') !== -1 || bVal.length > 90;
       if (isStepText) {
         if (!current) {
-          current = { title: null, steps: [] };
+          current = { title: null, phases: [], steps: [] };
           blocks.push(current);
         }
         current.steps = current.steps.concat(splitSteps(bVal));
       } else {
-        current = { title: bVal, steps: [] };
+        current = { title: bVal, phases: splitPhases(cleanText(valueAt(values, r, 3))), steps: [] };
         blocks.push(current);
       }
     }
@@ -249,6 +261,8 @@
           description: idx === 0 ? description : null,
           // La tabla de ingredientes completa va en la primera etapa (es la que se escala).
           ingredients: idx === 0 ? ingredients : [],
+          // Qué fases de la tabla se alistan en esta etapa (vacío = ninguna propia).
+          phases: b.phases || [],
           steps: b.steps,
         });
       });
@@ -259,6 +273,7 @@
         procedureTitle: null,
         description: description,
         ingredients: ingredients,
+        phases: [],
         steps: [pending || 'Pasos pendientes de redactar.'],
       });
     }

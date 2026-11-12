@@ -156,3 +156,104 @@ if (failures) {
   console.error(`\n${failures} fallo(s)`);
   process.exit(1);
 }
+
+/* ---------------- Fases de ingredientes ---------------- */
+
+const croquetas = {
+  stages: [
+    {
+      title: "MASA",
+      phases: ["Masa"],
+      ingredients: [
+        { name: "Leche", qty: 1400, unit: "ml", phase: "Masa" },
+        { name: "Harina", qty: 155, unit: "g", phase: "Masa" },
+        { name: "Huevos", qty: 6, unit: "ud", phase: "Empanado" },
+        { name: "Pan rallado", qty: 200, unit: "g", phase: "Empanado" },
+        { name: "Aceite de girasol", qty: 329, unit: "ml", phase: "Fritura" },
+        { name: "Perejil", qty: 2, unit: "g", phase: "" },
+      ],
+      steps: ["1"],
+    },
+    { title: "BOLEADO", phases: ["Empanado"], ingredients: [], steps: ["Preparar un bol con los huevos batidos."] },
+    { title: "FRITURA", phases: "Fritura", ingredients: [], steps: ["2"] },
+    { title: "REGENERACIÓN", phases: [], ingredients: [], steps: ["3"] },
+  ],
+};
+
+test("cada etapa alista solo los ingredientes de sus fases", () => {
+  const names = (i) => T.ingredientsForStage(croquetas, i).map((x) => x.name);
+  // el perejil no lo reclama ninguna etapa: cae en la primera, no desaparece
+  assert.deepEqual(names(0), ["Leche", "Harina", "Perejil"]);
+  assert.deepEqual(names(1), ["Huevos", "Pan rallado"]);
+  assert.deepEqual(names(2), ["Aceite de girasol"]); // declaración como texto
+  assert.deepEqual(names(3), []); // etapa sin ingredientes propios
+});
+
+test("una ficha sin fases se comporta como siempre", () => {
+  const sinFases = {
+    stages: [
+      { title: "A", ingredients: [{ name: "Agua", qty: 1, unit: "ml" }], steps: ["1"] },
+      { title: "B", ingredients: [], steps: ["2"] },
+    ],
+  };
+  assert.equal(T.recipeUsesPhases(sinFases), false);
+  assert.equal(T.ingredientsForStage(sinFases, 0).length, 1);
+  assert.deepEqual(T.ingredientsForStage(sinFases, 1), []);
+});
+
+test("las fases se comparan sin acentos ni mayúsculas", () => {
+  assert.equal(T.phaseKey(" EMPANADO "), "empanado");
+  assert.equal(T.phaseKey("Regeneración"), T.phaseKey("REGENERACION"));
+  const r = {
+    stages: [
+      { title: "A", phases: ["regeneracion"], ingredients: [{ name: "X", qty: 1, unit: "g", phase: "Regeneración" }], steps: ["1"] },
+    ],
+  };
+  assert.equal(T.ingredientsForStage(r, 0).length, 1);
+});
+
+test("la tabla se agrupa por fases en el orden de la ficha", () => {
+  const groups = T.groupByPhase(croquetas.stages[0].ingredients);
+  assert.deepEqual(groups.map((g) => g.phase), ["Masa", "Empanado", "Fritura", ""]);
+  assert.deepEqual(groups[1].items.map((x) => x.index), [2, 3]);
+  // el índice tiene que ser el de la tabla sin agrupar: es el que escala
+  assert.equal(groups[2].items[0].ingredient.name, "Aceite de girasol");
+  assert.equal(groups[2].items[0].index, 4);
+});
+
+test("los pasos de una etapa posterior ya dicen la cantidad", () => {
+  const stage = croquetas.stages[1];
+  const out = T.stepTexts(stage.steps, T.ingredientsForStage(croquetas, 1), 1);
+  assert.match(out[0], /6 ud de huevos/);
+});
+
+test("al escalar, la etapa posterior escala con la receta", () => {
+  const out = T.stepTexts(croquetas.stages[1].steps, T.ingredientsForStage(croquetas, 1), 1.5);
+  assert.match(out[0], /9 ud de huevos/);
+});
+
+test("la cantidad pegada al ingrediente se escala y no se duplica", () => {
+  const ing = [
+    { name: "Huevos", qty: 4, unit: "ud" },
+    { name: "Pan rallado crujiente", qty: 300, unit: "g" },
+  ];
+  const paso = "Una bandeja con 4 huevos (4 ud) batidos y otra con 300 g de pan rallado.";
+  // sin escalar sobra el paréntesis: el número de delante ya lo dice
+  assert.equal(
+    T.stepTexts([paso], ing, 1)[0],
+    "Una bandeja con 4 huevos batidos y otra con 300 g de pan rallado."
+  );
+  // al escalar se reescribe el número escrito, sin contradecirse
+  const x2 = T.stepTexts([paso], ing, 2)[0];
+  assert.match(x2, /8 huevos batidos/);
+  assert.doesNotMatch(x2, /\(/);
+  assert.match(x2, /600 g de pan rallado/);
+});
+
+test("una cantidad parcial no se convierte en el lote entero", () => {
+  const ing = [{ name: "Huevos", qty: 4, unit: "ud" }];
+  // "2 huevos" no es la cantidad de la ficha: ni se escala ni se le añade el lote
+  assert.equal(T.stepTexts(["Añadir 2 huevos"], ing, 2)[0], "Añadir 2 huevos");
+  // la mención sin número sí recibe la cantidad
+  assert.match(T.stepTexts(["Añadir los huevos"], ing, 2)[0], /8 ud de huevos/);
+});
