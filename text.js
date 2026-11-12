@@ -86,11 +86,19 @@
       // after it, so the exclusion has to fire at either boundary or the
       // "at the space" attempt slips through as the leftmost match.
       const re = new RegExp(
-        `(?<![A-Za-zÁÉÍÓÚÜÑáéíóúüñ])(?<!\\d+\\s*(?:g|gramos?|kg|kilos?|ml|mililitros?|ud|unidades?)\\s+de\\s*)` +
+        `(?<![A-Za-zÁÉÍÓÚÜÑáéíóúüñ])(?<!\\d+\\s*(?:g|gramos?|kg|kilos?|ml|mililitros?|ud|unidades?)\\s+del?\\s*)` +
           // Si la frase ya pone un número delante del ingrediente ("añadir 2
           // huevos"), es una parte, no el lote: añadirle el total del lote
           // detrás solo confunde.
-          `(?<!\\d[\\d.,]*\\s{0,3})(el|la|los|las)?(\\s*)\\b(${escapeRegex(key)}(?:es|s)?)\\b`,
+          `(?<!\\d[\\d.,]*\\s{0,3})` +
+          // Lo mismo cuando entre el número y el ingrediente hay una medida
+          // de cocina que no es la de la ficha: "1 tarrina de jamón",
+          // "3 L de aceite", "2 rebanadas de pan". Son porciones, no el lote.
+          `(?<!\\d[\\d.,]*\\s*[A-Za-zÁÉÍÓÚÜÑáéíóúüñ.]{0,12}\\s+del?\\s*)` +
+          `(el|la|los|las)?(\\s*)\\b(${escapeRegex(key)}(?:es|s)?)\\b` +
+          // Y si la ficha ya puso la cantidad entre paréntesis detrás
+          // ("jamón (75 g)"), no se le añade otra delante.
+          `(?!\\s*\\(\\s*\\d+(?:[.,]\\d+)?\\s*(?:${UNIT_WORDS.join("|")})\\s*\\))`,
         "i"
       );
       const m = result.match(re);
@@ -182,7 +190,7 @@
       const key = ingredientKeyTerm(ing.name);
       if (key.length < 3 || GENERIC_KEY_BLOCKLIST.has(key)) return;
       const re = new RegExp(
-        `(\\d+(?:[.,]\\d+)?)(\\s*)(${UNIT_WORDS.join("|")})\\b(\\s+de\\s+(?:la\\s+|el\\s+|los\\s+|las\\s+)?)(${escapeRegex(key)}(?:es|s)?)\\b`,
+        `(\\d+(?:[.,]\\d+)?)(\\s*)(${UNIT_WORDS.join("|")})\\b(\\s+de\\s+(?:la\\s+|el\\s+|los\\s+|las\\s+)?|\\s+del\\s+)(${escapeRegex(key)}(?:es|s)?)\\b`,
         "gi"
       );
       out = out.replace(re, (whole, num, sep, unitWord, middle, name) => {
@@ -198,6 +206,21 @@
             ? scaleQty(ing.qty, ing.unit, ratio)
             : (ing.qty * base.k * ratio) / written.k;
         return `${fmtQty(scaled)}${sep}${unitWord}${middle}${name}`;
+      });
+
+      // Tercer patrón: la cantidad de la ficha escrita con una medida de
+      // cocina que no es una unidad ("las 11 hojas de gelatina" cuando la
+      // ficha dice 11 ud). Si el número es justo el de la ficha, se escala
+      // igual; si no lo fuera sería una porción y no se toca.
+      const reMeasure = new RegExp(
+        `(?<![\\d.,])(\\d+(?:[.,]\\d+)?)(\\s+)([A-Za-zÁÉÍÓÚÜÑáéíóúüñ]{2,12})(\\s+del?\\s+)(${escapeRegex(key)}(?:es|s)?)\\b`,
+        "gi"
+      );
+      out = out.replace(reMeasure, (whole, num, sep, word, middle, name) => {
+        if (UNIT_SCALE[word.toLowerCase()]) return whole; // lo lleva el primer patrón
+        if (!(Math.abs(parseFloat(num.replace(",", ".")) - ing.qty) < 0.01)) return whole;
+        touched.push(key);
+        return `${fmtQty(scaleQty(ing.qty, ing.unit, ratio || 1))}${sep}${word}${middle}${name}`;
       });
 
       // Segundo patrón: la ficha nombra la cantidad sin unidad, pegada al

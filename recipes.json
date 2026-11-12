@@ -1,6 +1,6 @@
 {
-  "fetchedAt": "2026-11-12T18:34:11.906Z",
-  "sourceUpdatedAt": "2026-11-12T17:54:13.153Z",
+  "fetchedAt": "2026-11-12T18:53:43.898Z",
+  "sourceUpdatedAt": "2026-11-12T18:41:09.032Z",
   "recipes": [
     {
       "id": "sofrito-base",
@@ -32,6 +32,7 @@
               "name": "Aceite de Oliva"
             }
           ],
+          "phases": [],
           "steps": [
             "Cortar la cebolla y el pimiento en trozos de tamaño mediano.",
             "Colocar los trozos de verdura en el vaso de la Thermomix grande.",
@@ -155,6 +156,7 @@
               "name": "Sal"
             }
           ],
+          "phases": [],
           "steps": [
             "Pelar las cebollas, cortarlas en trozos medianos y colocarlas en el vaso de la Thermomix.",
             "Picar 20 segundos, velocidad 4. Bajar con una espátula la cebolla de las paredes del vaso y picar otros 20 segundos, velocidad 4. La cebolla debe quedar en trozos muy pequeños.",
@@ -304,6 +306,7 @@
               "name": "Pimentón dulce"
             }
           ],
+          "phases": [],
           "steps": [
             "Lavar los tomates, cortarlos en cuartos y repartirlos en dos recipientes.",
             "Pelar los ajos.",
@@ -522,6 +525,9 @@
               "phase": "Fumet"
             }
           ],
+          "phases": [
+            "Fumet"
+          ],
           "steps": [
             "Lavar bien el pescado.",
             "En una olla grande, en el fuego de gas a fuego bajo, poner el pescado con la sal, el laurel y el agua.",
@@ -538,6 +544,7 @@
           "procedureTitle": null,
           "description": null,
           "ingredients": [],
+          "phases": [],
           "steps": [
             "Colocar la olla a presión de 25 litros en el fuego con agua fría. Colocar una primera fila de 8 botes de cristal de 450 ml, previamente lavados. Encima, colocar la bandeja de metal y sobre ella otros 7 botes. El agua fría debe cubrir todos los botes.",
             "Sin tapar la olla, llevar el agua a ebullición. Los botes no se meten fríos en agua hirviendo para evitar el choque térmico, que podría romper el cristal.",
@@ -835,6 +842,9 @@
               "phase": "Caldo"
             }
           ],
+          "phases": [
+            "Caldo"
+          ],
           "steps": [
             "Preparar la cesta de la airfryer: colocar aluminio en el fondo y las rejillas encima para facilitar la limpieza posterior.",
             "Tostar las carcasas de pollo en la airfryer, 205 °C durante 20 minutos, sin aceite. Si es necesario, hacerlo en dos tandas.",
@@ -859,6 +869,7 @@
           "procedureTitle": null,
           "description": null,
           "ingredients": [],
+          "phases": [],
           "steps": [
             "Colocar la olla a presión de 25 litros en el fuego con agua fría. Colocar una primera fila de 8 botes de cristal de 450 ml, previamente lavados. Encima, colocar la bandeja de metal y sobre ella otros 7 botes. El agua fría debe cubrir todos los botes.",
             "Sin tapar la olla, llevar el agua a ebullición. Los botes no se meten fríos en agua hirviendo para evitar el choque térmico, que podría romper el cristal.",
@@ -1212,6 +1223,7 @@
               "name": "Pimienta de cayena molida"
             }
           ],
+          "phases": [],
           "steps": [
             "Pelar los ajos.",
             "Laminar el ajo en rodajas muy finas con la cuchilla de laminar del rallador.",
@@ -1344,6 +1356,9 @@
               "phase": "Aceite"
             }
           ],
+          "phases": [
+            "Aceite"
+          ],
           "steps": [
             "En el vaso de la Thermomix colocar el aceite y el polvo con aroma a humo.",
             "Programar 15 minutos, 40 °C, velocidad 2.",
@@ -1356,6 +1371,7 @@
           "procedureTitle": null,
           "description": null,
           "ingredients": [],
+          "phases": [],
           "steps": [
             "Filtrar el aceite con una muselina para retirar el polvo (lleva sal y no se disuelve en el aceite).",
             "Envasar, etiquetar, fechar y guardar en nevera un máximo de 15 días."
@@ -1475,6 +1491,7 @@
               "name": "Salmorreta RTMY"
             }
           ],
+          "phases": [],
           "steps": [
             "Lavar y cortar el tomate en trozos medianos.",
             "Deshojar el romero: solo las hojas, sin rama.",
@@ -1614,6 +1631,9 @@
               "name": "Sal",
               "phase": "Masa"
             }
+          ],
+          "phases": [
+            "Masa"
           ],
           "steps": [
             "Calentar el agua a 40 °C en el hervidor eléctrico.",
@@ -1800,6 +1820,7 @@
               "name": "Aceite de Oliva"
             }
           ],
+          "phases": [],
           "steps": [
             "Calentar el agua a 40 °C con el hervidor eléctrico.",
             "En un bol, colocar el agua caliente con la levadura. Mezclar suavemente para disolver la levadura.",
@@ -2022,6 +2043,9 @@
               "phase": "Base"
             }
           ],
+          "phases": [
+            "Base"
+          ],
           "steps": [
             "Rallar la piel de limón. Reservar.",
             "Exprimir el zumo de limón y reservar.",
@@ -2038,6 +2062,7 @@
           "procedureTitle": null,
           "description": null,
           "ingredients": [],
+          "phases": [],
           "steps": [
             "Limonada: 80 ml de base + 280 ml de agua (con o sin gas).",
             "Tinto de verano: 60 ml de base + 140 ml de vino tinto + 140 ml de agua con gas."
@@ -2208,6 +2233,9 @@
               "phase": "Caldo"
             }
           ],
+          "phases": [
+            "Caldo"
+          ],
           "steps": [
             "Lavar todas las verduras. Pelar la cebolla y el ajo. Cortar cebolla, puerro, pimiento y tomate en trozos medianos. La zanahoria ya viene en cubos.",
             "Poner en la olla el agua FRÍA, todas las verduras, la sal y el laurel. Sin aceite.",
@@ -2223,6 +2251,7 @@
           "procedureTitle": null,
           "description": null,
           "ingredients": [],
+          "phases": [],
           "steps": [
             "Envasar el caldo en bolsas de congelación.",
             "Fechar las bolsas y congelar un máximo de 3 meses."
@@ -2371,6 +2400,7 @@
               "name": "Vinagre de Jerez"
             }
           ],
+          "phases": [],
           "steps": [
             "Colocar el huevo en el vaso de la turmix (el vaso debe estar bien seco).",
             "Cubrir con el aceite de girasol, agregándolo suavemente para que el huevo quede en el fondo del vaso.",
@@ -2448,6 +2478,7 @@
               "name": "Vinagre de Jerez"
             }
           ],
+          "phases": [],
           "steps": [
             "Lavar y rallar el tomate. Reservar.",
             "Ajo 5 s / V5, bajar restos. Añadir el AOVE: 4 min / 120 °C / V1.",
@@ -2615,6 +2646,7 @@
               "name": "Aceite de girasol"
             }
           ],
+          "phases": [],
           "steps": [
             "Lavar y pelar las patatas.",
             "Cortarlas en bastones con la cortadora VEVOR.",
@@ -2802,6 +2834,7 @@
               "name": "Sal"
             }
           ],
+          "phases": [],
           "steps": [
             "Pelar las patatas.",
             "Laminarlas con la mandolina.",
@@ -2933,6 +2966,7 @@
               "name": "Sal"
             }
           ],
+          "phases": [],
           "steps": [
             "Atemperar la mantequilla durante unos 90 minutos a temperatura ambiente (para obtener un punto pomada).",
             "Trabajar la mantequilla con espátula hasta obtener una textura lisa y homogénea. Mezclar el resto de ingredientes en un recipiente aparte e incorporarlos a la mantequilla en dos tandas, mezclando bien.",
@@ -3047,6 +3081,7 @@
               "name": "Sal"
             }
           ],
+          "phases": [],
           "steps": [
             "Atemperar la mantequilla durante unos 90 minutos a temperatura ambiente (para obtener un punto pomada).",
             "Trabajar la mantequilla con espátula hasta obtener una textura lisa y homogénea. Mezclar el resto de ingredientes en un recipiente aparte e incorporarlos a la mantequilla en dos tandas, mezclando bien.",
@@ -3156,6 +3191,7 @@
               "name": "Sal"
             }
           ],
+          "phases": [],
           "steps": [
             "Atemperar la mantequilla durante unos 90 minutos a temperatura ambiente (para obtener un punto pomada).",
             "Mientras tanto, rallar la piel del limón.",
@@ -3287,6 +3323,7 @@
               "name": "Vinagre de Jerez"
             }
           ],
+          "phases": [],
           "steps": [
             "Lavar las patatas enteras, con piel y de tamaño lo más uniforme posible. Ponerlas en la olla mediana con 2,5 L de agua fría y 25 g de sal; el agua debe cubrirlas 2–3 cm.",
             "Calentar en la IsEasy a nivel 9 hasta que hierva (unos 10 minutos). Bajar a nivel 5 para un hervor suave.",
@@ -3465,6 +3502,7 @@
               "name": "Pan Masa Madre RTMY"
             }
           ],
+          "phases": [],
           "steps": [
             "Cortar una rebanada de 20 g de cada una de las tres mantequillas y colocarlas en la base metálica de tres divisiones, para que se vayan atemperando mientras se prepara el pan.",
             "Mientras tanto, cortar 3 rebanadas de pan de 50 g y partirlas por la mitad.",
@@ -3532,6 +3570,9 @@
               "phase": "Especias"
             }
           ],
+          "phases": [
+            "Emplatado"
+          ],
           "steps": [
             "Retirar las patatas de la bolsa refrigerada.",
             "Colocar en la airfryer a 205 °C durante 7 minutos.",
@@ -3546,6 +3587,9 @@
           "procedureTitle": null,
           "description": null,
           "ingredients": [],
+          "phases": [
+            "Especias"
+          ],
           "steps": [
             "Mezclar 23 g de sal, 13 g de pimentón dulce y 8 g de ajo en polvo en un bote hermético (44 g, para 10 raciones).",
             "Tapar, fechar y guardar a temperatura ambiente. Se dosifican 4,4 g por ración."
@@ -3597,6 +3641,7 @@
               "name": "Mayonesa"
             }
           ],
+          "phases": [],
           "steps": [
             "Abrir una bolsa de verduras cocidas (S08) y pasarla a una bandeja de metal.",
             "Agregar el atún escurrido y desmigado, y remover con cuidado.",
@@ -3713,6 +3758,9 @@
               "phase": "Emplatado"
             }
           ],
+          "phases": [
+            "Base"
+          ],
           "steps": [
             "Lavar, limpiar y cortar todas las verduras.",
             "Quitar la pulpa y las semillas de los tomates y usar solo la carne. La pulpa se guarda para otra preparación.",
@@ -3728,6 +3776,9 @@
           "procedureTitle": null,
           "description": null,
           "ingredients": [],
+          "phases": [
+            "Emplatado"
+          ],
           "steps": [
             "Servir 150 g de gazpacho en un vaso frío.",
             "Agregar 5 g de aceite de oliva virgen extra arbequina por encima.",
@@ -3925,6 +3976,9 @@
               "phase": "Fritura"
             }
           ],
+          "phases": [
+            "Masa"
+          ],
           "steps": [
             "Infusionar la leche con los huesos: 30 min / 100 °C / V1 / giro inverso, con el cubilete puesto.",
             "Colar y pesar en gramos. Si no se llega a 1.400 g, completar con leche. Reservar caliente.",
@@ -3947,6 +4001,9 @@
           "procedureTitle": null,
           "description": null,
           "ingredients": [],
+          "phases": [
+            "Empanado"
+          ],
           "steps": [
             "Preparar tres bandejas: una con 150 g de harina, otra con 4 huevos batidos y otra con 300 g de pan rallado.",
             "Bolear con la masa recién sacada de la nevera, a 40 g por croqueta, pesando cada una.",
@@ -3959,6 +4016,9 @@
           "procedureTitle": null,
           "description": null,
           "ingredients": [],
+          "phases": [
+            "Fritura"
+          ],
           "steps": [
             "Poner la freidora con 3 L de aceite de girasol a 185 °C y esperar a que se encienda el piloto.",
             "Freír en tandas de 6 croquetas durante 2 minutos y medio. Entre tanda y tanda, dejar que el aceite recupere la temperatura (esperar al piloto).",
@@ -3971,6 +4031,7 @@
           "procedureTitle": null,
           "description": null,
           "ingredients": [],
+          "phases": [],
           "steps": [
             "Regenerar en la airfryer, directamente desde congeladas: 205 °C durante 10 minutos."
           ]
@@ -4322,6 +4383,11 @@
               "phase": "Fritura"
             }
           ],
+          "phases": [
+            "Setas",
+            "Bechamel",
+            "Masa"
+          ],
           "steps": [
             "Cocinar las setas en 3 tandas de 333 g con 15 g de AOVE cada una: 18 min / 130 °C / V1. A mitad de tiempo, bajar los restos de las paredes.",
             "Pesar todas las setas cocinadas: máximo 500 g. Si pesan más, añadir 5 min / 130 °C / V1 sin cubilete y volver a pesar.",
@@ -4345,6 +4411,9 @@
           "procedureTitle": null,
           "description": null,
           "ingredients": [],
+          "phases": [
+            "Empanado"
+          ],
           "steps": [
             "Preparar tres bandejas: una con 150 g de harina, otra con 4 huevos batidos y otra con 300 g de pan rallado.",
             "Bolear con la masa recién sacada de la nevera, a 40 g por croqueta, pesando cada una.",
@@ -4357,6 +4426,9 @@
           "procedureTitle": null,
           "description": null,
           "ingredients": [],
+          "phases": [
+            "Fritura"
+          ],
           "steps": [
             "Poner la freidora con 3 L de aceite de girasol a 185 °C y esperar a que se encienda el piloto.",
             "Freír en tandas de 6 croquetas durante 2 minutos y medio. Entre tanda y tanda, dejar que el aceite recupere la temperatura (esperar al piloto).",
@@ -4369,6 +4441,7 @@
           "procedureTitle": null,
           "description": null,
           "ingredients": [],
+          "phases": [],
           "steps": [
             "Regenerar en la airfryer, directamente desde congeladas: 205 °C durante 10 minutos."
           ]
@@ -4731,6 +4804,9 @@
               "phase": "Masa"
             }
           ],
+          "phases": [
+            "Relleno"
+          ],
           "steps": [
             "Poner en el vaso del MCC 200 g de tomate pera y 10 g de ajo pelado.",
             "Triturar 5 segundos a velocidad 5. Retirar y reservar.",
@@ -4749,6 +4825,9 @@
           "procedureTitle": null,
           "description": null,
           "ingredients": [],
+          "phases": [
+            "Masa"
+          ],
           "steps": [
             "En la cesta de la panificadora, incorporar los ingredientes en este orden: 240 ml de agua, 67 g del aceite del sofrito reservado, 8 g de sal, 500 g de harina y 5 g de levadura.",
             "Programar AMASADO (programa 9), 20 minutos.",
@@ -4766,6 +4845,7 @@
           "procedureTitle": null,
           "description": null,
           "ingredients": [],
+          "phases": [],
           "steps": [
             "Atemperar la empanada horneada. Cortar en raciones. Congelar. PENDIENTE: vida útil."
           ]
@@ -4911,6 +4991,9 @@
               "phase": "Servicio"
             }
           ],
+          "phases": [
+            "Macerado"
+          ],
           "steps": [
             "Mezclar la leche con el zumo de limón. Remover y dejar reposar 10 minutos a temperatura ambiente hasta que se espese ligeramente.",
             "Añadir las especias y remover.",
@@ -4923,6 +5006,9 @@
           "procedureTitle": null,
           "description": null,
           "ingredients": [],
+          "phases": [
+            "Rebozado"
+          ],
           "steps": [
             "Escurrir el exceso de leche de las tiras de pollo maceradas.",
             "Triturar los copos de maíz hasta obtener una textura fina pero irregular (no un polvo).",
@@ -4938,6 +5024,9 @@
           "procedureTitle": null,
           "description": null,
           "ingredients": [],
+          "phases": [
+            "Servicio"
+          ],
           "steps": [
             "Sacar del congelador una ración de las tiras de pollo congeladas.",
             "Colocar en Airfryer durante 7 minutos a 205 grados.",
@@ -5078,6 +5167,9 @@
               "phase": "Guiso"
             }
           ],
+          "phases": [
+            "Guiso"
+          ],
           "steps": [
             "Limpiar bien las carrilleras quitando membranas y exceso de grasa.",
             "Salpimentar con sal y pimienta y dejar reposar 15 minutos en la nevera.",
@@ -5100,6 +5192,7 @@
           "procedureTitle": null,
           "description": null,
           "ingredients": [],
+          "phases": [],
           "steps": [
             "Colocar la olla a presión de 25 litros en el fuego con agua fría. Colocar una primera fila de 8 botes de cristal de 450 ml, previamente lavados. Encima, colocar la bandeja de metal y sobre ella otros 7 botes. El agua fría debe cubrir todos los botes.",
             "Sin tapar la olla, llevar el agua a ebullición. Los botes no se meten fríos en agua hirviendo para evitar el choque térmico, que podría romper el cristal.",
@@ -5123,6 +5216,7 @@
           "procedureTitle": null,
           "description": null,
           "ingredients": [],
+          "phases": [],
           "steps": [
             "Abrir el bote, volcar el contenido en una sartén y calentar en la vitro a nivel 3 durante 5 minutos. Esto calienta la carne y espesa y reduce un poco la salsa."
           ]
@@ -5248,6 +5342,7 @@
               "name": "Sal en escamas"
             }
           ],
+          "phases": [],
           "steps": [
             "Los langostinos tienen que estar bien secos.",
             "Colocar dos cucharadas del aceite base (aceite de ajo y cayena B06, solo el aceite) en la sartén y calentarla en vitrocerámica nivel 4 durante 4 minutos.",
@@ -5310,6 +5405,7 @@
               "name": "Sal en escamas"
             }
           ],
+          "phases": [],
           "steps": [
             "Colocar las dos alcachofas descongeladas en la Airfryer, 5 minutos a 150 grados.",
             "Mientras se calientan, templar la salmorreta (B03) 2 minutos en el microondas a nivel medio y colocarla en el fondo de un plato hondo.",
@@ -5377,6 +5473,7 @@
               "name": "Sal en escamas"
             }
           ],
+          "phases": [],
           "steps": [
             "Poner la burrata, sin abrir la bolsa, en un túper con agua caliente del grifo para atemperarla. Mientras tanto, preparar el resto del plato.",
             "Templar juntas, 2 minutos en el microondas a nivel medio, la salmorreta (B03) y el tomate confitado (B08).",
@@ -5432,6 +5529,7 @@
               "name": "Tomate"
             }
           ],
+          "phases": [],
           "steps": [
             "Poner las 2 rebanadas de pan de masa madre en la tostadora (el tostado es automático).",
             "Mientras tanto, en el plato de color con divisiones, colocar una anchoa en cada división.",
@@ -5476,6 +5574,7 @@
               "name": "Picos"
             }
           ],
+          "phases": [],
           "steps": [
             "Pasar los 40 g de jamón cortado a cuchillo de la bandeja al plato.",
             "Dejar el plato a temperatura ambiente para atemperar el jamón antes de llevarlo a la mesa.",
@@ -5518,6 +5617,7 @@
               "name": "Picos"
             }
           ],
+          "phases": [],
           "steps": [
             "Pasar de la bandeja a un plato rectangular las 6 lonchas de queso curado (93 g), acomodando los triángulos de las cuñas a cada lado.",
             "Dejar el plato a temperatura ambiente 10 minutos para atemperar el queso antes de llevarlo a la mesa.",
@@ -5574,6 +5674,9 @@
               "phase": "Emplatado"
             }
           ],
+          "phases": [
+            "Cuajado"
+          ],
           "steps": [
             "Poner la sartén de 14 cm en la vitrocerámica y precalentarla 4 minutos a nivel 4.",
             "Mientras tanto, sacar una bolsa de base de patata de la nevera, abrirla y calentar la base en el microondas 2 minutos a nivel medio.",
@@ -5590,6 +5693,9 @@
           "procedureTitle": null,
           "description": null,
           "ingredients": [],
+          "phases": [
+            "Emplatado"
+          ],
           "steps": [
             "Pasar la tortilla a un plato metálico, a un lado. Colocar el vasito de tomate en el extremo opuesto y, a cada lado del vasito, una media rebanada de pan caliente."
           ]
@@ -5661,6 +5767,9 @@
               "phase": "Emplatado"
             }
           ],
+          "phases": [
+            "Cuajado"
+          ],
           "steps": [
             "Poner la sartén de 14 cm en la vitrocerámica y precalentarla 4 minutos a nivel 4. Al mismo tiempo, calentar también dentro de la sartén los 30 g de sobrasada (ya porcionada).",
             "Mientras tanto, sacar una bolsa de base de patata de la nevera, abrirla y calentar la base en el microondas 2 minutos a nivel medio.",
@@ -5677,6 +5786,9 @@
           "procedureTitle": null,
           "description": null,
           "ingredients": [],
+          "phases": [
+            "Emplatado"
+          ],
           "steps": [
             "Pasar la tortilla a un plato metálico, a un lado. Colocar el vasito de tomate en el extremo opuesto y, a cada lado del vasito, una media rebanada de pan caliente."
           ]
@@ -5748,6 +5860,9 @@
               "phase": "Emplatado"
             }
           ],
+          "phases": [
+            "Cuajado"
+          ],
           "steps": [
             "Poner la sartén de 14 cm en la vitrocerámica y precalentarla 4 minutos a nivel 4. Al mismo tiempo, calentar también dentro de la sartén la media alcachofa confitada (30 g), cortada en trozos.",
             "Mientras tanto, sacar una bolsa de base de patata de la nevera, abrirla y calentar la base en el microondas 2 minutos a nivel medio.",
@@ -5764,6 +5879,9 @@
           "procedureTitle": null,
           "description": null,
           "ingredients": [],
+          "phases": [
+            "Emplatado"
+          ],
           "steps": [
             "Pasar la tortilla a un plato metálico, a un lado. Colocar el vasito de tomate en el extremo opuesto y, a cada lado del vasito, una media rebanada de pan caliente."
           ]
@@ -5829,6 +5947,9 @@
               "phase": "Emplatado"
             }
           ],
+          "phases": [
+            "Cuajado"
+          ],
           "steps": [
             "Poner la sartén de 14 cm en la vitrocerámica y precalentarla 4 minutos a nivel 4.",
             "Mientras tanto, sacar una bolsa de base de patata de la nevera, abrirla y calentar la base en el microondas 2 minutos a nivel medio.",
@@ -5845,6 +5966,9 @@
           "procedureTitle": null,
           "description": null,
           "ingredients": [],
+          "phases": [
+            "Emplatado"
+          ],
           "steps": [
             "Pasar la tortilla a un plato metálico, a un lado. Colocar por encima 4 filetes de anchoa en forma de cruz. Colocar el vasito de tomate en el extremo opuesto y, a cada lado del vasito, una media rebanada de pan caliente."
           ]
@@ -5916,6 +6040,9 @@
               "phase": "Emplatado"
             }
           ],
+          "phases": [
+            "Cuajado"
+          ],
           "steps": [
             "Poner la sartén de 14 cm en la vitrocerámica y precalentarla 4 minutos a nivel 4.",
             "Mientras tanto, sacar una bolsa de base de patata de la nevera, abrirla y calentar la base en el microondas 2 minutos a nivel medio.",
@@ -5932,6 +6059,9 @@
           "procedureTitle": null,
           "description": null,
           "ingredients": [],
+          "phases": [
+            "Emplatado"
+          ],
           "steps": [
             "Pasar la tortilla a un plato metálico, a un lado. Colocar por encima 3 lonchas de jamón cortado a cuchillo (30 g). Colocar el vasito de tomate en el extremo opuesto y, a cada lado del vasito, una media rebanada de pan caliente."
           ]
@@ -6002,6 +6132,7 @@
               "name": "Sal"
             }
           ],
+          "phases": [],
           "steps": [
             "Precalentar el horno a 180 grados.",
             "Fundir la mantequilla y el chocolate en el microondas, 3 minutos a nivel medio.",
@@ -6074,6 +6205,9 @@
               "phase": "Emplatado"
             }
           ],
+          "phases": [
+            "Crema"
+          ],
           "steps": [
             "Colocar un litro de leche en el vaso de la thermomix.",
             "Agregar la canela y la piel de limón.",
@@ -6089,6 +6223,9 @@
           "procedureTitle": null,
           "description": null,
           "ingredients": [],
+          "phases": [
+            "Crema"
+          ],
           "steps": [
             "En el vaso de la Thermomix con el accesorio batidor colocar la leche infusionada.",
             "Agregar la maizena y la yema de huevo.",
@@ -6104,6 +6241,9 @@
           "procedureTitle": null,
           "description": null,
           "ingredients": [],
+          "phases": [
+            "Emplatado"
+          ],
           "steps": [
             "Retirar la crema catalana de la nevera.",
             "Cubrir la superficie con una fina capa de azúcar.",
@@ -6183,6 +6323,12 @@
               "phase": "Marisco"
             }
           ],
+          "phases": [
+            "Arroz",
+            "Base",
+            "Caldo",
+            "Marisco"
+          ],
           "steps": [
             "Calentar la paella a fuego medio con 10 g de aceite. Dorar 5 g de ajo y retirarlo.",
             "Marcar los 2 langostinos 1 minuto por lado y retirarlos.",
@@ -6206,6 +6352,7 @@
           "procedureTitle": null,
           "description": null,
           "ingredients": [],
+          "phases": [],
           "steps": [
             "Llevar la paella a la mesa."
           ]
@@ -6282,6 +6429,12 @@
               "phase": "Verdura"
             }
           ],
+          "phases": [
+            "Arroz",
+            "Base",
+            "Caldo",
+            "Verdura"
+          ],
           "steps": [
             "Calentar la paella a fuego medio con 10 g de aceite. Dorar 5 g de ajo y retirarlo.",
             "Marcar 60 g de alcachofas confitadas 1 minuto por lado y retirarlas.",
@@ -6305,6 +6458,7 @@
           "procedureTitle": null,
           "description": null,
           "ingredients": [],
+          "phases": [],
           "steps": [
             "Llevar la paella a la mesa."
           ]
@@ -6387,6 +6541,13 @@
               "phase": "Verdura"
             }
           ],
+          "phases": [
+            "Arroz",
+            "Base",
+            "Caldo",
+            "Carne",
+            "Verdura"
+          ],
           "steps": [
             "Calentar la paella a fuego medio con 10 g de aceite. Dorar 5 g de ajo y retirarlo.",
             "Marcar 40 g de magret 1 minuto por lado y retirarlo.",
@@ -6410,6 +6571,7 @@
           "procedureTitle": null,
           "description": null,
           "ingredients": [],
+          "phases": [],
           "steps": [
             "Llevar la paella a la mesa."
           ]
@@ -6480,6 +6642,12 @@
               "phase": "Carne"
             }
           ],
+          "phases": [
+            "Arroz",
+            "Base",
+            "Caldo",
+            "Carne"
+          ],
           "steps": [
             "Calentar la paella a fuego medio con 10 g de aceite. Dorar 5 g de ajo y retirarlo.",
             "Marcar 125 g de carrillera cocida 1 minuto por lado y retirarla.",
@@ -6501,6 +6669,7 @@
           "procedureTitle": null,
           "description": null,
           "ingredients": [],
+          "phases": [],
           "steps": [
             "Llevar la paella a la mesa."
           ]
@@ -6577,6 +6746,12 @@
               "phase": "Base"
             }
           ],
+          "phases": [
+            "Arroz",
+            "Base",
+            "Caldo",
+            "Marisco"
+          ],
           "steps": [
             "Calentar la paella a fuego medio con 10 g de aceite. Dorar 5 g de ajo y retirarlo.",
             "Añadir el calamar y marcarlo 3 minutos en el perímetro de la paella.",
@@ -6598,6 +6773,7 @@
           "procedureTitle": null,
           "description": null,
           "ingredients": [],
+          "phases": [],
           "steps": [
             "Llevar la paella a la mesa."
           ]

@@ -257,3 +257,48 @@ test("una cantidad parcial no se convierte en el lote entero", () => {
   // la mención sin número sí recibe la cantidad
   assert.match(T.stepTexts(["Añadir los huevos"], ing, 2)[0], /8 ud de huevos/);
 });
+
+test('"del" cuenta como "de" al reescribir cantidades', () => {
+  const ing = [{ name: "Aceite de Oliva", qty: 67, unit: "g" }];
+  const paso = "Incorporar 67 g del aceite del sofrito reservado.";
+  // sin escalar no se toca y, sobre todo, no se le añade la cantidad otra vez
+  assert.equal(T.stepTexts([paso], ing, 1)[0], paso);
+  assert.equal(T.stepTexts([paso], ing, 2)[0], "Incorporar 134 g del aceite del sofrito reservado.");
+});
+
+test("una porción no se confunde con el lote", () => {
+  const jamon = [{ name: "Jamón a dados", qty: 225, unit: "g" }];
+  // la ficha ya dice cuánto pesa esa tarrina: no se le añade el lote delante
+  assert.equal(
+    T.stepTexts(["Triturar 1 tarrina de jamón (75 g) con Turbo 3 s."], jamon, 1)[0],
+    "Triturar 1 tarrina de jamón (75 g) con Turbo 3 s."
+  );
+  // una medida de cocina que no es la de la ficha tampoco atrae el lote
+  const aceite = [{ name: "Aceite de girasol", qty: 329, unit: "ml" }];
+  assert.equal(
+    T.stepTexts(["Poner la freidora con 3 L de aceite de girasol a 185 °C."], aceite, 1)[0],
+    "Poner la freidora con 3 L de aceite de girasol a 185 °C."
+  );
+  const pan = [{ name: "Pan de masa madre", qty: 100, unit: "g" }];
+  assert.equal(
+    T.stepTexts(["Poner las 2 rebanadas de pan de masa madre en la tostadora."], pan, 1)[0],
+    "Poner las 2 rebanadas de pan de masa madre en la tostadora."
+  );
+  // pero una mención limpia sigue recibiendo su cantidad
+  assert.match(T.stepTexts(["Añadir el aceite y calentar."], aceite, 1)[0], /329 ml de aceite/);
+});
+
+test("la cantidad escrita con una medida de cocina también escala", () => {
+  const gel = [{ name: "Gelatina", qty: 11, unit: "ud" }];
+  const paso = "Hidratar las 11 hojas de gelatina en agua fría.";
+  assert.equal(T.stepTexts([paso], gel, 1)[0], paso);
+  assert.match(T.stepTexts([paso], gel, 2)[0], /22 hojas de gelatina/);
+  // contable: 16,5 hojas no existen
+  assert.match(T.stepTexts([paso], gel, 1.5)[0], /17 hojas de gelatina/);
+  // si el número no es el de la ficha es una porción: no se toca
+  const jamon = [{ name: "Jamón a dados", qty: 225, unit: "g" }];
+  assert.equal(
+    T.stepTexts(["Triturar 1 tarrina de jamón con Turbo."], jamon, 2)[0],
+    "Triturar 1 tarrina de jamón con Turbo."
+  );
+});
