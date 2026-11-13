@@ -17,6 +17,13 @@ const CONFIG = {
   RUNTIME_KEY: "rtmy_runtime_v2",
   // Selección, personas y tareas hechas del planificador de jornada.
   PLAN_KEY: "rtmy_plan_v1",
+  // Jornada compartida: el código, quién es este dispositivo y lo que queda
+  // por mandar. Ver JORNADA_COMPARTIDA.md.
+  JORNADA_KEY: "rtmy_jornada_v1",
+  // Cada cuánto se pregunta al servidor por los cambios de los demás. Con
+  // 4 tablets y 8 h de jornada son ~11.500 lecturas: muy por debajo de las
+  // 50.000 diarias que admite PropertiesService.
+  JORNADA_POLL_MS: 10000,
   // Si el Apps Script no responde a tiempo se usa el respaldo local en vez
   // de dejar la app en "Cargando recetas…" indefinidamente.
   FETCH_TIMEOUT_MS: 10000,
@@ -61,6 +68,27 @@ const state = {
 
   // Planificador de jornada: qué recetas se preparan hoy, cuántas personas
   // y a qué hora empieza el turno. `result` es el plan calculado.
+  // Jornada compartida: sin código, la app funciona como siempre, cada
+  // dispositivo por su cuenta.
+  jornada: {
+    code: null, // código de cuatro dígitos
+    slot: 0, // qué persona del plan es este dispositivo
+    name: "", // su nombre (para reconocerlo al volver)
+    rev: 0, // última versión del estado que se ha visto
+    planRev: 0, // versión del plan compartido
+    offset: 0, // desfase de este reloj contra el del servidor (ms)
+    live: null, // último estado recibido
+    queue: [], // operaciones pendientes de mandar (red caída)
+    status: "off", // off | ok | offline | working
+    error: null,
+    joinCode: "", // lo que se está escribiendo en la caja del código
+    inputs: null, // entradas con las que se calculó el plan compartido
+    dataStamp: null,
+    staleData: false, // el plan se calculó con otros datos de recetas
+    panel: false, // el panel de compartir está abierto
+    expired: false, // la jornada guardada ya no existía al volver a abrir
+  },
+
   planUi: {
     selected: [],
     people: 2,
@@ -560,6 +588,7 @@ function startTimer(label, seconds, sessionId, recipeName, person) {
   ensureTimerTick();
   renderTimerBar();
   renderPlanTimers();
+  return state.timers[state.timers.length - 1];
 }
 
 window.startTimerByIndex = function (i) {
@@ -583,6 +612,11 @@ window.toggleTimer = function (id) {
 };
 
 window.cancelTimer = function (id) {
+  const gone = state.timers.find((x) => x.id === id);
+  if (gone && gone.shared && planShared()) {
+    jornadaQueue({ op: "timerStop", id: gone.shared });
+    jornadaFlush();
+  }
   state.timers = state.timers.filter((x) => x.id !== id);
   saveRuntimeState();
   renderTimerBar();
@@ -704,8 +738,11 @@ function onHashChange() {
     state.view = "plan-setup";
   } else if (hash === "#/planificar/plan") {
     // Sin recetas elegidas no hay plan: se vuelve a la selección.
-    state.planUi.result = null;
-    state.view = planSelectedValid().length ? "plan" : "plan-setup";
+    // En una jornada compartida el plan no se recalcula: es el del servidor.
+    if (!planShared()) state.planUi.result = null;
+    // Una tablet que solo se engancha a una jornada no tiene selección propia:
+    // su plan es el del servidor.
+    state.view = planSelectedValid().length || state.jornada.code ? "plan" : "plan-setup";
   } else if (sesionMatch) {
     const id = decodeURIComponent(sesionMatch[1]);
     const s = findSession(id);
@@ -1658,6 +1695,8 @@ function renderPlanSetup() {
         : ""
     }
 
+    ${planJoinHtml()}
+
     <button class="rtmy-cta" onclick="goPlan()" ${n ? "" : "disabled"}>
       ${n ? `Ver el plan · ${n} receta${n === 1 ? "" : "s"} · ${ui.people} persona${ui.people === 1 ? "" : "s"}` : "Elige al menos una receta"}
     </button>
@@ -1729,8 +1768,16 @@ function planWaitMin(t) {
 }
 
 // Una tarjeta de paso dentro de la franja de una persona (o de "sin nadie").
-function planCardHtml(t, plan, colors) {
-  const done = !!state.planUi.done[planTaskKey(t)];
+function planCardHtml(t, plan, colors, view) {
+  const key = planTaskKey(t);
+  const doneBy = view.done[key];
+  const done = doneBy !== undefined;
+  // En una jornada compartida se dice quién lo marcó y quién cogió la tarea:
+  // "hecho" a secas no vale cuando son cuatro en la cocina.
+  const by = view.shared && done && doneBy !== view.slot ? view.names[doneBy] || "Persona " + (doneBy + 1) : "";
+  const owner = view.shared ? view.owner[key] : undefined;
+  const ownerText =
+    owner === undefined || done ? "" : owner === view.slot ? "la tienes tú" : "la tiene " + (view.names[owner] || "Persona " + (owner + 1));
   const machine = t.person === null;
   const wait = planWaitMin(t);
   const dur = (t.assumed ? "~" : "") + RTMYPlanner.fmtDuration(machine ? t.totalMin : t.personMin);
@@ -1739,7 +1786,7 @@ function planCardHtml(t, plan, colors) {
       <div class="rtmy-plan-head">
         <span class="rtmy-plan-hour">${planClock(plan, t.start)}</span>
         <span class="rtmy-plan-dur">${machine ? "hasta " + planClock(plan, t.end) + " · " + dur : dur}</span>
-        <button class="rtmy-plan-tick" onclick="onPlanDone('${escapeHtml(planTaskKey(t))}')" aria-pressed="${done}" aria-label="${done ? "Marcar como pendiente" : "Marcar como hecho"}">
+        <button class="rtmy-plan-tick" onclick="onPlanDone('${escapeHtml(key)}')" aria-pressed="${done}" aria-label="${done ? "Marcar como pendiente" : "Marcar como hecho"}">
           <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="3" stroke-linecap="round" stroke-linejoin="round"><path d="M5 12.5l4.5 4.5L19 7.5"/></svg>
         </button>
       </div>
@@ -1747,6 +1794,19 @@ function planCardHtml(t, plan, colors) {
       <div class="rtmy-plan-tags">
         <span class="rtmy-plan-eq">${escapeHtml(t.equipment)}</span>
         ${machine && t.totalMin >= 5 ? `<span class="rtmy-plan-alone">en marcha · no hace falta estar</span>` : ""}
+        ${by ? `<span class="rtmy-plan-by">hecho por ${escapeHtml(by)}</span>` : ""}
+        ${ownerText ? `<span class="rtmy-plan-by">${escapeHtml(ownerText)}</span>` : ""}
+        ${
+          // Coger un paso que le toca a otro: el servidor se la da al primero
+          // que la pide y al segundo le avisa en vez de quitarsela.
+          !view.shared || done
+            ? ""
+            : owner === view.slot
+              ? `<button class="rtmy-plan-claim" onclick="onPlanClaim('${escapeHtml(key)}', false)">Soltarla</button>`
+              : owner === undefined && t.person !== null && t.person !== view.slot
+                ? `<button class="rtmy-plan-claim" onclick="onPlanClaim('${escapeHtml(key)}', true)">La cojo yo</button>`
+                : ""
+        }
       </div>
       <p>${escapeHtml(t.text)}</p>
       ${
@@ -1786,6 +1846,8 @@ function planWhoChips(tasks, plan, colors) {
    aparte, para que sepa cuándo volver sin buscarlos en otro sitio. */
 function planByPersonHtml(plan, colors) {
   const ui = state.planUi;
+  const j = state.jornada;
+  const view = { shared: planShared(), slot: j.slot, done: planDoneMap(), owner: planOwnerMap(), names: planPeopleNames() };
   const inDay = (t) => RTMYPlanner.dayOf(t.start) === ui.day;
   const cols = [];
 
@@ -1797,11 +1859,12 @@ function planByPersonHtml(plan, colors) {
     const waiting = mine.filter((t) => t.person === null).length;
     cols.push({
       person: p,
-      title: "Persona " + (p + 1),
+      mine: view.shared && p === j.slot,
+      title: (view.names[p] ? view.names[p] : "Persona " + (p + 1)) + (view.shared && p === j.slot ? " · tú" : ""),
       sub: (total ? RTMYPlanner.fmtDuration(total) + " de trabajo" : "sin tareas") + (waiting ? " · " + waiting + " en marcha" : ""),
       chips: planWhoChips(mine, plan, colors),
       body: mine.length
-        ? `<ol class="rtmy-plan-tasks">${mine.map((t) => planCardHtml(t, plan, colors)).join("")}</ol>`
+        ? `<ol class="rtmy-plan-tasks">${mine.map((t) => planCardHtml(t, plan, colors, view)).join("")}</ol>`
         : `<p class="rtmy-plan-none">${total ? "Nada que hacer este día." : "Con este lote no hace falta una persona más."}</p>`,
     });
   }
@@ -1811,7 +1874,7 @@ function planByPersonHtml(plan, colors) {
       ${cols
         .map(
           (c) => `
-        <section class="rtmy-plan-col" aria-label="${escapeHtml(c.title)}">
+        <section class="rtmy-plan-col ${c.mine ? "mine" : ""}" aria-label="${escapeHtml(c.title)}">
           <header class="rtmy-plan-col-head">
             <h2>${escapeHtml(c.title)}</h2>
             <span class="rtmy-plan-col-sub">${escapeHtml(c.sub)}</span>
@@ -1987,18 +2050,35 @@ function planNotesHtml(plan) {
 
 function renderPlan() {
   const ui = state.planUi;
-  const plan = ui.result || computePlan();
+  const j = state.jornada;
+  // Enganchada a una jornada pero sin el plan todavía (al abrir la app).
+  if (j.code && !ui.result) {
+    root.innerHTML = `
+      ${header(true, "#/planificar", "Plan de la jornada")}
+      <div class="rtmy-panel rtmy-plan-share joined ${j.status === "offline" ? "offline" : ""}">
+        <div class="rtmy-plan-kicker">Jornada</div>
+        <div class="rtmy-plan-code">${escapeHtml(j.code)}</div>
+        <p class="rtmy-plan-share-help">${j.status === "offline" ? "Sin conexión con el servidor. Se reintenta solo." : "Bajando el plan de la jornada…"}</p>
+        ${j.error ? `<p class="rtmy-plan-share-error">${escapeHtml(j.error)}</p>` : ""}
+        <button class="rtmy-plan-reset" onclick="onJornadaLeave()">Salir de la jornada (este dispositivo)</button>
+      </div>`;
+    return;
+  }
+  const plan = planCurrent();
   if (!plan.ok) {
     root.innerHTML = `
       ${header(true, "#/planificar", "Plan de la jornada")}
+      ${j.error ? `<p class="rtmy-plan-share-error">${escapeHtml(j.error)}</p>` : ""}
       <div class="rtmy-panel"><p><strong>No se pudo montar el plan.</strong></p>
-      <p style="font-size:13px;opacity:.75">${escapeHtml(plan.warnings.join(" ") || "Elige al menos una receta con datos de planificación.")}</p></div>`;
+      <p style="font-size:13px;opacity:.75">${escapeHtml(plan.warnings.join(" ") || "Elige al menos una receta con datos de planificación.")}</p></div>
+      ${planJoinHtml()}`;
     return;
   }
   const colors = planColorMap(plan);
   if (ui.day > plan.days) ui.day = 1;
   const endDay = RTMYPlanner.dayOf(plan.end - 1);
-  const doneCount = plan.tasks.filter((t) => ui.done[planTaskKey(t)]).length;
+  const done = planDoneMap();
+  const doneCount = plan.tasks.filter((t) => done[planTaskKey(t)] !== undefined).length;
 
   const recipesHtml = plan.recipes
     .map(
@@ -2036,6 +2116,7 @@ function renderPlan() {
       <div class="rtmy-plan-progress-text">${doneCount} de ${plan.tasks.length} pasos hechos</div>
     </div>
 
+    ${planShareHtml(plan)}
     ${planNotesHtml(plan)}
 
     <div class="rtmy-plan-tabs" role="tablist" aria-label="Vista del plan">
@@ -2058,21 +2139,38 @@ function renderPlan() {
 function renderPlanTimers() {
   const slots = root.querySelectorAll(".rtmy-plan-timers[data-person]");
   if (!slots.length) return;
+  // Los temporizadores de máquina que han puesto los demás: se ven, con su
+  // cuenta atrás en hora del servidor, pero no se tocan desde aquí.
+  const shared = planSharedTimers();
+  const names = planPeopleNames();
+  const now = Date.now();
   slots.forEach((slot) => {
     const person = Number(slot.dataset.person);
     const mine = state.timers.filter((t) => t.person === person);
-    slot.innerHTML = mine
-      .map(
-        (t) => `
+    const theirs = shared.filter((t) => t.b === person);
+    slot.innerHTML =
+      mine
+        .map(
+          (t) => `
         <div class="rtmy-plan-timer-chip ${t.done ? "done" : ""}">
           <span class="clock">${t.done ? "¡Listo!" : fmtClock(t.remaining)}</span>
           <span class="what">${escapeHtml(t.label)}</span>
           ${t.done ? "" : `<button onclick="toggleTimer(${t.id})" aria-label="${t.running ? "Pausar" : "Reanudar"}">${t.running ? "⏸" : "▶️"}</button>`}
           <button onclick="cancelTimer(${t.id})" aria-label="Descartar temporizador">✕</button>
         </div>`
-      )
-      .join("");
-    slot.hidden = !mine.length;
+        )
+        .join("") +
+      theirs
+        .map((t) => {
+          const left = RTMYJornada.remainingSeconds(t, state.jornada.offset, now);
+          return `
+        <div class="rtmy-plan-timer-chip remote ${left ? "" : "done"}">
+          <span class="clock">${left ? fmtClock(left) : "¡Listo!"}</span>
+          <span class="what">${escapeHtml(t.l || "")} · ${escapeHtml(names[t.b] || "Persona " + (t.b + 1))}</span>
+        </div>`;
+        })
+        .join("");
+    slot.hidden = !mine.length && !theirs.length;
   });
 }
 
@@ -2113,13 +2211,37 @@ window.onPlanDay = function (day) {
   renderPlan();
 };
 window.onPlanDone = function (key) {
+  if (planShared()) {
+    // Interfaz optimista: se pinta ya y se manda por detrás. Con 1-3 s de
+    // latencia, esperar la respuesta se nota y molesta.
+    const wasDone = planDoneMap()[key] !== undefined;
+    jornadaQueue({ op: wasDone ? "undone" : "done", key, slot: state.jornada.slot });
+    renderPlan();
+    jornadaFlush();
+    return;
+  }
   const done = state.planUi.done;
   if (done[key]) delete done[key];
   else done[key] = 1;
   savePlanState();
   renderPlan();
 };
+// Coger (o soltar) un paso que el plan le ha dado a otra persona.
+window.onPlanClaim = function (key, take) {
+  if (!planShared()) return;
+  jornadaQueue({ op: take ? "claim" : "release", key, slot: state.jornada.slot });
+  renderPlan();
+  jornadaFlush();
+};
 window.onPlanResetDone = function () {
+  if (planShared()) {
+    const done = planDoneMap();
+    Object.keys(done).forEach((key) => jornadaQueue({ op: "undone", key }, true));
+    saveJornadaState();
+    renderPlan();
+    jornadaFlush();
+    return;
+  }
   state.planUi.done = {};
   savePlanState();
   renderPlan();
@@ -2132,8 +2254,533 @@ window.planTimer = function (taskId) {
   const minutes = t.type === "Activo + espera" ? t.totalMin - t.personMin : t.totalMin;
   const short = t.text.length > 34 ? t.text.slice(0, 33).trimEnd() + "…" : t.text;
   const who = t.person !== null && t.person !== undefined ? t.person : t.watcher;
-  startTimer(`${t.code}.${t.step} · ${short}`, Math.max(1, Math.round(minutes * 60)), null, t.recipeName, who);
+  const label = `${t.code}.${t.step} · ${short}`;
+  const seconds = Math.max(1, Math.round(minutes * 60));
+  const timer = startTimer(label, seconds, null, t.recipeName, who);
+  // Los temporizadores de máquina son de la cocina, no de la tablet: al arroz
+  // le da igual quién lo programó, así que se comparten.
+  if (timer && planShared()) {
+    timer.shared = state.jornada.slot + "-" + timer.id;
+    jornadaQueue({ op: "timer", id: timer.shared, key: planTaskKey(t), label, seconds });
+    saveRuntimeState();
+    jornadaFlush();
+  }
 };
+
+/* ---------------- Jornada compartida (interfaz) ----------------
+   Varios dispositivos sobre el mismo plan. Sin código de jornada todo
+   funciona como antes: el plan se calcula aquí y lo marcado se guarda en este
+   dispositivo. Con código, el plan y lo marcado vienen del servidor.
+   El contrato está en JORNADA_COMPARTIDA.md; el transporte, en jornada.js.
+------------------------------------------------- */
+
+function jornadaAvailable() {
+  return !!(CONFIG.DATA_URL && window.RTMYJornada);
+}
+
+// ¿Se está trabajando sobre un plan compartido?
+function planShared() {
+  return !!(state.jornada.code && state.planUi.result && state.planUi.result.shared);
+}
+
+// El plan que hay que pintar: el compartido si lo hay, o el que calcula este
+// dispositivo. Al ser determinista, los dos salen iguales con los mismos datos.
+function planCurrent() {
+  return state.planUi.result || computePlan();
+}
+
+// Lo marcado como hecho: {clave: slot de quien lo marcó}. En solitario el slot
+// no significa nada, pero así la vista es la misma en los dos modos.
+function planDoneMap() {
+  const j = state.jornada;
+  if (planShared()) return RTMYJornada.applyQueue(j.live, j.queue, j.slot).done;
+  const out = {};
+  Object.keys(state.planUi.done).forEach((key) => (out[key] = 0));
+  return out;
+}
+
+function planOwnerMap() {
+  const j = state.jornada;
+  return planShared() ? RTMYJornada.applyQueue(j.live, j.queue, j.slot).owner : {};
+}
+
+function planPeopleNames() {
+  return planShared() ? RTMYJornada.peopleNames(state.jornada.live) : {};
+}
+
+// Los temporizadores que han puesto los demás (los míos ya están en la barra).
+function planSharedTimers() {
+  const j = state.jornada;
+  if (!planShared() || !j.live) return [];
+  return (j.live.timers || []).filter((t) => t.b !== j.slot);
+}
+
+let jornadaClientRef = null;
+function jornadaClient() {
+  if (!jornadaClientRef) jornadaClientRef = RTMYJornada.createClient({ url: CONFIG.DATA_URL });
+  return jornadaClientRef;
+}
+
+function saveJornadaState() {
+  try {
+    const j = state.jornada;
+    localStorage.setItem(
+      CONFIG.JORNADA_KEY,
+      JSON.stringify({ code: j.code, slot: j.slot, name: j.name, rev: j.rev, planRev: j.planRev, offset: j.offset, queue: j.queue, inputs: j.inputs, dataStamp: j.dataStamp })
+    );
+  } catch (e) {
+    console.warn("No se pudo guardar la jornada compartida.", e);
+  }
+}
+
+function restoreJornadaState() {
+  try {
+    const saved = JSON.parse(localStorage.getItem(CONFIG.JORNADA_KEY) || "null");
+    if (!saved) return;
+    const j = state.jornada;
+    // El nombre se guarda aunque no haya jornada: el cocinero no tiene que
+    // volver a escribirlo cada mañana.
+    if (typeof saved.name === "string") j.name = saved.name;
+    if (!/^\d{4}$/.test(saved.code || "")) return;
+    j.code = saved.code;
+    j.slot = Number.isFinite(saved.slot) ? saved.slot : 0;
+    j.name = typeof saved.name === "string" ? saved.name : "";
+    j.rev = Number(saved.rev) || 0;
+    j.planRev = Number(saved.planRev) || 0;
+    j.offset = Number(saved.offset) || 0;
+    j.queue = Array.isArray(saved.queue) ? saved.queue : [];
+    j.inputs = saved.inputs || null;
+    j.dataStamp = saved.dataStamp || null;
+  } catch (e) {
+    console.warn("No se pudo restaurar la jornada compartida.", e);
+  }
+}
+
+function jornadaQueue(op, silent) {
+  const j = state.jornada;
+  j.queue = RTMYJornada.queuePush(j.queue, op);
+  if (!silent) saveJornadaState();
+}
+
+// Lo que trae cualquier respuesta del servidor: su hora, el estado y si el
+// plan ha cambiado porque alguien lo ha recalculado.
+function jornadaApply(res) {
+  const j = state.jornada;
+  if (typeof res.offset === "number") j.offset = res.offset;
+  if (typeof res.rev === "number") j.rev = res.rev;
+  if (res.live) j.live = res.live;
+  j.status = "ok";
+  j.error = null;
+  if (res.meta) {
+    j.inputs = res.meta.inputs || null;
+    j.dataStamp = res.meta.dataStamp || null;
+    j.staleData = !!(j.dataStamp && state.updatedAt && j.dataStamp !== state.updatedAt);
+  }
+  if (res.plan) {
+    state.planUi.result = RTMYJornada.unpackPlan(res.plan, state.recipes);
+    if (state.planUi.day > (state.planUi.result.days || 1)) state.planUi.day = 1;
+  }
+  if (typeof res.planRev === "number") {
+    const changed = j.planRev && res.planRev !== j.planRev && !res.plan;
+    j.planRev = res.planRev;
+    if (changed) jornadaReloadPlan();
+  }
+}
+
+function jornadaFail(err) {
+  const j = state.jornada;
+  if (err && err.data && err.data.missing) {
+    // Una jornada se cierra sola cuando pasa día y medio sin usarse: la tablet
+    // que vuelve al día siguiente con el código de ayer tiene que enterarse,
+    // no quedarse en silencio con su plan de siempre.
+    jornadaLeaveLocal("La jornada " + j.code + " ya se cerró: se cierran solas cuando pasa un día y medio sin usarse.", true);
+    return;
+  }
+  j.status = "offline";
+  // Al cocinero no se le enseña "Failed to fetch": en una cocina el wifi se cae
+  // y lo único que importa es que no se ha perdido nada.
+  const raw = (err && (err.name === "AbortError" ? "timeout" : err.message)) || "";
+  j.error = /timeout|fetch|network|load failed/i.test(raw)
+    ? "Sin conexión con el servidor. Lo marcado se guarda y se manda en cuanto vuelva."
+    : raw || "Error al hablar con el servidor.";
+}
+
+let jornadaBusy = false;
+
+// Manda lo que haya en la cola. Si falla, se queda en la cola y se reintenta
+// en el siguiente sondeo: no se pierde lo que marcó el cocinero.
+async function jornadaFlush() {
+  const j = state.jornada;
+  if (jornadaBusy || !j.code || !j.queue.length || !jornadaAvailable()) return;
+  jornadaBusy = true;
+  const sending = j.queue.slice();
+  try {
+    const res = await jornadaClient().patch({ code: j.code, slot: j.slot, name: j.name, ops: sending });
+    j.queue = j.queue.filter((op) => sending.indexOf(op) < 0);
+    jornadaApply(res);
+    jornadaRejected(res.rejected);
+  } catch (err) {
+    jornadaFail(err);
+  } finally {
+    jornadaBusy = false;
+    saveJornadaState();
+    renderPlanKeepingScroll();
+  }
+}
+
+// Coger una tarea que ya tiene dueño se rechaza en el servidor: se avisa, no
+// se roba.
+function jornadaRejected(list) {
+  if (!list || !list.length) return;
+  const names = planPeopleNames();
+  const clash = list.filter((r) => r.op === "claim");
+  if (clash.length) {
+    const who = names[clash[0].owner] || "Persona " + (clash[0].owner + 1);
+    state.jornada.error = "Esa tarea ya la tiene " + who + ".";
+  }
+}
+
+async function jornadaPoll() {
+  const j = state.jornada;
+  if (jornadaBusy || !j.code || !jornadaAvailable()) return;
+  if (document.hidden) return; // tablet en reposo: ni se sondea ni se gasta cuota
+  if (j.queue.length) return jornadaFlush();
+  jornadaBusy = true;
+  try {
+    const res = await jornadaClient().read(j.code, j.rev);
+    const changed = !res.unchanged;
+    jornadaApply(res);
+    if (changed) renderPlanKeepingScroll();
+    else if (state.view === "plan") renderPlanTimers();
+  } catch (err) {
+    jornadaFail(err);
+    renderPlanKeepingScroll();
+  } finally {
+    jornadaBusy = false;
+  }
+}
+
+async function jornadaReloadPlan() {
+  const j = state.jornada;
+  if (!j.code) return;
+  try {
+    const res = await jornadaClient().read(j.code, null, true);
+    jornadaApply(res);
+    renderPlanKeepingScroll();
+  } catch (err) {
+    jornadaFail(err);
+  }
+}
+
+let jornadaTimer = null;
+function jornadaWatch() {
+  if (jornadaTimer || !state.jornada.code) return;
+  jornadaTimer = setInterval(jornadaPoll, CONFIG.JORNADA_POLL_MS);
+  document.addEventListener("visibilitychange", () => {
+    if (!document.hidden) jornadaPoll();
+  });
+}
+
+function jornadaUnwatch() {
+  if (jornadaTimer) clearInterval(jornadaTimer);
+  jornadaTimer = null;
+}
+
+function jornadaLeaveLocal(message, expired) {
+  const j = state.jornada;
+  j.expired = !!expired;
+  jornadaUnwatch();
+  j.code = null;
+  j.live = null;
+  j.queue = [];
+  j.rev = 0;
+  j.planRev = 0;
+  j.inputs = null;
+  j.staleData = false;
+  j.status = "off";
+  j.error = message || null;
+  state.planUi.result = null;
+  saveJornadaState();
+}
+
+/* ----- Acciones ----- */
+
+// Crea la jornada con el plan que hay en pantalla y reparte el código.
+window.onJornadaCreate = async function (replace) {
+  const j = state.jornada;
+  if (!jornadaAvailable()) return;
+  const plan = replace ? computePlan() : planCurrent();
+  if (!plan.ok) return;
+  j.status = "working";
+  j.error = null;
+  renderPlan();
+  try {
+    const body = {
+      code: replace ? j.code : null,
+      replace: !!replace,
+      name: j.name,
+      slot: replace ? j.slot : undefined,
+      inputs: { selected: planSelectedValid(), people: state.planUi.people, start: state.planUi.start, shiftH: state.planUi.shiftH },
+      dataStamp: state.updatedAt || null,
+      plannerVersion: RTMYPlanner.VERSION,
+      plan: RTMYJornada.packPlan(plan),
+    };
+    const res = await jornadaClient().create(body);
+    j.code = res.code;
+    j.slot = res.slot;
+    j.planRev = res.planRev;
+    j.inputs = body.inputs;
+    j.dataStamp = body.dataStamp;
+    j.staleData = false;
+    jornadaApply(res);
+    // El que crea la jornada ya tiene el plan calculado: se queda con el suyo
+    // en el formato compartido, para que las dos pantallas sean idénticas.
+    state.planUi.result = RTMYJornada.unpackPlan(RTMYJornada.packPlan(plan), state.recipes);
+    saveJornadaState();
+    jornadaWatch();
+    jornadaPoll();
+  } catch (err) {
+    jornadaFail(err);
+  }
+  renderPlan();
+};
+
+window.onJornadaJoin = async function () {
+  const j = state.jornada;
+  const code = String(j.joinCode || "").replace(/\D/g, "");
+  if (!jornadaAvailable() || !/^\d{4}$/.test(code)) {
+    j.error = "El código son cuatro números.";
+    render();
+    return;
+  }
+  j.status = "working";
+  j.error = null;
+  render();
+  try {
+    const res = await jornadaClient().join({ code, name: j.name });
+    j.code = res.code;
+    j.slot = res.slot;
+    j.planRev = res.planRev || 0;
+    j.joinCode = "";
+    j.queue = [];
+    jornadaApply(res);
+    saveJornadaState();
+    jornadaWatch();
+    if (state.view === "plan-setup") {
+      goto("#/planificar/plan");
+      return;
+    }
+  } catch (err) {
+    j.code = null;
+    jornadaFail(err);
+  }
+  render();
+};
+
+// Al volver a abrir la app se vuelve a entrar en la jornada guardada.
+async function jornadaResume() {
+  const j = state.jornada;
+  if (!j.code || !jornadaAvailable()) return;
+  j.status = "working";
+  try {
+    const res = await jornadaClient().join({ code: j.code, name: j.name, slot: j.slot });
+    j.slot = res.slot;
+    j.planRev = res.planRev || 0;
+    jornadaApply(res);
+    saveJornadaState();
+    jornadaWatch();
+    jornadaFlush();
+  } catch (err) {
+    jornadaFail(err);
+  }
+  if (state.view === "plan") renderPlan();
+}
+
+window.onJornadaLeave = function () {
+  jornadaLeaveLocal(null, false);
+  render();
+};
+
+window.onJornadaName = function (value) {
+  const j = state.jornada;
+  j.name = String(value || "").trim().slice(0, 24);
+  saveJornadaState();
+  if (j.code) {
+    jornadaQueue({ op: "ping", slot: j.slot });
+    jornadaFlush();
+  }
+};
+
+window.onJornadaCodeInput = function (value) {
+  state.jornada.joinCode = String(value || "").replace(/\D/g, "").slice(0, 4);
+};
+
+window.onJornadaSlot = async function (value) {
+  const j = state.jornada;
+  const slot = Math.max(0, Math.min(7, Number(value) || 0));
+  if (!j.code || slot === j.slot) return;
+  j.slot = slot;
+  saveJornadaState();
+  try {
+    jornadaApply(await jornadaClient().join({ code: j.code, name: j.name, slot }));
+  } catch (err) {
+    jornadaFail(err);
+  }
+  renderPlan();
+};
+
+window.onJornadaPanel = function (open) {
+  state.jornada.panel = !!open;
+  state.jornada.error = null;
+  state.jornada.expired = false;
+  renderPlan();
+};
+
+/* ----- La franja de la jornada, arriba del plan ----- */
+
+function jornadaStatusText() {
+  const j = state.jornada;
+  if (j.status === "working") return "Conectando…";
+  if (j.queue.length) return j.queue.length + " cambio" + (j.queue.length === 1 ? "" : "s") + " por enviar";
+  if (j.status === "offline") return "Sin conexión · se reintenta solo";
+  return "Al día";
+}
+
+// ¿La selección de pantalla 1 ya no es la del plan compartido?
+function jornadaInputsChanged() {
+  const j = state.jornada;
+  // Una tablet que solo se enganchó no tiene selección propia: a ella no se le
+  // propone recalcular nada.
+  if (!j.inputs || !planSelectedValid().length) return false;
+  const now = { selected: planSelectedValid(), people: state.planUi.people, start: state.planUi.start, shiftH: state.planUi.shiftH };
+  return JSON.stringify(now) !== JSON.stringify({ selected: j.inputs.selected || [], people: j.inputs.people, start: j.inputs.start, shiftH: j.inputs.shiftH });
+}
+
+/* En la pantalla de elegir recetas: una tablet que llega a media mañana solo
+   necesita el código, no elegir nada. */
+function planJoinHtml() {
+  const j = state.jornada;
+  if (!jornadaAvailable()) return "";
+  if (j.code) {
+    return `
+      <div class="rtmy-plan-note share">
+        <b>Estás en la jornada ${escapeHtml(j.code)}.</b> El plan es el de todos: si cambias la selección, habrá que recalcularlo para los demás.
+        <button class="rtmy-plan-timer" onclick="goto('#/planificar/plan')">Ver el plan de la jornada</button>
+      </div>`;
+  }
+  return `
+    ${j.expired ? `<div class="rtmy-plan-note share gone"><b>${escapeHtml(j.error || "La jornada anterior ya se cerró.")}</b> Esta tablet ha vuelto a trabajar por su cuenta.</div>` : ""}
+    <div class="rtmy-panel rtmy-plan-share">
+      <h2 class="rtmy-plan-h">¿Ya hay una jornada en marcha?</h2>
+      <p class="rtmy-plan-share-help">Escribe su código y verás el mismo plan que las demás tablets, sin elegir nada aquí.</p>
+      <div class="rtmy-plan-row">
+        <label class="rtmy-plan-label" for="j-name-setup">Tu nombre</label>
+        <input id="j-name-setup" class="rtmy-plan-input" type="text" maxlength="24" placeholder="Leo" value="${escapeHtml(j.name)}" onchange="onJornadaName(this.value)">
+      </div>
+      <div class="rtmy-plan-row">
+        <label class="rtmy-plan-label" for="j-code-setup">Código de jornada</label>
+        <input id="j-code-setup" class="rtmy-plan-input code" type="text" inputmode="numeric" maxlength="4" placeholder="0000" value="${escapeHtml(j.joinCode)}" oninput="onJornadaCodeInput(this.value)">
+      </div>
+      <button class="rtmy-cta secondary" onclick="onJornadaJoin()" ${j.status === "working" ? "disabled" : ""}>Entrar</button>
+      ${j.error ? `<p class="rtmy-plan-share-error">${escapeHtml(j.error)}</p>` : ""}
+    </div>`;
+}
+
+function planShareHtml(plan) {
+  const j = state.jornada;
+  if (!jornadaAvailable()) return "";
+  const nameField = `
+    <label class="rtmy-plan-label" for="j-name">Tu nombre</label>
+    <input id="j-name" class="rtmy-plan-input" type="text" maxlength="24" placeholder="Leo" value="${escapeHtml(j.name)}" onchange="onJornadaName(this.value)">`;
+
+  if (!j.code) {
+    if (!j.panel) {
+      // Si la jornada de ayer ya no existe, el plan que se está viendo es solo
+      // de esta tablet aunque parezca el mismo: hay que decirlo.
+      if (j.expired) {
+        return `
+          <div class="rtmy-plan-note share gone">
+            <b>${escapeHtml(j.error || "La jornada anterior ya se cerró.")}</b>
+            Este plan vuelve a ser solo de esta tablet: lo que marques aquí no lo ven las demás.
+            <button class="rtmy-plan-timer" onclick="onJornadaPanel(true)">Crear una jornada nueva</button>
+          </div>`;
+      }
+      return `
+        <div class="rtmy-plan-note share">
+          <b>Cada tablet va por su cuenta.</b> Para que varios trabajéis sobre este mismo plan, crea un código de jornada.
+          <button class="rtmy-plan-timer" onclick="onJornadaPanel(true)">Trabajar en equipo</button>
+        </div>`;
+    }
+    return `
+      <div class="rtmy-panel rtmy-plan-share">
+        <h2 class="rtmy-plan-h">Trabajar en equipo</h2>
+        <div class="rtmy-plan-row">${nameField}</div>
+        <button class="rtmy-cta" onclick="onJornadaCreate(false)" ${j.status === "working" ? "disabled" : ""}>Crear la jornada con este plan</button>
+        <p class="rtmy-plan-share-or">o entra en una que ya existe</p>
+        <div class="rtmy-plan-row">
+          <label class="rtmy-plan-label" for="j-code">Código de jornada</label>
+          <input id="j-code" class="rtmy-plan-input code" type="text" inputmode="numeric" maxlength="4" placeholder="0000" value="${escapeHtml(j.joinCode)}" oninput="onJornadaCodeInput(this.value)">
+        </div>
+        <button class="rtmy-cta secondary" onclick="onJornadaJoin()" ${j.status === "working" ? "disabled" : ""}>Entrar</button>
+        ${j.error ? `<p class="rtmy-plan-share-error">${escapeHtml(j.error)}</p>` : ""}
+        <button class="rtmy-plan-reset" onclick="onJornadaPanel(false)">Dejarlo para después</button>
+      </div>`;
+  }
+
+  const names = planPeopleNames();
+  const people = ((j.live && j.live.people) || [])
+    .slice()
+    .sort((a, b) => a.s - b.s)
+    .map((p) => `<span class="rtmy-plan-who-chip ${p.s === j.slot ? "me" : ""}"><i></i>${escapeHtml(p.n || "Persona " + (p.s + 1))}</span>`)
+    .join("");
+  const slots = Array.from({ length: plan.persons || 1 }, (_, i) => i)
+    .map((i) => `<option value="${i}" ${i === j.slot ? "selected" : ""}>${escapeHtml(names[i] || "Persona " + (i + 1))}</option>`)
+    .join("");
+
+  return `
+    <div class="rtmy-panel rtmy-plan-share joined ${j.status === "offline" ? "offline" : ""}">
+      <div class="rtmy-plan-share-head">
+        <div>
+          <div class="rtmy-plan-kicker">Jornada</div>
+          <div class="rtmy-plan-code">${escapeHtml(j.code)}</div>
+        </div>
+        <div class="rtmy-plan-share-state">
+          <span class="dot" aria-hidden="true"></span>${escapeHtml(jornadaStatusText())}
+        </div>
+      </div>
+      <p class="rtmy-plan-share-help">Dicta este código en las demás tablets para que vean el mismo plan.</p>
+      <div class="rtmy-plan-row">${nameField}</div>
+      <div class="rtmy-plan-row">
+        <label class="rtmy-plan-label" for="j-slot">Eres</label>
+        <select id="j-slot" class="rtmy-plan-input" onchange="onJornadaSlot(this.value)">${slots}</select>
+      </div>
+      ${people ? `<div class="rtmy-plan-who">${people}</div>` : ""}
+      ${j.staleData ? `<p class="rtmy-plan-share-error">Este plan se calculó con otra versión de las recetas. Dale a "Actualizar" en la lista para igualar los datos.</p>` : ""}
+      ${plan.missing && plan.missing.length ? `<p class="rtmy-plan-share-error">${plan.missing.length} paso${plan.missing.length === 1 ? "" : "s"} del plan no está${plan.missing.length === 1 ? "" : "n"} en los datos de esta tablet: se ven la hora y el aparato, pero no el texto.</p>` : ""}
+      ${jornadaInputsChanged() ? `<button class="rtmy-cta" onclick="onJornadaCreate(true)">Has cambiado la selección · recalcular el plan para todos</button>` : ""}
+      ${j.error ? `<p class="rtmy-plan-share-error">${escapeHtml(j.error)}</p>` : ""}
+      <button class="rtmy-plan-reset" onclick="onJornadaLeave()">Salir de la jornada (este dispositivo)</button>
+    </div>`;
+}
+
+// Repinta el plan sin perder dónde estaba mirando el cocinero: el sondeo llega
+// cada 10 s y no puede mover la pantalla a nadie.
+function renderPlanKeepingScroll() {
+  if (state.view !== "plan") return;
+  const cols = root.querySelector(".rtmy-plan-cols");
+  const left = cols ? cols.scrollLeft : 0;
+  const top = window.scrollY;
+  const active = document.activeElement;
+  const focusId = active && active.id ? active.id : null;
+  renderPlan();
+  const after = root.querySelector(".rtmy-plan-cols");
+  if (after) after.scrollLeft = left;
+  window.scrollTo(0, top);
+  if (focusId) {
+    const back = document.getElementById(focusId);
+    if (back) back.focus();
+  }
+}
 
 /* ---------------- Boot ---------------- */
 
@@ -2150,8 +2797,12 @@ loadRecipes().then(() => {
   // así que aquí es donde hay que engancharlas a la ficha de verdad.
   relinkRecipeRefs();
   restorePlanState();
+  restoreJornadaState();
   if (state.timers.some((timer) => timer.running && !timer.done)) ensureTimerTick();
   renderTimerBar();
   renderSessionBar();
   onHashChange();
+  // Si este dispositivo estaba en una jornada, se vuelve a enganchar y manda
+  // lo que quedara en la cola de cuando se cayó la red.
+  jornadaResume();
 });

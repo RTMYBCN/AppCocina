@@ -84,6 +84,22 @@ Es 100% gratis y no tiene límite de visitas para un uso normal como este.
 
 ---
 
+## Jornada compartida (varias tablets sobre el mismo plan)
+
+Un cocinero crea la jornada desde la pantalla del plan y los demás entran con
+un código de cuatro dígitos: todos ven el mismo reparto, cada uno marca lo
+suyo y lo que marca uno lo ven los demás. Sin código, la app funciona como
+siempre: cada dispositivo por su cuenta.
+
+El estado compartido lo guarda el mismo Apps Script en `PropertiesService`
+(el Excel de recetas no se toca). El contrato —qué se comparte, cómo se
+resuelven los conflictos, el protocolo y los límites— está en
+[JORNADA_COMPARTIDA.md](JORNADA_COMPARTIDA.md), y el cliente en `jornada.js`.
+
+**Importante:** cada cambio en `Code.gs` exige volver a desplegar el Apps
+Script (Implementar > Gestionar implementaciones > Nueva versión); si no, la
+app seguirá hablando con la versión antigua, que no sabe de jornadas.
+
 ## Calidad y recuperación
 
 - La app intenta primero la API en vivo y, si no responde, carga

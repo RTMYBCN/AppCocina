@@ -34,6 +34,8 @@
   var TAB_RE = /^([BSC])(\d{2})(?:\s|$)/i;
   
   function doGet(e) {
+    // ?jornada=CODE: estado de la jornada compartida (ver JORNADA_COMPARTIDA.md).
+    if (e && e.parameter && e.parameter.jornada) return jornadaGet(e);
     // ?fresh=… (botón "Actualizar" de la app): ignora la caché de 5 min, relee
     // el Sheet y deja la caché al día para los demás.
     var fresh = !!(e && e.parameter && e.parameter.fresh);
@@ -463,4 +465,437 @@
         r.stages[0].ingredients.length + ' ingredientes' + planInfo);
       if (r.plan && r.plan.warnings) r.plan.warnings.forEach(function (w) { Logger.log('    ! ' + w); });
     });
+  }
+  
+  /* ===================================================================
+     JORNADA COMPARTIDA
+  
+     Varios dispositivos de la cocina sobre el mismo plan. El estado vive en
+     las propiedades del script (PropertiesService), nunca en el Excel de
+     recetas. El contrato está escrito en JORNADA_COMPARTIDA.md.
+  
+     Lecturas por GET (?jornada=CODE[&rev=N][&plan=1]), escrituras por POST
+     con cuerpo JSON {action, code, …}. Toda escritura toma el candado del
+     script: dos tablets que guardan a la vez no se pisan.
+     =================================================================== */
+  
+  var J_PLAN_CHUNK = 8000;   // caracteres por trozo (límite de una propiedad: 9 KB)
+  var J_TTL_MS = 36 * 60 * 60 * 1000; // una jornada sin tocar se borra
+  var J_LOCK_MS = 15000;
+  var J_MAX_SLOTS = 8;
+  var J_MAX_TIMERS = 24;
+  var J_MAX_DONE = 600;
+  
+  function jProps() {
+    return PropertiesService.getScriptProperties();
+  }
+  
+  function jKey(code, part) {
+    return 'j:' + code + ':' + part;
+  }
+  
+  function jOut(obj) {
+    return ContentService.createTextOutput(JSON.stringify(obj)).setMimeType(ContentService.MimeType.JSON);
+  }
+  
+  function jError(message, extra) {
+    var out = { ok: false, error: message, now: Date.now() };
+    if (extra) for (var k in extra) out[k] = extra[k];
+    return jOut(out);
+  }
+  
+  // Un código de jornada son cuatro dígitos. Se acepta con espacios o guiones.
+  function jNormCode(value) {
+    var digits = String(value === null || value === undefined ? '' : value).replace(/\D/g, '');
+    return /^\d{4}$/.test(digits) ? digits : null;
+  }
+  
+  function jParse(raw, fallback) {
+    if (!raw) return fallback;
+    try {
+      return JSON.parse(raw);
+    } catch (err) {
+      return fallback;
+    }
+  }
+  
+  // Un objeto agrupado por receta; cualquier otra cosa (o un formato viejo) se
+  // descarta en vez de romper la jornada.
+  function jMap(value) {
+    return value && typeof value === 'object' && !(value instanceof Array) ? value : {};
+  }
+  
+  function jEmptyLive() {
+    return { rev: 0, at: 0, done: {}, owner: {}, timers: [], people: [] };
+  }
+  
+  function jReadMeta(props, code) {
+    return jParse(props.getProperty(jKey(code, 'meta')), null);
+  }
+  
+  function jReadLive(props, code) {
+    var live = jParse(props.getProperty(jKey(code, 'live')), null);
+    if (!live) return jEmptyLive();
+    live.done = jMap(live.done);
+    live.owner = jMap(live.owner);
+    live.timers = live.timers || [];
+    live.people = live.people || [];
+    return live;
+  }
+  
+  // El plan no cabe en una propiedad: se trocea igual que la caché de recetas.
+  function jReadPlan(props, code) {
+    var n = parseInt(props.getProperty(jKey(code, 'plan:n')), 10);
+    if (!n) return null;
+    var json = '';
+    for (var i = 0; i < n; i++) {
+      var part = props.getProperty(jKey(code, 'plan:' + i));
+      if (part === null || part === undefined) return null;
+      json += part;
+    }
+    return jParse(json, null);
+  }
+  
+  function jWritePlan(props, code, plan) {
+    var old = parseInt(props.getProperty(jKey(code, 'plan:n')), 10) || 0;
+    var json = JSON.stringify(plan);
+    var n = Math.ceil(json.length / J_PLAN_CHUNK);
+    for (var i = 0; i < n; i++) props.setProperty(jKey(code, 'plan:' + i), json.substr(i * J_PLAN_CHUNK, J_PLAN_CHUNK));
+    for (var j = n; j < old; j++) props.deleteProperty(jKey(code, 'plan:' + j));
+    props.setProperty(jKey(code, 'plan:n'), String(n));
+  }
+  
+  function jDelete(props, code) {
+    var n = parseInt(props.getProperty(jKey(code, 'plan:n')), 10) || 0;
+    for (var i = 0; i < n; i++) props.deleteProperty(jKey(code, 'plan:' + i));
+    props.deleteProperty(jKey(code, 'plan:n'));
+    props.deleteProperty(jKey(code, 'meta'));
+    props.deleteProperty(jKey(code, 'live'));
+    var index = jParse(props.getProperty('j:index'), {}) || {};
+    delete index[code];
+    props.setProperty('j:index', JSON.stringify(index));
+  }
+  
+  function jTouch(props, code, at) {
+    var index = jParse(props.getProperty('j:index'), {}) || {};
+    index[code] = at;
+    props.setProperty('j:index', JSON.stringify(index));
+  }
+  
+  // Las jornadas viejas se barren en la siguiente escritura: no hace falta
+  // activador y así el almacén no crece sin fin.
+  function jPrune(props, now) {
+    var index = jParse(props.getProperty('j:index'), {}) || {};
+    var codes = Object.keys(index);
+    for (var i = 0; i < codes.length; i++) {
+      if (now - (index[codes[i]] || 0) > J_TTL_MS) jDelete(props, codes[i]);
+    }
+  }
+  
+  function jFreeCode(props) {
+    for (var attempt = 0; attempt < 40; attempt++) {
+      var code = String(1000 + Math.floor(Math.random() * 9000));
+      if (!props.getProperty(jKey(code, 'meta'))) return code;
+    }
+    return null;
+  }
+  
+  /* `done` y `owner` se guardan AGRUPADOS POR RECETA:
+       {"croquetas-de-jamon": ["9|12:3", "1|2:0"]}  ->  "bloque|paso:slot"
+     Con la clave entera repetida en cada entrada (receta|bloque|paso:slot),
+     una jornada de 245 pasos marcados pasaba de los 9 KB de una propiedad.
+     Agrupada ocupa un tercio. */
+  function jSplit(key) {
+    var text = String(key || '');
+    var i = text.indexOf('|');
+    if (i <= 0 || i === text.length - 1) return null;
+    return { r: text.slice(0, i), s: text.slice(i + 1) };
+  }
+  
+  // Slot de quien marcó/cogió ese paso, o null si no está.
+  function jGet(map, key) {
+    var p = jSplit(key);
+    if (!p || !map[p.r]) return null;
+    var list = map[p.r];
+    for (var i = 0; i < list.length; i++) {
+      var parts = String(list[i]).split(':');
+      if (parts[0] === p.s) return Number(parts[1]);
+    }
+    return null;
+  }
+  
+  function jDrop(map, key) {
+    var p = jSplit(key);
+    if (!p || !map[p.r]) return false;
+    var list = map[p.r];
+    var dropped = false;
+    for (var i = list.length - 1; i >= 0; i--) {
+      if (String(list[i]).split(':')[0] === p.s) {
+        list.splice(i, 1);
+        dropped = true;
+      }
+    }
+    if (!list.length) delete map[p.r];
+    return dropped;
+  }
+  
+  function jSet(map, key, slot) {
+    var p = jSplit(key);
+    if (!p) return false;
+    jDrop(map, key);
+    if (!map[p.r]) map[p.r] = [];
+    map[p.r].push(p.s + ':' + slot);
+    return true;
+  }
+  
+  function jCount(map) {
+    var n = 0;
+    for (var k in map) n += map[k].length;
+    return n;
+  }
+  
+  function jSlot(value, people) {
+    var slot = Math.round(Number(value));
+    if (!isFinite(slot) || slot < 0) return 0;
+    var max = Math.max(1, Math.min(J_MAX_SLOTS, people || J_MAX_SLOTS)) - 1;
+    return Math.min(slot, max);
+  }
+  
+  function jName(value) {
+    return String(value === null || value === undefined ? '' : value).trim().slice(0, 24);
+  }
+  
+  // Quién es este dispositivo. Si vuelve con el mismo nombre recupera su sitio;
+  // si no, se le da el primer puesto libre del plan.
+  function jAssignSlot(live, wanted, name, people) {
+    var i;
+    if (name) {
+      for (i = 0; i < live.people.length; i++) if (jName(live.people[i].n) === name) return live.people[i].s;
+    }
+    if (wanted !== null && wanted !== undefined && wanted !== '') return jSlot(wanted, people);
+    var taken = {};
+    for (i = 0; i < live.people.length; i++) taken[live.people[i].s] = true;
+    var max = Math.max(1, Math.min(J_MAX_SLOTS, people || J_MAX_SLOTS));
+    for (i = 0; i < max; i++) if (!taken[i]) return i;
+    return 0;
+  }
+  
+  function jSeen(live, slot, name, now) {
+    for (var i = 0; i < live.people.length; i++) {
+      if (live.people[i].s === slot) {
+        if (name) live.people[i].n = name;
+        live.people[i].a = now;
+        return;
+      }
+    }
+    if (live.people.length < J_MAX_SLOTS) live.people.push({ s: slot, n: name || '', a: now });
+  }
+  
+  var J_PERSON_TTL_MS = 6 * 60 * 60 * 1000; // una tablet que no da señales en 6 h deja su puesto libre
+
+  // Si una tablet se apaga y no vuelve, su puesto se libera: si no, el
+  // siguiente que entra se encuentra todos los sitios cogidos.
+  function jPrunePeople(live, now) {
+    for (var i = live.people.length - 1; i >= 0; i--) {
+      if (now - (live.people[i].a || 0) > J_PERSON_TTL_MS) live.people.splice(i, 1);
+    }
+    return live;
+  }
+
+  function jSaveLive(props, code, live, now) {
+    live.rev = (live.rev || 0) + 1;
+    live.at = now;
+    jPrunePeople(live, now);
+    if (live.timers.length > J_MAX_TIMERS) live.timers = live.timers.slice(-J_MAX_TIMERS);
+    props.setProperty(jKey(code, 'live'), JSON.stringify(live));
+    jTouch(props, code, now);
+    return live;
+  }
+  
+  /* ---- Lectura (GET) ---- */
+  
+  function jornadaGet(e) {
+    var p = (e && e.parameter) || {};
+    var code = jNormCode(p.jornada);
+    var now = Date.now();
+    if (!code) return jError('Código de jornada no válido.');
+    var props = jProps();
+    var meta = jReadMeta(props, code);
+    if (!meta) return jError('Esa jornada no existe.', { missing: true, code: code });
+    var live = jReadLive(props, code);
+    var out = { ok: true, now: now, code: code, rev: live.rev || 0, planRev: meta.planRev || 1 };
+    // Sondeo: si el dispositivo ya tiene este rev, no se le manda nada más.
+    var rev = parseInt(p.rev, 10);
+    if (isFinite(rev) && rev === (live.rev || 0) && p.plan !== '1') {
+      out.unchanged = true;
+      return jOut(out);
+    }
+    out.live = live;
+    if (p.plan === '1' || !isFinite(rev)) {
+      out.meta = meta;
+      out.plan = jReadPlan(props, code);
+    }
+    return jOut(out);
+  }
+  
+  /* ---- Escritura (POST) ---- */
+  
+  function doPost(e) {
+    var body = jParse(e && e.postData && e.postData.contents, null);
+    if (!body || typeof body !== 'object') return jError('Cuerpo de la petición no válido.');
+    var action = String(body.action || '');
+    var lock = LockService.getScriptLock();
+    if (!lock.tryLock(J_LOCK_MS)) return jError('El servidor está ocupado, inténtalo otra vez.', { retry: true });
+    try {
+      if (action === 'create') return jornadaCreate(body);
+      if (action === 'join') return jornadaJoin(body);
+      if (action === 'patch') return jornadaPatch(body);
+      if (action === 'close') return jornadaClose(body);
+      return jError('Acción desconocida: ' + action);
+    } catch (err) {
+      return jError('Error del servidor: ' + (err && err.message ? err.message : err));
+    } finally {
+      lock.releaseLock();
+    }
+  }
+  
+  function jornadaCreate(body) {
+    var props = jProps();
+    var now = Date.now();
+    jPrune(props, now);
+    if (!body.plan || typeof body.plan !== 'object') return jError('Falta el plan.');
+    var code = body.code === null || body.code === undefined || body.code === '' ? jFreeCode(props) : jNormCode(body.code);
+    if (!code) return jError('Código de jornada no válido.');
+    var existing = jReadMeta(props, code);
+    if (existing && !body.replace) return jError('Ese código ya está en uso.', { taken: true, code: code });
+    var people = Math.max(1, Math.min(J_MAX_SLOTS, Math.round(Number((body.inputs || {}).people) || 1)));
+    var meta = {
+      createdAt: existing ? existing.createdAt : now,
+      at: now,
+      planRev: existing ? (existing.planRev || 1) + 1 : 1,
+      plannerVersion: Number(body.plannerVersion) || 0,
+      dataStamp: body.dataStamp || null,
+      inputs: body.inputs || null,
+      people: people,
+    };
+    jWritePlan(props, code, body.plan);
+    props.setProperty(jKey(code, 'meta'), JSON.stringify(meta));
+    // Al recalcular el plan se conservan los nombres y lo ya hecho: las claves
+    // de los pasos no cambian si no cambia la selección.
+    var live = existing ? jPrunePeople(jReadLive(props, code), now) : jEmptyLive();
+    if (!existing) live.done = {};
+    var name = jName(body.name);
+    var slot = jAssignSlot(live, body.slot, name, people);
+    jSeen(live, slot, name, now);
+    jSaveLive(props, code, live, now);
+    return jOut({ ok: true, code: code, rev: live.rev, planRev: meta.planRev, slot: slot, now: now, replaced: !!existing });
+  }
+  
+  function jornadaJoin(body) {
+    var props = jProps();
+    var now = Date.now();
+    var code = jNormCode(body.code);
+    if (!code) return jError('Código de jornada no válido.');
+    var meta = jReadMeta(props, code);
+    if (!meta) return jError('Esa jornada no existe.', { missing: true, code: code });
+    var live = jPrunePeople(jReadLive(props, code), now);
+    var name = jName(body.name);
+    var slot = jAssignSlot(live, body.slot, name, meta.people);
+    jSeen(live, slot, name, now);
+    jSaveLive(props, code, live, now);
+    return jOut({
+      ok: true, code: code, rev: live.rev, planRev: meta.planRev || 1, slot: slot, now: now,
+      meta: meta, plan: jReadPlan(props, code), live: live,
+    });
+  }
+  
+  function jornadaClose(body) {
+    var code = jNormCode(body.code);
+    if (!code) return jError('Código de jornada no válido.');
+    jDelete(jProps(), code);
+    return jOut({ ok: true, code: code, now: Date.now() });
+  }
+  
+  // Varias operaciones en una sola escritura: un candado y un solo rev nuevo.
+  function jornadaPatch(body) {
+    var props = jProps();
+    var now = Date.now();
+    var code = jNormCode(body.code);
+    if (!code) return jError('Código de jornada no válido.');
+    var meta = jReadMeta(props, code);
+    if (!meta) return jError('Esa jornada no existe.', { missing: true, code: code });
+    var ops = body.ops;
+    if (!ops || !ops.length) ops = [];
+    var live = jPrunePeople(jReadLive(props, code), now);
+    var slot = jSlot(body.slot, meta.people);
+    var rejected = [];
+    var changed = false;
+  
+    for (var i = 0; i < ops.length; i++) {
+      var op = ops[i] || {};
+      var key = String(op.key || '').slice(0, 40);
+      var who = op.slot === null || op.slot === undefined ? slot : jSlot(op.slot, meta.people);
+      switch (String(op.op)) {
+        case 'done':
+          if (!key) break;
+          if (jGet(live.done, key) === null && jCount(live.done) >= J_MAX_DONE) {
+            rejected.push({ op: 'done', key: key, error: 'demasiadas tareas marcadas' });
+            break;
+          }
+          jSet(live.done, key, who);
+          changed = true;
+          break;
+        case 'undone':
+          if (key && jDrop(live.done, key)) changed = true;
+          break;
+        case 'claim': {
+          if (!key) break;
+          var owner = jGet(live.owner, key);
+          if (owner !== null && owner !== who) {
+            // Gana el primero: la tarea no se roba, se avisa.
+            rejected.push({ op: 'claim', key: key, owner: owner });
+            break;
+          }
+          if (owner === null) {
+            jSet(live.owner, key, who);
+            changed = true;
+          }
+          break;
+        }
+        case 'release': {
+          if (!key) break;
+          if (jGet(live.owner, key) === who && jDrop(live.owner, key)) changed = true;
+          break;
+        }
+        case 'timer': {
+          var seconds = Math.max(1, Math.min(24 * 3600, Math.round(Number(op.seconds) || 0)));
+          var id = String(op.id || who + '-' + now).slice(0, 24);
+          for (var t = live.timers.length - 1; t >= 0; t--) if (live.timers[t].i === id) live.timers.splice(t, 1);
+          // El endsAt lo pone el servidor con SU reloj: dos tablets desfasadas
+          // ven la misma cuenta atrás.
+          live.timers.push({ i: id, k: key || null, l: String(op.label || '').slice(0, 40), e: now + seconds * 1000, b: who });
+          changed = true;
+          break;
+        }
+        case 'timerStop': {
+          var stopId = String(op.id || '');
+          for (var s = live.timers.length - 1; s >= 0; s--) {
+            if (live.timers[s].i === stopId) {
+              live.timers.splice(s, 1);
+              changed = true;
+            }
+          }
+          break;
+        }
+        case 'ping':
+          break;
+        default:
+          rejected.push({ op: String(op.op), key: key, error: 'desconocida' });
+      }
+    }
+  
+    jSeen(live, slot, jName(body.name), now);
+    jSaveLive(props, code, live, now);
+    jPrune(props, now);
+    return jOut({ ok: true, code: code, rev: live.rev, planRev: meta.planRev || 1, now: now, live: live, rejected: rejected, changed: changed });
   }

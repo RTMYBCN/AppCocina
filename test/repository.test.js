@@ -43,10 +43,11 @@ test("recipes.json has valid unique recipes and executable stages", () => {
 
 test("HTML references the current cache-busted assets and accessibility regions", () => {
   const html = fs.readFileSync(path.join(root, "index.html"), "utf8");
-  assert.match(html, /styles\.css\?v=18/);
-  assert.match(html, /planner\.js\?v=18/);
-  assert.match(html, /app\.js\?v=18/);
-  assert.match(html, /text\.js\?v=18/);
+  assert.match(html, /styles\.css\?v=19/);
+  assert.match(html, /planner\.js\?v=19/);
+  assert.match(html, /jornada\.js\?v=19/);
+  assert.match(html, /app\.js\?v=19/);
+  assert.match(html, /text\.js\?v=19/);
   assert.match(html, /id="timer-bar"[^>]+aria-live="assertive"/);
 });
 
@@ -81,7 +82,7 @@ test("the planner shows one column per cook and names the recipe on each card", 
   const source = fs.readFileSync(path.join(root, "app.js"), "utf8");
   const css = fs.readFileSync(path.join(root, "styles.css"), "utf8");
   assert.match(source, /rtmy-plan-cols/);
-  assert.match(source, /class="rtmy-plan-col"/);
+  assert.match(source, /class="rtmy-plan-col /);
   assert.match(source, /rtmy-plan-recipe-tag/);
   // los pasos de máquina van en la franja de quien la pone en marcha
   assert.match(source, /t\.watcher === p/);
@@ -149,4 +150,17 @@ test("each stage declares which ingredient phases it needs", () => {
   assert.match(source, /RTMYText\.ingredientsForStage\(r, item\.stageIndex\)/);
   assert.match(source, /usesPhases \|\| isMainStage \? session\.scaleFactor : 1/);
   assert.match(source, /applyScale\(stageIngredients, stageRatio\)/);
+});
+
+test("la jornada compartida avisa en vez de volver en silencio al modo de una tablet", () => {
+  const source = fs.readFileSync(path.join(root, "app.js"), "utf8");
+  const css = fs.readFileSync(path.join(root, "styles.css"), "utf8");
+  // Si el servidor dice que esa jornada ya no existe, se sale de ella marcando
+  // que ha caducado (segundo argumento) y se pinta el aviso.
+  assert.match(source, /jornadaLeaveLocal\([^)]*ya se cerró[^)]*,\s*true\)/s);
+  assert.match(source, /if \(j\.expired\)/);
+  assert.match(source, /rtmy-plan-note share gone/);
+  assert.match(css, /\.rtmy-plan-note\.share\.gone\{/);
+  // Y el cliente guarda en la cola lo que no se pudo mandar.
+  assert.match(source, /queue: \[\]/);
 });

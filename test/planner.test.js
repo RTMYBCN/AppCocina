@@ -262,3 +262,51 @@ test("quien vigila una máquina es quien hizo el paso anterior de esa receta", (
       assert.equal(t.watcher, expected === null ? 0 : expected);
     });
 });
+
+/* ---- El mismo plan en cualquier dispositivo ----
+   La búsqueda se cortaba por tiempo, así que un móvil lento exploraba menos
+   variantes que una tablet rápida y salían planes distintos con los mismos
+   datos. Estas comprobaciones fijan que el plan dependa solo de las entradas:
+   sin eso no se puede compartir un plan entre los dispositivos de la cocina. */
+
+function planFingerprint(plan) {
+  return JSON.stringify({
+    end: plan.end,
+    start: plan.start,
+    tasks: plan.tasks.map((t) => [t.code, t.block, t.step, t.start, t.end, t.person, t.watcher, t.equipment]),
+    spans: plan.spans.map((s) => [s.key, s.label, s.code, s.start, s.end]),
+    busy: plan.busy,
+  });
+}
+
+test("el mismo plan sale igual dos veces seguidas", () => {
+  const ids = withB03.map((r) => r.id);
+  const a = planner.buildPlan(withB03, ids, { people: 3 });
+  const b = planner.buildPlan(withB03, ids, { people: 3 });
+  assert.equal(planFingerprint(a), planFingerprint(b));
+});
+
+test("el plan no depende de lo rápido que sea el dispositivo", () => {
+  const ids = withB03.map((r) => r.id);
+  const normal = planner.buildPlan(withB03, ids, { people: 2 });
+  // Reloj que salta una hora en cada lectura: cualquier presupuesto de tiempo
+  // cortaría la búsqueda en la primera variante.
+  const realNow = Date.now;
+  let fake = realNow.call(Date);
+  Date.now = () => (fake += 3600000);
+  let slow;
+  try {
+    slow = planner.buildPlan(withB03, ids, { people: 2 });
+  } finally {
+    Date.now = realNow;
+  }
+  assert.equal(planFingerprint(slow), planFingerprint(normal));
+});
+
+test("el plan de una sola receta también es estable", () => {
+  const a = planner.buildPlan(recipes, [b02.id], { people: 1 });
+  const b = planner.buildPlan(recipes, [b02.id], { people: 4 });
+  const c = planner.buildPlan(recipes, [b02.id], { people: 1 });
+  assert.equal(planFingerprint(a), planFingerprint(c));
+  assert.ok(b.end <= a.end);
+});

@@ -283,6 +283,9 @@
 
     const result = {
       ok: selected.length > 0,
+      // Versión de la lógica de reparto con la que se calculó este plan: viaja
+      // con el plan compartido para no mezclar planes de versiones distintas.
+      version: VERSION,
       options: opts,
       tasks: [],
       recipes: [],
@@ -390,8 +393,12 @@
     const sizes = [];
     for (let size = opts.people; size >= 1; size--) sizes.push(size);
     let best = null;
-    const clock = Date.now();
-    for (let i = 0; i < variants.length && (i < 4 || Date.now() - clock < 1200); i++) {
+    // Se recorren SIEMPRE todas las variantes. Antes la búsqueda se cortaba por
+    // tiempo (1200 ms), así que una tablet rápida y un móvil viejo exploraban
+    // distinto número de variantes y salían planes distintos con los mismos
+    // datos. Ahora el plan depende solo de las entradas: es el mismo en
+    // cualquier dispositivo y se puede compartir entre ellos.
+    for (let i = 0; i < variants.length; i++) {
       for (const size of sizes) {
         for (const strict of [false, true]) {
           const run = simulate(ctx, variants[i].prio, size, variants[i].delays, strict);
@@ -514,7 +521,11 @@
     return r ? `${h} h ${r} min` : `${h} h`;
   }
 
-  const api = { buildPlan, hasPlan, fmtClock, fmtDuration, dayOf, DEFAULTS, EQUIPMENT, DAY };
+  // Cambiar VERSION cuando se toque la lógica de reparto: un plan compartido
+  // que venga de otra versión no se puede mezclar con lo que calcula esta.
+  const VERSION = 1;
+
+  const api = { buildPlan, hasPlan, fmtClock, fmtDuration, dayOf, DEFAULTS, EQUIPMENT, DAY, VERSION, SEARCH_RUNS };
   if (typeof module !== "undefined" && module.exports) module.exports = api;
   else root.RTMYPlanner = api;
 })(typeof window !== "undefined" ? window : globalThis);
